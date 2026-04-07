@@ -6,7 +6,7 @@ export async function GET(request: Request) {
   const code = url.searchParams.get("code")
 
   if (code) {
-    const supabase = createSupabaseServerClient(...)
+    const supabase = createSupabaseServerClient()
     await supabase.auth.exchangeCodeForSession(code)
     return NextResponse.redirect(new URL("/dashboard", request.url))
   }
