@@ -1,7 +1,7 @@
-import { NextResponse } from "next/server"
+import { NextRequest, NextResponse } from "next/server"
 import { createServerClient } from "@supabase/ssr"
 
-export async function middleware(req) {
+export async function middleware(req: NextRequest) {
   const res = NextResponse.next()
 
   const supabase = createServerClient(
@@ -9,27 +9,17 @@ export async function middleware(req) {
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
       cookies: {
-        get(name) {
-          return req.cookies.get(name)?.value
+        getAll() {
+          return req.cookies.getAll()
         },
-        set(name, value, options) {
-          res.cookies.set(name, value, options)
-        },
-        remove(name, options) {
-          res.cookies.set(name, "", options)
+        setAll(cookiesToSet) {
+          cookiesToSet.forEach(({ name, value, options }) => {
+            res.cookies.set(name, value, options)
+          })
         },
       },
     }
   )
-
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-
-  // Legg user-id på request headers
-  if (user) {
-    res.headers.set("x-user-id", user.id)
-  }
 
   return res
 }

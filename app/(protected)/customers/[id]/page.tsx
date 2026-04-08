@@ -41,7 +41,6 @@ export default function CustomerPage(props: CustomerPageProps) {
   const params = use(props.params)
   const id = params.id
 
-  // Hent agreementId fra URL (kun i browser)
   const searchParams =
     typeof window !== "undefined"
       ? new URLSearchParams(window.location.search)
@@ -49,25 +48,20 @@ export default function CustomerPage(props: CustomerPageProps) {
 
   const agreementId = searchParams?.get("agreementId") || null
 
-  // Kunde
   const [customer, setCustomer] = useState<Customer | null>(null)
   const [name, setName] = useState("")
   const [email, setEmail] = useState("")
   const [phone, setPhone] = useState("")
 
-  // Notater
   const [notes, setNotes] = useState<Note[]>([])
   const [newNote, setNewNote] = useState("")
 
-  // Avtaler
   const [agreements, setAgreements] = useState<Agreement[]>([])
   const activeAgreements = agreements.filter((a) => !a.archived)
   const archivedAgreements = agreements.filter((a) => a.archived)
 
-  // Slide-over
   const [slideOverOpen, setSlideOverOpen] = useState(false)
 
-  // Avtale-skjema
   const [editingAgreement, setEditingAgreement] = useState<Agreement | null>(null)
   const [newTitle, setNewTitle] = useState("")
   const [newStart, setNewStart] = useState("")
@@ -160,7 +154,6 @@ export default function CustomerPage(props: CustomerPageProps) {
     if (data) setAgreements(data as Agreement[])
   }
 
-  // Automatisk åpning av avtale når agreementId finnes
   useEffect(() => {
     if (!agreementId) return
     if (agreements.length === 0) return
@@ -199,6 +192,8 @@ export default function CustomerPage(props: CustomerPageProps) {
     const {
       data: { user },
     } = await supabase.auth.getUser()
+
+    if (!user) return
 
     const { error } = await supabase.from("notes").insert({
       customer_id: id,
@@ -255,6 +250,8 @@ export default function CustomerPage(props: CustomerPageProps) {
       data: { user },
     } = await supabase.auth.getUser()
 
+    if (!user) return
+
     const file_url = await uploadAgreementFile(null)
 
     const { error } = await supabase.from("agreements").insert({
@@ -300,7 +297,6 @@ export default function CustomerPage(props: CustomerPageProps) {
 
     fetchAgreements()
   }
-
   async function archiveAgreement(agreementId: string) {
     await supabase.from("agreements").update({ archived: true }).eq("id", agreementId)
     fetchAgreements()
@@ -311,12 +307,18 @@ export default function CustomerPage(props: CustomerPageProps) {
     fetchAgreements()
   }
 
+  // ⭐ Denne manglet – nå er den tilbake
   function getAgreementStatus(a: Agreement) {
     const today = new Date().toISOString().split("T")[0]
 
-    if (a.end_date < today) return { label: "Utløpt", color: "red", emoji: "⛔" }
-    if (a.start_date > today)
+    if (a.end_date < today) {
+      return { label: "Utløpt", color: "red", emoji: "⛔" }
+    }
+
+    if (a.start_date > today) {
       return { label: "Kommende", color: "yellow", emoji: "⏳" }
+    }
+
     return { label: "Aktiv", color: "green", emoji: "✔️" }
   }
 
@@ -325,8 +327,7 @@ export default function CustomerPage(props: CustomerPageProps) {
     const target = new Date(dateStr)
 
     const diff = target.getTime() - today.getTime()
-    const days = Math.ceil(diff / (1000 * 60 * 60 * 24))
-    return days
+    return Math.ceil(diff / (1000 * 60 * 60 * 24))
   }
 
   function getExpiryBadge(a: Agreement) {
@@ -585,7 +586,6 @@ export default function CustomerPage(props: CustomerPageProps) {
           </div>
         </div>
       </div>
-
       {/* SLIDE-OVER */}
       <AgreementSlideOver
         open={slideOverOpen}

@@ -30,7 +30,8 @@ export default function Sidebar() {
         return
       }
 
-      setEmail(userData.user.email)
+      // FIX: email kan være undefined → bruk null
+      setEmail(userData.user.email ?? null)
 
       const { data } = await supabase
         .from("profiles")
@@ -57,7 +58,8 @@ export default function Sidebar() {
         return
       }
 
-      setEmail(session.user.email)
+      // FIX: email kan være undefined → bruk null
+      setEmail(session.user.email ?? null)
 
       const { data } = await supabase
         .from("profiles")

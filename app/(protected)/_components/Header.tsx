@@ -1,13 +1,7 @@
-import Header from "@/components/Header";
-
-export default function DashboardLayout({ children }) {
+export default function Header() {
   return (
-    <div className="flex min-h-screen">
-      {/* Sidebar kommer senere */}
-      <div className="flex-1">
-        <Header />
-        <main>{children}</main>
-      </div>
-    </div>
-  );
+    <header className="border-b px-6 py-4">
+      <h1 className="text-lg font-semibold">GDPR‑dashboard</h1>
+    </header>
+  )
 }

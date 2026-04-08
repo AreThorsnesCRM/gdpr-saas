@@ -2,14 +2,18 @@ import { redirect } from "next/navigation"
 import { cookies } from "next/headers"
 import { createServerClient } from "@supabase/ssr"
 import Sidebar from "./_components/sidebar"
+import Header from "./_components/Header"   // ← DENNE ER NY
 
 export const metadata = {
   title: "AreCRM",
   description: "Kunde- og avtalesystem",
 }
 
-export default async function ProtectedLayout({ children }) {
-  // Next.js 16: cookies() er async
+export default async function ProtectedLayout({
+  children,
+}: {
+  children: React.ReactNode
+}) {
   const cookieStore = await cookies()
 
   const supabase = createServerClient(
@@ -30,7 +34,6 @@ export default async function ProtectedLayout({ children }) {
     }
   )
 
-  // 1. Hent bruker (tryggere enn getSession)
   const { data: userData } = await supabase.auth.getUser()
 
   if (!userData?.user) {
@@ -39,7 +42,6 @@ export default async function ProtectedLayout({ children }) {
 
   const user = userData.user
 
-  // 2. Hent profil
   const { data: profile } = await supabase
     .from("profiles")
     .select("*")
@@ -50,7 +52,6 @@ export default async function ProtectedLayout({ children }) {
     redirect("/subscribe")
   }
 
-  // 3. Trial / subscription sjekk
   const now = new Date()
   const trialEnd = profile.trial_end ? new Date(profile.trial_end) : null
 
@@ -65,11 +66,11 @@ export default async function ProtectedLayout({ children }) {
     redirect("/subscribe")
   }
 
-  // 4. Hvis alt er OK → slipp inn
   return (
     <div className="bg-gray-100 min-h-screen flex">
       <Sidebar />
       <main className="flex-1 p-6 ml-64">
+        <Header />          {/* ← Header vises her */}
         {children}
       </main>
     </div>

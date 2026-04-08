@@ -1,7 +1,8 @@
-import { createServerClient } from "@/lib/supabaseServer";
+import { createSupabaseServerClient } from "@/lib/supabaseServer";
 
 export async function getUserProfile() {
-  const supabase = createServerClient();
+  // createSupabaseServerClient() er async → må await'es
+  const supabase = await createSupabaseServerClient();
 
   // 1. Hent session
   const {

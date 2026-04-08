@@ -256,7 +256,7 @@ export default function Page() {
 
   // Fetch graph data
   async function fetchGraphData() {
-    let data = []
+    let data: any[] = []
 
     if (graphType === "agreements") {
       const { data: agreements } = await supabase

@@ -3,9 +3,8 @@ import Stripe from "stripe";
 import { createClient } from "@supabase/supabase-js";
 import { headers } from "next/headers";
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: "2023-10-16",
-});
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
+
 
 // Supabase server client (service role)
 const supabase = createClient(
@@ -33,15 +32,22 @@ export async function POST(req: Request) {
 
   console.log("🔔 Received Stripe event:", event.type);
 
-  // Hent user_id fra metadata (hvis det finnes)
-  const userId = event.data.object?.metadata?.user_id;
-  console.log("👤 User ID from metadata:", userId);
+  // Hent user_id fra metadata (kun for checkout.session.completed)
+let userId: string | null = null;
 
-  // Hvis vi ikke har userId, kan vi ikke oppdatere Supabase
-  if (!userId) {
-    console.log("⚠️ No user_id in metadata, skipping Supabase update.");
-    return NextResponse.json({ received: true });
-  }
+if (event.type === "checkout.session.completed") {
+  const session = event.data.object as Stripe.Checkout.Session;
+  userId = session.metadata?.user_id ?? null;
+}
+
+console.log("👤 User ID from metadata:", userId);
+
+// Hvis vi ikke har userId, kan vi ikke oppdatere Supabase
+if (!userId) {
+  console.log("⚠️ No user_id in metadata, skipping Supabase update.");
+  return NextResponse.json({ received: true });
+}
+
 
   // Håndter relevante Stripe events
   switch (event.type) {

@@ -25,7 +25,6 @@ export default function CustomersPage() {
   const searchParams = useSearchParams()
   const router = useRouter()
 
-  // URL‑baserte filter
   const filterNoActive = searchParams.get("noActive") === "true"
   const filterActive = searchParams.get("active") === "true"
   const filterNever = searchParams.get("never") === "true"
@@ -48,14 +47,12 @@ export default function CustomersPage() {
 
     if (!user) return
 
-    // Hent kunder
     const { data: customerData } = await supabase
       .from("customers")
       .select("*")
       .eq("user_id", user.id)
       .order("created_at", { ascending: false })
 
-    // Hent avtaler
     const { data: agreements } = await supabase
       .from("agreements")
       .select("customer_id, archived, end_date")
@@ -65,7 +62,6 @@ export default function CustomersPage() {
       return
     }
 
-    // Enrich kunder
     const enriched = customerData.map((c) => {
       const customerAgreements = agreements.filter(a => a.customer_id === c.id)
 
@@ -85,16 +81,15 @@ export default function CustomersPage() {
         .filter(a => a.archived)
         .sort((a, b) => (a.end_date > b.end_date ? -1 : 1))
 
-     if (ended.length === 0) {
-  return {
-    ...c,
-    hasNeverHadAgreement: false, // <-- viktig endring
-    hasActiveAgreement: hasActive,
-    lastAgreementEnd: null,
-    daysSinceEnd: null,
-  }
-}
-
+      if (ended.length === 0) {
+        return {
+          ...c,
+          hasNeverHadAgreement: false,
+          hasActiveAgreement: hasActive,
+          lastAgreementEnd: null,
+          daysSinceEnd: null,
+        }
+      }
 
       const lastEnd = ended[0].end_date
       const days = Math.ceil(
@@ -160,10 +155,20 @@ export default function CustomersPage() {
     router.push(`/customers?${param}=true`)
   }
 
+  // ⭐ Lagt til — dette var feilen
+  async function deleteCustomer(customerId: string) {
+    const confirmed = window.confirm("Er du sikker på at du vil slette denne kunden?")
+    if (!confirmed) return
+
+    await supabase.from("customers").delete().eq("id", customerId)
+
+    // Oppdater listen
+    loadCustomers()
+  }
+
   return (
     <div className="p-6 space-y-10">
 
-      {/* Header with "Ny kunde" button */}
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-semibold">Kunder</h1>
 
@@ -175,7 +180,6 @@ export default function CustomersPage() {
         </Link>
       </div>
 
-      {/* Filter-bar */}
       <div className="bg-white rounded-lg shadow p-4 flex items-center gap-4">
         {filterNoActive || filterActive || filterNever ? (
           <>
@@ -228,7 +232,6 @@ export default function CustomersPage() {
         )}
       </div>
 
-      {/* Kundeliste */}
       <div className="bg-white rounded-lg shadow p-6 space-y-6">
         <div className="space-y-4">
           {filteredCustomers.map((c) => (
