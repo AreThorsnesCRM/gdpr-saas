@@ -5,13 +5,8 @@ import { cookies } from "next/headers";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
 
-
 export async function POST() {
-  console.log("SECRET KEY IN USE:", process.env.STRIPE_SECRET_KEY);
-  console.log("PRICE ID IN USE:", process.env.STRIPE_PRICE_ID);
-
   try {
-    // Next 16: cookies() er async
     const cookieStore = await cookies();
 
     const supabase = createServerClient(
@@ -20,8 +15,7 @@ export async function POST() {
       {
         cookies: {
           get(name: string) {
-            const value = cookieStore.get(name);
-            return value?.value;
+            return cookieStore.get(name)?.value;
           },
         },
       }
@@ -38,6 +32,9 @@ export async function POST() {
       );
     }
 
+    // IMPORTANT: Use the same variable as portal-session
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL!;
+
     const session = await stripe.checkout.sessions.create({
       mode: "subscription",
       line_items: [
@@ -46,8 +43,8 @@ export async function POST() {
           quantity: 1,
         },
       ],
-      success_url: `${process.env.NEXT_PUBLIC_BASE_URL}/dashboard?success=true`,
-      cancel_url: `${process.env.NEXT_PUBLIC_BASE_URL}/dashboard?canceled=true`,
+      success_url: `${baseUrl}/dashboard?success=true`,
+      cancel_url: `${baseUrl}/dashboard?canceled=true`,
       metadata: {
         user_id: user.id,
       },
