@@ -42,11 +42,11 @@ export default async function ProtectedLayout({
 
   const user = userData.user
 
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("*")
-    .eq("user_id", user.id)
-    .single()
+  const { data: profile, error: profileError } = await supabase
+  .from("profiles")
+  .select("*")
+  .eq("user_id", user.id)
+  .maybeSingle()
 
   if (!profile) {
     redirect("/subscribe")
