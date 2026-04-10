@@ -4,32 +4,45 @@ import { createServerClient } from "@supabase/ssr"
 export async function GET(request: NextRequest) {
   const url = new URL(request.url)
   const code = url.searchParams.get("code")
+  const token = url.searchParams.get("token")
+  const type = url.searchParams.get("type")
 
-  // Vi må lage responsen først, slik at vi kan sette cookies på den
   const response = NextResponse.redirect(
-    new URL(code ? "/dashboard" : "/login", request.url)
+    new URL("/dashboard", request.url)
   )
 
-  if (code) {
-    const supabase = createServerClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      {
-        cookies: {
-          getAll() {
-            return request.cookies.getAll()
-          },
-          setAll(cookiesToSet) {
-            cookiesToSet.forEach(({ name, value, options }) => {
-              response.cookies.set(name, value, options)
-            })
-          },
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        getAll() {
+          return request.cookies.getAll()
         },
-      }
-    )
+        setAll(cookiesToSet) {
+          cookiesToSet.forEach(({ name, value, options }) => {
+            response.cookies.set(name, value, options)
+          })
+        },
+      },
+    }
+  )
 
+  // 1. Magic link / OAuth / password reset
+  if (code) {
     await supabase.auth.exchangeCodeForSession(code)
+    return response
   }
 
-  return response
+  // 2. Email verification
+  if (token && type === "signup") {
+    await supabase.auth.verifyOtp({
+      token,
+      type: "signup",
+    })
+    return response
+  }
+
+  // Hvis noe mangler → send til login
+  return NextResponse.redirect(new URL("/login", request.url))
 }
