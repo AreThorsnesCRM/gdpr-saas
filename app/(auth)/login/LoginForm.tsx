@@ -12,7 +12,6 @@ export default function LoginForm() {
 
     const formData = new FormData(e.currentTarget)
 
-    // 🔥 Viktig: FormData.get() må konverteres til string
     const email = String(formData.get("email") || "")
     const password = String(formData.get("password") || "")
 
@@ -76,6 +75,17 @@ export default function LoginForm() {
           Glemt passord?
         </button>
       </form>
+
+      {/* 🔥 Ny seksjon: Opprett konto */}
+      <p className="text-sm text-gray-600 text-center">
+        Har du ikke konto?{" "}
+        <a
+          href="/register"
+          className="text-blue-600 hover:underline font-medium"
+        >
+          Opprett en her
+        </a>
+      </p>
     </div>
   )
 }

@@ -18,7 +18,6 @@ export default function RegisterPage() {
     setLoading(true);
     setError("");
 
-    // 1. Opprett bruker i Supabase Auth
     const { data, error: signUpError } = await supabase.auth.signUp({
       email,
       password,
@@ -30,7 +29,6 @@ export default function RegisterPage() {
       return;
     }
 
-    // 2. Opprett profil i "profiles"
     if (data.user) {
       const { error: profileError } = await supabase
         .from("profiles")
@@ -47,7 +45,6 @@ export default function RegisterPage() {
       }
     }
 
-    // 3. Send bruker videre til "check email"
     router.push("/check-email");
   }
 
@@ -101,6 +98,17 @@ export default function RegisterPage() {
         >
           {loading ? "Oppretter..." : "Opprett konto"}
         </button>
+
+        {/* 🔥 Ny seksjon: Logg inn-lenke */}
+        <p className="text-sm text-gray-600 text-center pt-2">
+          Har du allerede konto?{" "}
+          <a
+            href="/login"
+            className="text-blue-600 hover:underline font-medium"
+          >
+            Logg inn
+          </a>
+        </p>
       </form>
     </div>
   );
