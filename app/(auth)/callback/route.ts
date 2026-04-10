@@ -35,13 +35,20 @@ export async function GET(request: NextRequest) {
   }
 
   // 2. Email verification
-  if (token && type === "signup") {
+if (token && type === "signup") {
+  const email = url.searchParams.get("email")
+
+  if (email) {
     await supabase.auth.verifyOtp({
+      email,
       token,
       type: "signup",
     })
-    return response
   }
+
+  return response
+}
+
 
   // Hvis noe mangler → send til login
   return NextResponse.redirect(new URL("/login", request.url))
