@@ -7,6 +7,7 @@ import { supabase } from "@/lib/supabaseClient";
 export default function RegisterPage() {
   const router = useRouter();
 
+  const [company, setCompany] = useState("");
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -18,6 +19,7 @@ export default function RegisterPage() {
     setLoading(true);
     setError("");
 
+    // 1. Opprett bruker i Supabase Auth
     const { data, error: signUpError } = await supabase.auth.signUp({
       email,
       password,
@@ -29,12 +31,14 @@ export default function RegisterPage() {
       return;
     }
 
+    // 2. Opprett profil i "profiles"
     if (data.user) {
       const { error: profileError } = await supabase
         .from("profiles")
         .insert({
           user_id: data.user.id,
           full_name: name,
+          company_name: company,
         });
 
       if (profileError) {
@@ -45,6 +49,7 @@ export default function RegisterPage() {
       }
     }
 
+    // 3. Send bruker videre til "check email"
     router.push("/check-email");
   }
 
@@ -55,6 +60,17 @@ export default function RegisterPage() {
         className="w-full max-w-md space-y-4 rounded-lg bg-white p-6 shadow"
       >
         <h1 className="text-2xl font-semibold">Opprett konto</h1>
+
+        <div>
+          <label className="block text-sm font-medium">Firmanavn</label>
+          <input
+            type="text"
+            className="mt-1 w-full rounded border px-3 py-2"
+            value={company}
+            onChange={(e) => setCompany(e.target.value)}
+            required
+          />
+        </div>
 
         <div>
           <label className="block text-sm font-medium">Navn</label>
@@ -99,7 +115,6 @@ export default function RegisterPage() {
           {loading ? "Oppretter..." : "Opprett konto"}
         </button>
 
-        {/* 🔥 Ny seksjon: Logg inn-lenke */}
         <p className="text-sm text-gray-600 text-center pt-2">
           Har du allerede konto?{" "}
           <a
