@@ -20,9 +20,16 @@ export default function RegisterPage() {
     setError("");
 
     // 1. Opprett bruker i Supabase Auth
-    const { data, error: signUpError } = await supabase.auth.signUp({
+    const { error: signUpError } = await supabase.auth.signUp({
       email,
       password,
+      options: {
+        // Vi sender med metadata slik at callback kan hente dem senere
+        data: {
+          company_name: company,
+          full_name: name,
+        },
+      },
     });
 
     if (signUpError) {
@@ -31,25 +38,7 @@ export default function RegisterPage() {
       return;
     }
 
-    // 2. Opprett profil i "profiles"
-    if (data.user) {
-      const { error: profileError } = await supabase
-        .from("profiles")
-        .insert({
-          user_id: data.user.id,
-          full_name: name,
-          company_name: company,
-        });
-
-      if (profileError) {
-        console.error("Profile insert error:", profileError);
-        setError("Kunne ikke opprette profil. Prøv igjen.");
-        setLoading(false);
-        return;
-      }
-    }
-
-    // 3. Send bruker videre til "check email"
+    // 2. Send bruker videre til "check email"
     router.push("/check-email");
   }
 
