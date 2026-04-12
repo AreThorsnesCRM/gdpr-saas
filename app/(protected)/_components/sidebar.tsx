@@ -19,6 +19,7 @@ export default function Sidebar() {
   const [status, setStatus] = useState<string>("unknown")
   const [fullName, setFullName] = useState<string | null>(null)
   const [email, setEmail] = useState<string | null>(null)
+  const [companyName, setCompanyName] = useState<string | null>(null)
 
   // Hent status + profil ved første render
   useEffect(() => {
@@ -30,17 +31,17 @@ export default function Sidebar() {
         return
       }
 
-      // FIX: email kan være undefined → bruk null
       setEmail(userData.user.email ?? null)
 
       const { data } = await supabase
         .from("profiles")
-        .select("subscription_status, full_name")
+        .select("subscription_status, full_name, company_name")
         .eq("user_id", userData.user.id)
         .single()
 
       setStatus(data?.subscription_status ?? "unknown")
       setFullName(data?.full_name ?? null)
+      setCompanyName(data?.company_name ?? null)
     }
 
     loadInitial()
@@ -55,20 +56,21 @@ export default function Sidebar() {
         setStatus("unknown")
         setFullName(null)
         setEmail(null)
+        setCompanyName(null)
         return
       }
 
-      // FIX: email kan være undefined → bruk null
       setEmail(session.user.email ?? null)
 
       const { data } = await supabase
         .from("profiles")
-        .select("subscription_status, full_name")
+        .select("subscription_status, full_name, company_name")
         .eq("user_id", session.user.id)
         .single()
 
       setStatus(data?.subscription_status ?? "unknown")
       setFullName(data?.full_name ?? null)
+      setCompanyName(data?.company_name ?? null)
     })
 
     return () => subscription.unsubscribe()
@@ -104,14 +106,22 @@ export default function Sidebar() {
 
       {/* Profilseksjon */}
       <div className="mb-6">
+        {/* Firma-navn */}
+        <div className="text-lg font-bold text-gray-900">
+          {companyName ?? ""}
+        </div>
+
+        {/* Fullt navn */}
         <div className="font-semibold text-gray-800">
           {fullName ?? "Bruker"}
         </div>
 
+        {/* E-post */}
         <div className="text-sm text-gray-500 truncate">
           {email ?? ""}
         </div>
 
+        {/* Status-badge */}
         <span
           className={`inline-block mt-2 rounded px-2 py-0.5 text-xs font-medium ${badgeStyles[status]}`}
         >
