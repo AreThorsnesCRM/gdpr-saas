@@ -55,21 +55,29 @@ export async function GET(request: NextRequest) {
     return NextResponse.redirect(new URL("/login", request.url))
   }
 
-  // 4. Sjekk om profil finnes
+  // 4. Hent metadata
+  const company_name = user.user_metadata?.company_name ?? null
+  const full_name = user.user_metadata?.full_name ?? null
+
+  // 5. Sjekk om profil finnes
   const { data: existingProfile } = await supabase
     .from("profiles")
     .select("id")
     .eq("user_id", user.id)
     .maybeSingle()
 
-  // 5. Opprett profil hvis den ikke finnes
+  // 6. Opprett profil hvis den ikke finnes
   if (!existingProfile) {
+    const now = new Date()
+    const trialEnd = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000)
+
     await supabase.from("profiles").insert({
       user_id: user.id,
-      company_name: null, // du kan fylle inn fra metadata senere
+      company_name,
+      full_name,
       subscription_status: "trial",
-      trial_start: new Date().toISOString(),
-      trial_end: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+      trial_start: now.toISOString(),
+      trial_end: trialEnd.toISOString(),
     })
   }
 
