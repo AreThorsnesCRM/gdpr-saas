@@ -3,6 +3,7 @@ import { cookies } from "next/headers"
 import { createServerClient } from "@supabase/ssr"
 import Sidebar from "./_components/sidebar"
 import Header from "./_components/Header"
+import React from "react"
 
 export const metadata = {
   title: "AreCRM",
