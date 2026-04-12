@@ -2,7 +2,7 @@ import { redirect } from "next/navigation"
 import { cookies } from "next/headers"
 import { createServerClient } from "@supabase/ssr"
 import Sidebar from "./_components/sidebar"
-import Header from "./_components/Header"   // ← DENNE ER NY
+import Header from "./_components/Header"
 
 export const metadata = {
   title: "AreCRM",
@@ -42,11 +42,11 @@ export default async function ProtectedLayout({
 
   const user = userData.user
 
-  const { data: profile, error: profileError } = await supabase
-  .from("profiles")
-  .select("*")
-  .eq("user_id", user.id)
-  .maybeSingle()
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("*")
+    .eq("user_id", user.id)
+    .maybeSingle()
 
   if (!profile) {
     redirect("/subscribe")
@@ -68,10 +68,15 @@ export default async function ProtectedLayout({
 
   return (
     <div className="bg-gray-100 min-h-screen flex">
-      <Sidebar />
+      {/* Nå sender vi profile inn i Sidebar */}
+      <Sidebar profile={profile} />
+
       <main className="flex-1 p-6 ml-64">
-        <Header />          {/* ← Header vises her */}
-        {children}
+        {/* Og inn i Header */}
+        <Header profile={profile} />
+
+        {/* Og videre til dashboard/page.tsx */}
+        {children && React.cloneElement(children as any, { profile })}
       </main>
     </div>
   )

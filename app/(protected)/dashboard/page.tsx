@@ -37,7 +37,7 @@ ChartJS.register(
   Legend
 )
 
-export default function Page() {
+export default function Page({ profile }: { profile: any }) {
   // Subscription
   const [subscription, setSubscription] = useState<any>(null)
 
@@ -339,6 +339,12 @@ export default function Page() {
           {subscription.subscription_status === "canceled" && "Abonnement avsluttet"}
           {subscription.subscription_status === "past_due" && "Betaling feilet"}
         </h2>
+       
+        {/* Firma-navn */}	 
+	<p className="text-gray-700 font-medium">
+ 	 {profile?.company_name}
+	</p>
+
 
         {/* Undertekst */}
         {subscription.subscription_status === "trialing" && (
