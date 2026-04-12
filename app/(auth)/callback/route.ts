@@ -31,25 +31,47 @@ export async function GET(request: NextRequest) {
   // 1. Magic link / OAuth / password reset
   if (code) {
     await supabase.auth.exchangeCodeForSession(code)
-    return response
   }
 
   // 2. Email verification
-if (token && type === "signup") {
-  const email = url.searchParams.get("email")
+  if (token && type === "signup") {
+    const email = url.searchParams.get("email")
 
-  if (email) {
-    await supabase.auth.verifyOtp({
-      email,
-      token,
-      type: "signup",
+    if (email) {
+      await supabase.auth.verifyOtp({
+        email,
+        token,
+        type: "signup",
+      })
+    }
+  }
+
+  // 3. Nå er brukeren logget inn → hent user
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  if (!user) {
+    return NextResponse.redirect(new URL("/login", request.url))
+  }
+
+  // 4. Sjekk om profil finnes
+  const { data: existingProfile } = await supabase
+    .from("profiles")
+    .select("id")
+    .eq("user_id", user.id)
+    .maybeSingle()
+
+  // 5. Opprett profil hvis den ikke finnes
+  if (!existingProfile) {
+    await supabase.from("profiles").insert({
+      user_id: user.id,
+      company_name: null, // du kan fylle inn fra metadata senere
+      subscription_status: "trial",
+      trial_start: new Date().toISOString(),
+      trial_end: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
     })
   }
 
   return response
-}
-
-
-  // Hvis noe mangler → send til login
-  return NextResponse.redirect(new URL("/login", request.url))
 }
