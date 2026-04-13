@@ -55,9 +55,15 @@ export async function GET(request: NextRequest) {
     return NextResponse.redirect(new URL("/login", request.url))
   }
 
-  // 4. Hent metadata
-  const company_name = user.user_metadata?.company_name ?? null
-  const full_name = user.user_metadata?.full_name ?? null
+  // 4. Hent metadata riktig fra auth.users (IKKE user.user_metadata)
+  const { data: authUser } = await supabase
+    .from("auth.users")
+    .select("raw_user_meta_data")
+    .eq("id", user.id)
+    .single()
+
+  const company_name = authUser?.raw_user_meta_data?.company_name ?? null
+  const full_name = authUser?.raw_user_meta_data?.full_name ?? null
 
   // 5. Sjekk om profil finnes
   const { data: existingProfile } = await supabase
