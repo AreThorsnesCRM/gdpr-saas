@@ -85,20 +85,24 @@ export default function Sidebar({ profile }: { profile: any }) {
   ]
 
   const badgeStyles: Record<string, string> = {
-    active: "bg-green-100 text-green-700",
-    trialing: "bg-blue-100 text-blue-700",
-    canceled: "bg-gray-200 text-gray-600",
-    past_due: "bg-red-100 text-red-700",
-    unknown: "bg-gray-200 text-gray-600",
-  }
+  active: "bg-green-100 text-green-700",
+  trial: "bg-blue-100 text-blue-700",      // <--- LEGG TIL DENNE
+  trialing: "bg-blue-100 text-blue-700",
+  canceled: "bg-gray-200 text-gray-600",
+  past_due: "bg-red-100 text-red-700",
+  unknown: "bg-gray-200 text-gray-600",
+}
+
 
   const badgeLabel: Record<string, string> = {
-    active: "Active",
-    trialing: "Trial",
-    canceled: "Canceled",
-    past_due: "Past due",
-    unknown: "Unknown",
-  }
+  active: "Active",
+  trial: "Trial",                          // <--- LEGG TIL DENNE
+  trialing: "Trial",
+  canceled: "Canceled",
+  past_due: "Past due",
+  unknown: "Unknown",
+}
+
 
   return (
     <aside className="w-64 h-screen bg-white border-r border-gray-200 p-6 flex flex-col fixed left-0 top-0">
