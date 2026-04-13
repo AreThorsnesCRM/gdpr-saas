@@ -340,18 +340,19 @@ useEffect(() => {
       <div>
         <div className="text-sm text-gray-400 mb-1">Abonnement</div>
 
-        {/* Status-tittel */}
-        <h2 className="text-2xl font-bold">
-          {subscription.subscription_status === "active" && "Aktivt abonnement"}
-          {subscription.subscription_status === "trialing" && "Prøveperiode"}
-          {subscription.subscription_status === "canceled" && "Abonnement avsluttet"}
-          {subscription.subscription_status === "past_due" && "Betaling feilet"}
-        </h2>
-
         {/* Firma-navn */}
-        <p className="text-gray-700 font-medium">
-          {profile?.company_name}
-        </p>
+<p className="text-gray-700 font-medium">
+  {profile?.company_name}
+</p>
+
+{/* Status-tittel */}
+<h2 className="text-2xl font-bold mt-1">
+  {subscription.subscription_status === "active" && "Aktivt abonnement"}
+  {subscription.subscription_status === "trialing" && "Prøveperiode"}
+  {subscription.subscription_status === "canceled" && "Abonnement avsluttet"}
+  {subscription.subscription_status === "past_due" && "Betaling feilet"}
+</h2>
+
 
 
 
