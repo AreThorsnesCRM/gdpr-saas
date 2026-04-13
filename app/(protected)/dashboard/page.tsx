@@ -38,6 +38,9 @@ ChartJS.register(
 )
 
 export default function Page({ profile }: { profile: any }) {
+
+console.log("PROFILE I DASHBOARD:", profile)
+
   // Subscription
   const [subscription, setSubscription] = useState<any>(null)
 
