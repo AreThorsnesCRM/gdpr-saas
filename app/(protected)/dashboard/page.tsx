@@ -338,7 +338,6 @@ useEffect(() => {
   <div className="bg-white rounded-xl shadow p-6 border border-gray-100">
     <div className="flex items-center justify-between">
       <div>
-        <div className="text-sm text-gray-400 mb-1">Abonnement</div>
 
         {/* Firma-navn */}
 <p className="text-gray-700 font-medium">
