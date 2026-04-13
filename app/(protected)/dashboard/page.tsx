@@ -344,9 +344,12 @@ console.log("PROFILE I DASHBOARD:", profile)
         </h2>
        
         {/* Firma-navn */}	 
-	<p className="text-gray-700 font-medium">
- 	 {profile?.company_name}
-	</p>
+	{profile && (
+  <p className="text-gray-700 font-medium">
+    {profile.company_name}
+  </p>
+)}
+
 
 
         {/* Undertekst */}
