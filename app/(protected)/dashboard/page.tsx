@@ -329,7 +329,7 @@ console.log("PROFILE I DASHBOARD:", profile)
     <div className="p-8 space-y-10">
 
       {/* Subscription Section */}
-{subscription !== null && profile && (
+{subscription && (
   <div className="bg-white rounded-xl shadow p-6 border border-gray-100">
     <div className="flex items-center justify-between">
       <div>
@@ -342,13 +342,12 @@ console.log("PROFILE I DASHBOARD:", profile)
           {subscription.subscription_status === "canceled" && "Abonnement avsluttet"}
           {subscription.subscription_status === "past_due" && "Betaling feilet"}
         </h2>
-       
-        {/* Firma-navn */}	 
-	{profile && (
-  <p className="text-gray-700 font-medium">
-    {profile.company_name}
-  </p>
-)}
+
+        {/* Firma-navn */}
+        <p className="text-gray-700 font-medium">
+          {profile?.company_name}
+        </p>
+
 
 
 
