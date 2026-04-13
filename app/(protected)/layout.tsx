@@ -77,7 +77,7 @@ export default async function ProtectedLayout({
         <Header profile={profile} />
 
         {/* Og videre til dashboard/page.tsx */}
-        {children && React.cloneElement(children as any, { profile })}
+        {children}
       </main>
     </div>
   )

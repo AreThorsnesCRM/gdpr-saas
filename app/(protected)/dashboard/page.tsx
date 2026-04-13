@@ -37,12 +37,15 @@ ChartJS.register(
   Legend
 )
 
-export default function Page({ profile }: { profile: any }) {
+export default function Page() {
 
-console.log("PROFILE I DASHBOARD:", profile)
 
   // Subscription
   const [subscription, setSubscription] = useState<any>(null)
+  
+  // Profile
+  const [profile, setProfile] = useState<any>(null)
+	
 
   // Stats
   const [stats, setStats] = useState({
@@ -67,23 +70,25 @@ console.log("PROFILE I DASHBOARD:", profile)
     datasets: [],
   })
 
-  // Load subscription
-  useEffect(() => {
-    async function loadSubscription() {
-      const { data: userData } = await supabase.auth.getUser()
-      if (!userData?.user) return
+  // Load subscription + profile
+useEffect(() => {
+  async function loadSubscription() {
+    const { data: userData } = await supabase.auth.getUser()
+    if (!userData?.user) return
 
-      const { data } = await supabase
-        .from("profiles")
-        .select("subscription_status, trial_end")
-        .eq("user_id", userData.user.id)
-        .single()
+    const { data } = await supabase
+      .from("profiles")
+      .select("*")
+      .eq("user_id", userData.user.id)
+      .single()
 
-      setSubscription(data)
-    }
+    setSubscription(data)
+    setProfile(data)
+  }
 
-    loadSubscription()
-  }, [])
+  loadSubscription()
+}, [])
+
 
   // Trial countdown helper
   function daysLeft(dateString: string | null) {
