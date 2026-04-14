@@ -5,12 +5,24 @@ import { headers } from "next/headers";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
 
-
-// Supabase server client (service role)
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
+
+// 🔍 Hjelpefunksjon: Finn user_id basert på stripe_customer_id
+async function getUserIdFromCustomer(customerId: string | null) {
+  if (!customerId) return null;
+
+  const { data, error } = await supabase
+    .from("profiles")
+    .select("user_id")
+    .eq("stripe_customer_id", customerId)
+    .single();
+
+  if (error || !data) return null;
+  return data.user_id;
+}
 
 export async function POST(req: Request) {
   const body = await req.text();
@@ -32,29 +44,37 @@ export async function POST(req: Request) {
 
   console.log("🔔 Received Stripe event:", event.type);
 
-  // Hent user_id fra metadata (kun for checkout.session.completed)
-let userId: string | null = null;
+  let userId: string | null = null;
 
-if (event.type === "checkout.session.completed") {
-  const session = event.data.object as Stripe.Checkout.Session;
-  userId = session.metadata?.user_id ?? null;
-}
+  // 1️⃣ checkout.session.completed → metadata har user_id
+  if (event.type === "checkout.session.completed") {
+    const session = event.data.object as Stripe.Checkout.Session;
+    userId = session.metadata?.user_id ?? null;
+  }
 
-console.log("👤 User ID from metadata:", userId);
+  // 2️⃣ subscription events → finn user_id via stripe_customer_id
+  if (
+    event.type === "customer.subscription.updated" ||
+    event.type === "customer.subscription.created" ||
+    event.type === "customer.subscription.deleted"
+  ) {
+    const subscription = event.data.object as Stripe.Subscription;
+    const customerId = subscription.customer as string;
 
-// Hvis vi ikke har userId, kan vi ikke oppdatere Supabase
-if (!userId) {
-  console.log("⚠️ No user_id in metadata, skipping Supabase update.");
-  return NextResponse.json({ received: true });
-}
+    userId = await getUserIdFromCustomer(customerId);
+  }
 
+  console.log("👤 Resolved user ID:", userId);
 
-  // Håndter relevante Stripe events
+  if (!userId) {
+    console.log("⚠️ No user_id found. Skipping Supabase update.");
+    return NextResponse.json({ received: true });
+  }
+
+  // 🔄 Håndter eventene
   switch (event.type) {
     case "checkout.session.completed": {
-      const session = event.data.object;
-
-      console.log("💳 Checkout completed for user:", userId);
+      const session = event.data.object as Stripe.Checkout.Session;
 
       await supabase
         .from("profiles")
@@ -65,15 +85,12 @@ if (!userId) {
         })
         .eq("user_id", userId);
 
-      console.log("✅ Supabase updated after checkout.session.completed");
       break;
     }
 
     case "customer.subscription.updated":
     case "customer.subscription.created": {
-      const subscription = event.data.object;
-
-      console.log("🔄 Subscription updated:", subscription.status);
+      const subscription = event.data.object as Stripe.Subscription;
 
       await supabase
         .from("profiles")
@@ -83,13 +100,10 @@ if (!userId) {
         })
         .eq("user_id", userId);
 
-      console.log("✅ Supabase updated after subscription event");
       break;
     }
 
     case "customer.subscription.deleted": {
-      console.log("❌ Subscription canceled for user:", userId);
-
       await supabase
         .from("profiles")
         .update({
@@ -97,12 +111,8 @@ if (!userId) {
         })
         .eq("user_id", userId);
 
-      console.log("🛑 User subscription marked as canceled");
       break;
     }
-
-    default:
-      console.log("ℹ️ Event not handled:", event.type);
   }
 
   return NextResponse.json({ received: true });

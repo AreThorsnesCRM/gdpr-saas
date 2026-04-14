@@ -340,21 +340,19 @@ useEffect(() => {
       <div>
 
         {/* Firma-navn */}
-<p className="text-gray-700 font-medium">
-  {profile?.company_name}
-</p>
+        <p className="text-gray-700 font-medium">
+          {profile?.company_name}
+        </p>
 
-{/* Status-tittel */}
-<h2 className="text-2xl font-bold mt-1">
-  {subscription.subscription_status === "active" && "Aktivt abonnement"}
-  {subscription.subscription_status === "trialing" && "Prøveperiode"}
-  {subscription.subscription_status === "canceled" && "Abonnement avsluttet"}
-  {subscription.subscription_status === "past_due" && "Betaling feilet"}
-</h2>
-
-
-
-
+        {/* Status-tittel */}
+        <h2 className="text-2xl font-bold mt-1">
+          {subscription.subscription_status === "active" && "Aktivt abonnement"}
+          {subscription.subscription_status === "trialing" && "Prøveperiode aktiv"}
+          {subscription.subscription_status === "past_due" && "Betaling feilet"}
+          {subscription.subscription_status === "canceled" && "Abonnement avsluttet"}
+          {subscription.subscription_status === "incomplete" && "Betaling ikke fullført"}
+          {subscription.subscription_status === "unpaid" && "Abonnement ubetalt"}
+        </h2>
 
         {/* Undertekst */}
         {subscription.subscription_status === "trialing" && (
@@ -371,39 +369,51 @@ useEffect(() => {
 
         {subscription.subscription_status === "past_due" && (
           <p className="text-gray-600 mt-1">
-            Betalingen feilet – oppdater betalingsmetode
+            Betalingen feilet – oppdater betalingsmetode for å fortsette
           </p>
         )}
 
         {subscription.subscription_status === "canceled" && (
           <p className="text-gray-600 mt-1">
-            Abonnementet er avsluttet
+            Abonnementet er avsluttet – aktiver på nytt for å få tilgang
+          </p>
+        )}
+
+        {(subscription.subscription_status === "incomplete" ||
+          subscription.subscription_status === "unpaid") && (
+          <p className="text-gray-600 mt-1">
+            Betalingen ble ikke fullført – fullfør kjøpet for å aktivere abonnementet
           </p>
         )}
       </div>
 
       {/* Riktig knapp basert på status */}
-<div>
-  {subscription.subscription_status === "trialing" && (
-    <SubscribeButton label="Start abonnement" mode="checkout" />
-  )}
+      <div>
+        {subscription.subscription_status === "trialing" && (
+          <SubscribeButton label="Start abonnement" mode="checkout" />
+        )}
 
-  {subscription.subscription_status === "canceled" && (
-    <SubscribeButton label="Start abonnement" mode="checkout" />
-  )}
+        {subscription.subscription_status === "active" && (
+          <SubscribeButton label="Administrer abonnement" mode="portal" />
+        )}
 
-  {subscription.subscription_status === "past_due" && (
-    <SubscribeButton label="Oppdater betalingsmetode" mode="portal" />
-  )}
+        {subscription.subscription_status === "past_due" && (
+          <SubscribeButton label="Oppdater betalingsmetode" mode="portal" />
+        )}
 
-  {subscription.subscription_status === "active" && (
-    <SubscribeButton label="Administrer abonnement" mode="portal" />
-  )}
-</div>
+        {subscription.subscription_status === "canceled" && (
+          <SubscribeButton label="Start abonnement på nytt" mode="checkout" />
+        )}
 
+        {(subscription.subscription_status === "incomplete" ||
+          subscription.subscription_status === "unpaid") && (
+          <SubscribeButton label="Fullfør betaling" mode="checkout" />
+        )}
+      </div>
     </div>
   </div>
 )}
+
 
 
       {/* Header */}
