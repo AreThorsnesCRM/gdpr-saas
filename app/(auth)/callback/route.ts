@@ -2,6 +2,7 @@ export const dynamic = "force-dynamic";
 
 import { NextRequest, NextResponse } from "next/server";
 import { createServerClient } from "@supabase/ssr";
+import { supabaseAdmin } from "@/lib/supabaseAdmin";
 
 export async function GET(request: NextRequest) {
   const url = new URL(request.url);
@@ -13,6 +14,7 @@ export async function GET(request: NextRequest) {
     new URL("/dashboard", request.url)
   );
 
+  // Bruker ANON-klient for session/cookies
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
@@ -48,7 +50,7 @@ export async function GET(request: NextRequest) {
     }
   }
 
-  // 3. Hent bruker
+  // 3. Hent bruker fra session
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -57,9 +59,15 @@ export async function GET(request: NextRequest) {
     return NextResponse.redirect(new URL("/login", request.url));
   }
 
-  // ⭐ 4. Hent metadata riktig (IKKE fra auth.users)
-  const company_name = user.user_metadata?.company_name ?? null;
-  const full_name = user.user_metadata?.full_name ?? null;
+  // ⭐ 4. Hent metadata riktig via ADMIN-klient
+  const { data: authUser } = await supabaseAdmin
+    .from("auth.users")
+    .select("raw_user_meta_data")
+    .eq("id", user.id)
+    .single();
+
+  const company_name = authUser?.raw_user_meta_data?.company_name ?? null;
+  const full_name = authUser?.raw_user_meta_data?.full_name ?? null;
 
   // 5. Sjekk om profil finnes
   const { data: existingProfile } = await supabase
