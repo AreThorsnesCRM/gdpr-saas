@@ -1,6 +1,6 @@
 "use client"
 
-import SubscribeButton from "@/components/SubscribeButton"
+import SubscribeButton from "../../components/SubscribeButton"
 
 export default function UpgradePage() {
   return (
