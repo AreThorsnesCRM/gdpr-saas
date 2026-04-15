@@ -57,7 +57,7 @@ export default async function ProtectedLayout({
   const trialEnd = profile.trial_end ? new Date(profile.trial_end) : null
 
   const trialActive =
-    profile.subscription_status === "trial" &&
+    profile.subscription_status === "trialing" &&
     trialEnd &&
     trialEnd > now
 
