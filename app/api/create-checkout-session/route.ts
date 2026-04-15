@@ -21,6 +21,7 @@ export async function POST() {
       }
     );
 
+    // 1. Hent bruker
     const {
       data: { user },
     } = await supabase.auth.getUser();
@@ -32,11 +33,34 @@ export async function POST() {
       );
     }
 
-    // IMPORTANT: Use the same variable as portal-session
+    // 2. Hent profil
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("*")
+      .eq("user_id", user.id)
+      .single();
+
+    if (!profile) {
+      return NextResponse.json(
+        { error: "Profile not found" },
+        { status: 404 }
+      );
+    }
+
+    if (!profile.stripe_customer_id) {
+      return NextResponse.json(
+        { error: "Missing stripe_customer_id" },
+        { status: 400 }
+      );
+    }
+
+    // 3. Base URL
     const baseUrl = process.env.NEXT_PUBLIC_APP_URL!;
 
+    // 4. Lag checkout-session
     const session = await stripe.checkout.sessions.create({
       mode: "subscription",
+      customer: profile.stripe_customer_id, // ⭐ viktig!
       line_items: [
         {
           price: process.env.STRIPE_PRICE_ID!,
