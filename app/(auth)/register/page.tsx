@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabaseClient";
+import { createStripeCustomer } from "@/app/actions/createStripeCustomer";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -20,11 +21,10 @@ export default function RegisterPage() {
     setError("");
 
     // 1. Opprett bruker i Supabase Auth
-    const { error: signUpError } = await supabase.auth.signUp({
+    const { data, error: signUpError } = await supabase.auth.signUp({
       email,
       password,
       options: {
-        // Vi sender med metadata slik at callback kan hente dem senere
         data: {
           company_name: company,
           full_name: name,
@@ -38,7 +38,18 @@ export default function RegisterPage() {
       return;
     }
 
-    // 2. Send bruker videre til "check email"
+    const user = data.user;
+
+    // 2. Opprett Stripe customer + sett trialing-status
+    if (user) {
+      try {
+        await createStripeCustomer(user.id, email);
+      } catch (err) {
+        console.error("Stripe customer creation failed:", err);
+      }
+    }
+
+    // 3. Send bruker videre til "check email"
     router.push("/check-email");
   }
 
