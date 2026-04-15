@@ -13,11 +13,7 @@ export async function GET(request: NextRequest) {
   const token = url.searchParams.get("token");
   const type = url.searchParams.get("type");
 
-  const response = NextResponse.redirect(
-    new URL("/dashboard", request.url)
-  );
-
-  // Bruker ANON-klient for session/cookies
+  // ⭐ 1: Opprett supabase-klient FØR vi lager response
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
@@ -26,24 +22,21 @@ export async function GET(request: NextRequest) {
         getAll() {
           return request.cookies.getAll();
         },
-        setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value, options }) => {
-            response.cookies.set(name, value, options);
-          });
+        setAll() {
+          // Vi setter cookies manuelt senere
         },
       },
     }
   );
 
-  // 1. Magic link / OAuth / email login
+  // ⭐ 2: Magic link / OAuth
   if (code) {
     await supabase.auth.exchangeCodeForSession(code);
   }
 
-  // 2. Email verification
+  // ⭐ 3: Email verification
   if (token && type === "signup") {
     const email = url.searchParams.get("email");
-
     if (email) {
       await supabase.auth.verifyOtp({
         email,
@@ -53,7 +46,7 @@ export async function GET(request: NextRequest) {
     }
   }
 
-  // 3. Hent bruker fra session
+  // ⭐ 4: Hent bruker etter session er satt
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -62,7 +55,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.redirect(new URL("/login", request.url));
   }
 
-  // ⭐ 4. Hent metadata riktig via ADMIN-klient
+  // ⭐ 5: Hent metadata fra auth.users
   const { data: authUser } = await supabaseAdmin
     .from("auth.users")
     .select("raw_user_meta_data")
@@ -72,25 +65,23 @@ export async function GET(request: NextRequest) {
   const company_name = authUser?.raw_user_meta_data?.company_name ?? null;
   const full_name = authUser?.raw_user_meta_data?.full_name ?? null;
 
-  // 5. Sjekk om profil finnes
+  // ⭐ 6: Sjekk om profil finnes
   const { data: existingProfile } = await supabase
     .from("profiles")
     .select("*")
     .eq("user_id", user.id)
     .maybeSingle();
 
-  // 6. Opprett profil hvis den ikke finnes
+  // ⭐ 7: Opprett profil + Stripe-kunde hvis ny bruker
   if (!existingProfile) {
     const now = new Date();
     const trialEnd = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
 
-    // ⭐ Opprett Stripe-kunde
     const customer = await stripe.customers.create({
       email: user.email,
       metadata: { user_id: user.id },
     });
 
-    // ⭐ Opprett profil med stripe_customer_id
     await supabase.from("profiles").insert({
       user_id: user.id,
       company_name,
@@ -99,6 +90,27 @@ export async function GET(request: NextRequest) {
       subscription_status: "trialing",
       trial_start: now.toISOString(),
       trial_end: trialEnd.toISOString(),
+    });
+  }
+
+  // ⭐ 8: Hent session for å sette cookies manuelt
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
+
+  // ⭐ 9: Lag redirect-response ETTER at session er klar
+  const response = NextResponse.redirect(new URL("/dashboard", request.url));
+
+  // ⭐ 10: Sett cookies manuelt (Next.js 16 krever dette)
+  if (session) {
+    response.cookies.set("sb-access-token", session.access_token, {
+      path: "/",
+      httpOnly: true,
+    });
+
+    response.cookies.set("sb-refresh-token", session.refresh_token, {
+      path: "/",
+      httpOnly: true,
     });
   }
 
