@@ -3,6 +3,9 @@ export const dynamic = "force-dynamic";
 import { NextRequest, NextResponse } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
+import Stripe from "stripe";
+
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
 
 export async function GET(request: NextRequest) {
   const url = new URL(request.url);
@@ -72,7 +75,7 @@ export async function GET(request: NextRequest) {
   // 5. Sjekk om profil finnes
   const { data: existingProfile } = await supabase
     .from("profiles")
-    .select("id")
+    .select("*")
     .eq("user_id", user.id)
     .maybeSingle();
 
@@ -81,11 +84,19 @@ export async function GET(request: NextRequest) {
     const now = new Date();
     const trialEnd = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
 
+    // ⭐ Opprett Stripe-kunde
+    const customer = await stripe.customers.create({
+      email: user.email,
+      metadata: { user_id: user.id },
+    });
+
+    // ⭐ Opprett profil med stripe_customer_id
     await supabase.from("profiles").insert({
       user_id: user.id,
       company_name,
       full_name,
-      subscription_status: "trial",
+      stripe_customer_id: customer.id,
+      subscription_status: "trialing",
       trial_start: now.toISOString(),
       trial_end: trialEnd.toISOString(),
     });
