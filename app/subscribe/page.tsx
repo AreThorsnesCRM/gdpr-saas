@@ -1,16 +1,15 @@
 "use client"
 
-import { useRouter } from "next/navigation"
-import { supabase } from "@/lib/supabaseClient"
-
 export default function SubscribePage() {
-  const router = useRouter()
-
   const handleSubscribe = async () => {
-    const { data, error } = await supabase.functions.invoke("create-checkout-session")
+    const res = await fetch("/api/create-checkout-session", {
+      method: "POST",
+    })
 
-    if (error) {
-      console.error(error)
+    const data = await res.json()
+
+    if (!data?.url) {
+      console.error("No checkout URL returned")
       return
     }
 
