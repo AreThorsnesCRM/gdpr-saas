@@ -69,7 +69,6 @@ export default async function ProtectedLayout({
 
   return (
     <div className="bg-gray-100 min-h-screen flex">
-      {/* Nå sender vi profile inn i Sidebar */}
       <Sidebar />
 
       <main className="flex-1 p-6 ml-64">
