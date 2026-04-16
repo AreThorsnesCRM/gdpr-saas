@@ -37,18 +37,43 @@ ChartJS.register(
   Legend
 )
 
+type Profile = {
+  id: string
+  user_id: string
+  full_name: string | null
+  company_name: string | null
+  subscription_status: string | null
+  trial_start: string | null
+  trial_end: string | null
+  stripe_customer_id: string | null
+  stripe_subscription_id: string | null
+}
+
+type SubscriptionView = {
+  status: string | null
+  trial_end: string | null
+}
+
+type StatsState = {
+  customers: number
+  agreements: number
+  activeAgreements: number
+  expiringSoon: number
+  customersWithoutActive: number
+}
+
+type ChartDataState = {
+  labels: string[]
+  datasets: any[]
+}
+
 export default function Page() {
+  // Profil og abonnement (fra profiles-tabellen)
+  const [profile, setProfile] = useState<Profile | null>(null)
+  const [subscription, setSubscription] = useState<SubscriptionView | null>(null)
 
-
-  // Subscription
-  const [subscription, setSubscription] = useState<any>(null)
-  
-  // Profile
-  const [profile, setProfile] = useState<any>(null)
-	
-
-  // Stats
-  const [stats, setStats] = useState({
+  // Dashboard-data
+  const [stats, setStats] = useState<StatsState>({
     customers: 0,
     agreements: 0,
     activeAgreements: 0,
@@ -56,39 +81,23 @@ export default function Page() {
     customersWithoutActive: 0,
   })
 
-  // Activity
   const [recentActivity, setRecentActivity] = useState<any[]>([])
   const [upcoming, setUpcoming] = useState<any[]>([])
-
-  // Critical customers
   const [criticalCustomers, setCriticalCustomers] = useState<any[]>([])
 
-  // Graph
-  const [graphType, setGraphType] = useState("agreements")
-  const [chartData, setChartData] = useState<any>({
+  // Graf
+  const [graphType, setGraphType] = useState<"agreements" | "customers" | "activity" | "archived">("agreements")
+  const [chartData, setChartData] = useState<ChartDataState>({
     labels: [],
     datasets: [],
   })
 
-  // Load subscription + profile
-useEffect(() => {
-  async function loadSubscription() {
-    const { data: userData } = await supabase.auth.getUser()
-    if (!userData?.user) return
+  // En enkel loading-state for å unngå unødvendig blinking
+  const [isLoadingProfile, setIsLoadingProfile] = useState(true)
 
-    const { data } = await supabase
-      .from("profiles")
-      .select("*")
-      .eq("user_id", userData.user.id)
-      .single()
-
-    setSubscription(data)
-    setProfile(data)
-  }
-
-  loadSubscription()
-}, [])
-
+  // -----------------------------
+  // HJELPERE
+  // -----------------------------
 
   // Trial countdown helper
   function daysLeft(dateString: string | null) {
@@ -99,8 +108,54 @@ useEffect(() => {
     return Math.ceil(diff / (1000 * 60 * 60 * 24))
   }
 
-  // Load dashboard data
+  // -----------------------------
+  // PROFIL + ABONNEMENT
+  // -----------------------------
   useEffect(() => {
+    async function loadProfileAndSubscription() {
+      setIsLoadingProfile(true)
+
+      const { data: userData, error: userError } = await supabase.auth.getUser()
+      if (userError || !userData?.user) {
+        setProfile(null)
+        setSubscription(null)
+        setIsLoadingProfile(false)
+        return
+      }
+
+      const { data: profileData, error: profileError } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("user_id", userData.user.id)
+        .single<Profile>()
+
+      if (profileError || !profileData) {
+        setProfile(null)
+        setSubscription(null)
+        setIsLoadingProfile(false)
+        return
+      }
+
+      setProfile(profileData)
+
+      // Bygg en "view-modell" for abonnementet basert på profiles-feltene
+      setSubscription({
+        status: profileData.subscription_status,
+        trial_end: profileData.trial_end,
+      })
+
+      setIsLoadingProfile(false)
+    }
+
+    loadProfileAndSubscription()
+  }, [])
+
+  // -----------------------------
+  // DASHBOARD-DATA (stats, aktivitet, kommende, kritiske, graf)
+  // -----------------------------
+  useEffect(() => {
+    // Vi kan hente dashboard-data uavhengig av profil,
+    // men det er fint at profil-lastingen ikke blokkerer resten.
     fetchStats()
     fetchRecentActivity()
     fetchUpcoming()
@@ -124,7 +179,7 @@ useEffect(() => {
     const customerCount = customers?.length || 0
     const agreementCount = agreements?.length || 0
 
-    const active = agreements?.filter(a => !a.archived).length || 0
+    const active = agreements?.filter((a: any) => !a.archived).length || 0
 
     // 30-dagers logikk
     const today = new Date()
@@ -135,7 +190,7 @@ useEffect(() => {
     const in30DaysStr = in30Days.toISOString().split("T")[0]
 
     const soon =
-      agreements?.filter(a =>
+      agreements?.filter((a: any) =>
         a.end_date >= todayStr &&
         a.end_date <= in30DaysStr
       ).length || 0
@@ -143,12 +198,12 @@ useEffect(() => {
     // Finn kunder uten aktive avtaler
     const customersWithActive = new Set(
       agreements
-        ?.filter(a => !a.archived)
-        .map(a => a.customer_id)
+        ?.filter((a: any) => !a.archived)
+        .map((a: any) => a.customer_id)
     )
 
     const customersWithoutActive =
-      customers?.filter(c => !customersWithActive.has(c.id)).length || 0
+      customers?.filter((c: any) => !customersWithActive.has(c.id)).length || 0
 
     setStats({
       customers: customerCount,
@@ -203,8 +258,8 @@ useEffect(() => {
       return
     }
 
-    const enriched = customers.map((c) => {
-      const customerAgreements = agreements.filter(a => a.customer_id === c.id)
+    const enriched = customers.map((c: any) => {
+      const customerAgreements = agreements.filter((a: any) => a.customer_id === c.id)
 
       if (customerAgreements.length === 0) {
         return {
@@ -216,11 +271,11 @@ useEffect(() => {
         }
       }
 
-      const hasActive = customerAgreements.some(a => !a.archived)
+      const hasActive = customerAgreements.some((a: any) => !a.archived)
 
       const ended = customerAgreements
-        .filter(a => a.archived)
-        .sort((a, b) => (a.end_date > b.end_date ? -1 : 1))
+        .filter((a: any) => a.archived)
+        .sort((a: any, b: any) => (a.end_date > b.end_date ? -1 : 1))
 
       if (ended.length === 0) {
         return {
@@ -247,9 +302,9 @@ useEffect(() => {
       }
     })
 
-    let withoutActive = enriched.filter(c => !c.hasActiveAgreement)
+    let withoutActive = enriched.filter((c: any) => !c.hasActiveAgreement)
 
-    withoutActive = withoutActive.sort((a, b) => {
+    withoutActive = withoutActive.sort((a: any, b: any) => {
       if (a.hasNeverHadAgreement && !b.hasNeverHadAgreement) return -1
       if (!a.hasNeverHadAgreement && b.hasNeverHadAgreement) return 1
 
@@ -291,12 +346,12 @@ useEffect(() => {
       const { data: agreements } = await supabase
         .from("agreements")
         .select("archived, start_date")
-      data = agreements?.filter(a => a.archived) || []
+      data = agreements?.filter((a: any) => a.archived) || []
     }
 
     const counts: Record<string, number> = {}
 
-    data.forEach((item) => {
+    data.forEach((item: any) => {
       const date =
         item.start_date ||
         item.created_at ||
@@ -330,91 +385,92 @@ useEffect(() => {
     })
   }
 
+  // -----------------------------
+  // RENDER
+  // -----------------------------
   return (
     <div className="p-8 space-y-10">
 
       {/* Subscription Section */}
-{subscription && (
-  <div className="bg-white rounded-xl shadow p-6 border border-gray-100">
-    <div className="flex items-center justify-between">
-      <div>
+      {!isLoadingProfile && subscription && (
+        <div className="bg-white rounded-xl shadow p-6 border border-gray-100">
+          <div className="flex items-center justify-between">
+            <div>
 
-        {/* Firma-navn */}
-        <p className="text-gray-700 font-medium">
-          {profile?.company_name}
-        </p>
+              {/* Firma-navn */}
+              <p className="text-gray-700 font-medium">
+                {profile?.company_name}
+              </p>
 
-        {/* Status-tittel */}
-        <h2 className="text-2xl font-bold mt-1">
-          {subscription.subscription_status === "active" && "Aktivt abonnement"}
-          {subscription.subscription_status === "trialing" && "Prøveperiode aktiv"}
-          {subscription.subscription_status === "past_due" && "Betaling feilet"}
-          {subscription.subscription_status === "canceled" && "Abonnement avsluttet"}
-          {subscription.subscription_status === "incomplete" && "Betaling ikke fullført"}
-          {subscription.subscription_status === "unpaid" && "Abonnement ubetalt"}
-        </h2>
+              {/* Status-tittel */}
+              <h2 className="text-2xl font-bold mt-1">
+                {subscription.status === "active" && "Aktivt abonnement"}
+                {subscription.status === "trialing" && "Prøveperiode aktiv"}
+                {subscription.status === "past_due" && "Betaling feilet"}
+                {subscription.status === "canceled" && "Abonnement avsluttet"}
+                {subscription.status === "incomplete" && "Betaling ikke fullført"}
+                {subscription.status === "unpaid" && "Abonnement ubetalt"}
+              </h2>
 
-        {/* Undertekst */}
-        {subscription.subscription_status === "trialing" && (
-          <p className="text-gray-600 mt-1">
-            {daysLeft(subscription.trial_end)} dager igjen av prøveperioden
-          </p>
-        )}
+              {/* Undertekst */}
+              {subscription.status === "trialing" && (
+                <p className="text-gray-600 mt-1">
+                  {daysLeft(subscription.trial_end)} dager igjen av prøveperioden
+                </p>
+              )}
 
-        {subscription.subscription_status === "active" && (
-          <p className="text-gray-600 mt-1">
-            Abonnementet ditt er aktivt
-          </p>
-        )}
+              {subscription.status === "active" && (
+                <p className="text-gray-600 mt-1">
+                  Abonnementet ditt er aktivt
+                </p>
+              )}
 
-        {subscription.subscription_status === "past_due" && (
-          <p className="text-gray-600 mt-1">
-            Betalingen feilet – oppdater betalingsmetode for å fortsette
-          </p>
-        )}
+              {subscription.status === "past_due" && (
+                <p className="text-gray-600 mt-1">
+                  Betalingen feilet – oppdater betalingsmetode for å fortsette
+                </p>
+              )}
 
-        {subscription.subscription_status === "canceled" && (
-          <p className="text-gray-600 mt-1">
-            Abonnementet er avsluttet – aktiver på nytt for å få tilgang
-          </p>
-        )}
+              {subscription.status === "canceled" && (
+                <p className="text-gray-600 mt-1">
+                  Abonnementet er avsluttet – aktiver på nytt for å få tilgang
+                </p>
+              )}
 
-        {(subscription.subscription_status === "incomplete" ||
-          subscription.subscription_status === "unpaid") && (
-          <p className="text-gray-600 mt-1">
-            Betalingen ble ikke fullført – fullfør kjøpet for å aktivere abonnementet
-          </p>
-        )}
-      </div>
+              {(subscription.status === "incomplete" ||
+                subscription.status === "unpaid") && (
+                <p className="text-gray-600 mt-1">
+                  Betalingen ble ikke fullført – fullfør kjøpet for å aktivere abonnementet
+                </p>
+              )}
+            </div>
 
-      {/* Riktig knapp basert på status */}
-      <div>
-        {subscription.subscription_status === "trialing" && (
-          <SubscribeButton label="Start abonnement" mode="checkout" />
-        )}
+            {/* Riktig knapp basert på status */}
+            <div>
+              {subscription.status === "trialing" && (
+                <SubscribeButton label="Start abonnement" mode="checkout" />
+              )}
 
-        {subscription.subscription_status === "active" && (
-          <SubscribeButton label="Administrer abonnement" mode="portal" />
-        )}
+              {subscription.status === "active" && (
+                <SubscribeButton label="Administrer abonnement" mode="portal" />
+              )}
 
-        {subscription.subscription_status === "past_due" && (
-          <SubscribeButton label="Oppdater betalingsmetode" mode="portal" />
-        )}
+              {subscription.status === "past_due" && (
+                <SubscribeButton label="Oppdater betalingsmetode" mode="portal" />
+              )}
 
-        {subscription.subscription_status === "canceled" && (
-          <SubscribeButton label="Start abonnement på nytt" mode="checkout" />
-        )}
+              {subscription.status === "canceled" && (
+                <SubscribeButton label="Start abonnement på nytt" mode="checkout" />
+              )}
 
-        {(subscription.subscription_status === "incomplete" ||
-          subscription.subscription_status === "unpaid") && (
-          <SubscribeButton label="Fullfør betaling" mode="checkout" />
-        )}
-      </div>
-    </div>
-  </div>
-)}
-
-
+              {(subscription.status === "incomplete" ||
+                subscription.status === "unpaid") && (
+                <SubscribeButton label="Fullfør betaling" mode="checkout" />
+              )}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Header */}
       <div className="flex items-center justify-between">
@@ -429,7 +485,6 @@ useEffect(() => {
         </div>
 
         <div className="flex gap-3">
-
           <Link
             href="/customers/new"
             className="bg-blue-600 text-white px-4 py-2 rounded-lg shadow hover:bg-blue-700 transition"
@@ -489,7 +544,7 @@ useEffect(() => {
             {["agreements", "customers", "activity", "archived"].map((type) => (
               <button
                 key={type}
-                onClick={() => setGraphType(type)}
+                onClick={() => setGraphType(type as any)}
                 className={`px-3 py-1 rounded-lg text-sm border ${
                   graphType === type
                     ? "bg-blue-600 text-white border-blue-600"
@@ -515,7 +570,7 @@ useEffect(() => {
           {upcoming.length === 0 && (
             <p className="text-gray-500 text-sm">Ingen kommende avtaler</p>
           )}
-          {upcoming.map((a) => (
+          {upcoming.map((a: any) => (
             <li key={a.id} className="border rounded p-3">
               <div className="font-medium">{a.title}</div>
               <div className="text-sm text-gray-600">
@@ -535,7 +590,7 @@ useEffect(() => {
         )}
 
         <ul className="space-y-3">
-          {criticalCustomers.map((c) => (
+          {criticalCustomers.map((c: any) => (
             <li key={c.id} className="border rounded p-3 flex justify-between items-center">
               <div>
                 <Link href={`/customers/${c.id}`}>
@@ -573,7 +628,7 @@ useEffect(() => {
           {recentActivity.length === 0 && (
             <p className="text-gray-500 text-sm">Ingen aktivitet registrert</p>
           )}
-          {recentActivity.map((n) => (
+          {recentActivity.map((n: any) => (
             <li key={n.id} className="border rounded p-3">
               <div className="font-medium">{n.content}</div>
               <div className="text-sm text-gray-600">
