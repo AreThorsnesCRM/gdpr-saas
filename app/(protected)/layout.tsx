@@ -70,11 +70,11 @@ export default async function ProtectedLayout({
   return (
     <div className="bg-gray-100 min-h-screen flex">
       {/* Nå sender vi profile inn i Sidebar */}
-      <Sidebar profile={profile} />
+      <Sidebar />
 
       <main className="flex-1 p-6 ml-64">
         {/* Og inn i Header */}
-        <Header profile={profile} />
+        <Header />
 
         {/* Og videre til dashboard/page.tsx */}
         {children}

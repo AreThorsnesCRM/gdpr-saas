@@ -13,7 +13,7 @@ import LogoutButton from "../logout/LogoutButton"
 import { useEffect, useState } from "react"
 import { supabase } from "@/lib/supabaseClient"
 
-export default function Sidebar({ profile }: { profile: any }) {
+export default function Sidebar() {
   const pathname = usePathname()
 
   const [status, setStatus] = useState<string>("unknown")
