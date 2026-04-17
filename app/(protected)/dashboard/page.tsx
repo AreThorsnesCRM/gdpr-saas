@@ -1,5 +1,8 @@
 "use client"
 
+export const dynamic = "force-dynamic"
+
+
 import "../../styles/dashboard.css"
 
 import Link from "next/link"
