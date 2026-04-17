@@ -16,14 +16,46 @@ import { supabase } from "@/lib/supabaseClient"
 export default function Sidebar() {
   const pathname = usePathname()
 
-  const [status, setStatus] = useState<string>("unknown")
+  const [status, setStatus] = useState<string>("loading")
   const [fullName, setFullName] = useState<string | null>(null)
   const [email, setEmail] = useState<string | null>(null)
   const [companyName, setCompanyName] = useState<string | null>(null)
+  const [sessionReady, setSessionReady] = useState(false)
 
-  // Hent status + profil ved første render
+  // -----------------------------
+  // 1. Vent på session før vi henter profil
+  // -----------------------------
   useEffect(() => {
-    async function loadInitial() {
+    async function waitForSession() {
+      const { data: sessionData } = await supabase.auth.getSession()
+
+      if (sessionData?.session) {
+        setSessionReady(true)
+        return
+      }
+
+      // Hvis session ikke er klar, vent på onAuthStateChange
+      const {
+        data: { subscription },
+      } = supabase.auth.onAuthStateChange((_event, session) => {
+        if (session) {
+          setSessionReady(true)
+        }
+      })
+
+      return () => subscription.unsubscribe()
+    }
+
+    waitForSession()
+  }, [])
+
+  // -----------------------------
+  // 2. Når session er klar → hent profil
+  // -----------------------------
+  useEffect(() => {
+    if (!sessionReady) return
+
+    async function loadProfile() {
       const { data: userData } = await supabase.auth.getUser()
 
       if (!userData?.user) {
@@ -44,10 +76,12 @@ export default function Sidebar() {
       setCompanyName(data?.company_name ?? null)
     }
 
-    loadInitial()
-  }, [])
+    loadProfile()
+  }, [sessionReady])
 
-  // Oppdater status + profil ved endringer (login/logout)
+  // -----------------------------
+  // 3. Oppdater profil ved login/logout
+  // -----------------------------
   useEffect(() => {
     const {
       data: { subscription },
@@ -85,24 +119,22 @@ export default function Sidebar() {
   ]
 
   const badgeStyles: Record<string, string> = {
-  active: "bg-green-100 text-green-700",
-  trial: "bg-blue-100 text-blue-700",      // <--- LEGG TIL DENNE
-  trialing: "bg-blue-100 text-blue-700",
-  canceled: "bg-gray-200 text-gray-600",
-  past_due: "bg-red-100 text-red-700",
-  unknown: "bg-gray-200 text-gray-600",
-}
-
+    active: "bg-green-100 text-green-700",
+    trialing: "bg-blue-100 text-blue-700",
+    past_due: "bg-red-100 text-red-700",
+    canceled: "bg-gray-200 text-gray-600",
+    unknown: "bg-gray-200 text-gray-600",
+    loading: "bg-gray-200 text-gray-600",
+  }
 
   const badgeLabel: Record<string, string> = {
-  active: "Active",
-  trial: "Trial",                          // <--- LEGG TIL DENNE
-  trialing: "Trial",
-  canceled: "Canceled",
-  past_due: "Past due",
-  unknown: "Unknown",
-}
-
+    active: "Active",
+    trialing: "Trial",
+    past_due: "Past due",
+    canceled: "Canceled",
+    unknown: "Unknown",
+    loading: "Loading...",
+  }
 
   return (
     <aside className="w-64 h-screen bg-white border-r border-gray-200 p-6 flex flex-col fixed left-0 top-0">
@@ -110,22 +142,18 @@ export default function Sidebar() {
 
       {/* Profilseksjon */}
       <div className="mb-6">
-        {/* Firma-navn */}
         <div className="text-lg font-bold text-gray-900">
           {companyName ?? ""}
         </div>
 
-        {/* Fullt navn */}
         <div className="font-semibold text-gray-800">
           {fullName ?? "Bruker"}
         </div>
 
-        {/* E-post */}
         <div className="text-sm text-gray-500 truncate">
           {email ?? ""}
         </div>
 
-        {/* Status-badge */}
         <span
           className={`inline-block mt-2 rounded px-2 py-0.5 text-xs font-medium ${badgeStyles[status]}`}
         >

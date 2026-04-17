@@ -22,7 +22,7 @@ export async function createStripeCustomer(userId: string, email: string) {
   trialEnd.setDate(trialEnd.getDate() + 7);
 
   // 3. Oppdater Supabase-profilen
-  await supabase
+  const { error } = await supabase
     .from("profiles")
     .update({
       stripe_customer_id: customer.id,
@@ -32,5 +32,12 @@ export async function createStripeCustomer(userId: string, email: string) {
     })
     .eq("user_id", userId);
 
-  return customer.id;
+  if (error) {
+    console.error("Failed to update profile with Stripe data:", error);
+  }
+
+  return {
+    customerId: customer.id,
+    trialEnd: trialEnd.toISOString(),
+  };
 }
