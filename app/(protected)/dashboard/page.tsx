@@ -92,14 +92,14 @@ export default function Page() {
     datasets: [],
   })
 
-  // En enkel loading-state for å unngå unødvendig blinking
+  // Loading + session-ready
   const [isLoadingProfile, setIsLoadingProfile] = useState(true)
+  const [sessionReady, setSessionReady] = useState(false)
 
   // -----------------------------
   // HJELPERE
   // -----------------------------
 
-  // Trial countdown helper
   function daysLeft(dateString: string | null) {
     if (!dateString) return null
     const end = new Date(dateString)
@@ -109,9 +109,37 @@ export default function Page() {
   }
 
   // -----------------------------
-  // PROFIL + ABONNEMENT
+  // SESSION-READY: vent på session før vi henter profil
   // -----------------------------
   useEffect(() => {
+    async function waitForSession() {
+      const { data: sessionData } = await supabase.auth.getSession()
+
+      if (sessionData?.session) {
+        setSessionReady(true)
+        return
+      }
+
+      const {
+        data: { subscription },
+      } = supabase.auth.onAuthStateChange((_event, session) => {
+        if (session) {
+          setSessionReady(true)
+        }
+      })
+
+      return () => subscription.unsubscribe()
+    }
+
+    waitForSession()
+  }, [])
+
+  // -----------------------------
+  // PROFIL + ABONNEMENT når session er klar
+  // -----------------------------
+  useEffect(() => {
+    if (!sessionReady) return
+
     async function loadProfileAndSubscription() {
       setIsLoadingProfile(true)
 
@@ -137,8 +165,6 @@ export default function Page() {
       }
 
       setProfile(profileData)
-
-      // Bygg en "view-modell" for abonnementet basert på profiles-feltene
       setSubscription({
         status: profileData.subscription_status,
         trial_end: profileData.trial_end,
@@ -148,14 +174,47 @@ export default function Page() {
     }
 
     loadProfileAndSubscription()
+  }, [sessionReady])
+
+  // -----------------------------
+  // Oppdater profil/abonnement ved session-endringer (login/logout/Stripe-retur)
+  // -----------------------------
+  useEffect(() => {
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange(async (_event, session) => {
+      if (!session?.user) {
+        setProfile(null)
+        setSubscription(null)
+        return
+      }
+
+      const { data: profileData } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("user_id", session.user.id)
+        .single<Profile>()
+
+      if (!profileData) {
+        setProfile(null)
+        setSubscription(null)
+        return
+      }
+
+      setProfile(profileData)
+      setSubscription({
+        status: profileData.subscription_status,
+        trial_end: profileData.trial_end,
+      })
+    })
+
+    return () => subscription.unsubscribe()
   }, [])
 
   // -----------------------------
   // DASHBOARD-DATA (stats, aktivitet, kommende, kritiske, graf)
   // -----------------------------
   useEffect(() => {
-    // Vi kan hente dashboard-data uavhengig av profil,
-    // men det er fint at profil-lastingen ikke blokkerer resten.
     fetchStats()
     fetchRecentActivity()
     fetchUpcoming()
@@ -181,7 +240,6 @@ export default function Page() {
 
     const active = agreements?.filter((a: any) => !a.archived).length || 0
 
-    // 30-dagers logikk
     const today = new Date()
     const in30Days = new Date()
     in30Days.setDate(today.getDate() + 30)
@@ -195,7 +253,6 @@ export default function Page() {
         a.end_date <= in30DaysStr
       ).length || 0
 
-    // Finn kunder uten aktive avtaler
     const customersWithActive = new Set(
       agreements
         ?.filter((a: any) => !a.archived)
@@ -392,17 +449,14 @@ export default function Page() {
     <div className="p-8 space-y-10">
 
       {/* Subscription Section */}
-      {!isLoadingProfile && subscription && (
+      {sessionReady && !isLoadingProfile && subscription && (
         <div className="bg-white rounded-xl shadow p-6 border border-gray-100">
           <div className="flex items-center justify-between">
             <div>
-
-              {/* Firma-navn */}
               <p className="text-gray-700 font-medium">
                 {profile?.company_name}
               </p>
 
-              {/* Status-tittel */}
               <h2 className="text-2xl font-bold mt-1">
                 {subscription.status === "active" && "Aktivt abonnement"}
                 {subscription.status === "trialing" && "Prøveperiode aktiv"}
@@ -412,7 +466,6 @@ export default function Page() {
                 {subscription.status === "unpaid" && "Abonnement ubetalt"}
               </h2>
 
-              {/* Undertekst */}
               {subscription.status === "trialing" && (
                 <p className="text-gray-600 mt-1">
                   {daysLeft(subscription.trial_end)} dager igjen av prøveperioden
@@ -445,7 +498,6 @@ export default function Page() {
               )}
             </div>
 
-            {/* Riktig knapp basert på status */}
             <div>
               {subscription.status === "trialing" && (
                 <SubscribeButton label="Start abonnement" mode="checkout" />
@@ -496,7 +548,6 @@ export default function Page() {
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-
         <Link href="/customers">
           <StatCard
             title="Kunder"
@@ -532,7 +583,6 @@ export default function Page() {
             color="yellow"
           />
         </Link>
-
       </div>
 
       {/* Graph Section */}
