@@ -35,14 +35,17 @@ export default async function ProtectedLayout({
     }
   )
 
-  const { data: userData } = await supabase.auth.getUser()
+  // ⭐ Bruk getSession i stedet for getUser
+  const { data: sessionData } = await supabase.auth.getSession()
 
-  if (!userData?.user) {
+  const session = sessionData?.session
+  const user = session?.user
+
+  if (!user) {
     redirect("/login")
   }
 
-  const user = userData.user
-
+  // Hent profil
   const { data: profile } = await supabase
     .from("profiles")
     .select("*")
@@ -72,10 +75,7 @@ export default async function ProtectedLayout({
       <Sidebar />
 
       <main className="flex-1 p-6 ml-64">
-        {/* Og inn i Header */}
         <Header />
-
-        {/* Og videre til dashboard/page.tsx */}
         {children}
       </main>
     </div>
