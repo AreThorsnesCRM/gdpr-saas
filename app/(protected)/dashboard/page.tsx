@@ -218,15 +218,19 @@ export default function Page() {
   // DASHBOARD-DATA (stats, aktivitet, kommende, kritiske, graf)
   // -----------------------------
   useEffect(() => {
-    fetchStats()
-    fetchRecentActivity()
-    fetchUpcoming()
-    fetchCriticalCustomers()
-  }, [])
+  if (!sessionReady) return
+
+  fetchStats()
+  fetchRecentActivity()
+  fetchUpcoming()
+  fetchCriticalCustomers()
+}, [sessionReady])
 
   useEffect(() => {
-    fetchGraphData()
-  }, [graphType])
+  if (!sessionReady) return
+  fetchGraphData()
+}, [graphType, sessionReady])
+
 
   // Fetch stats
   async function fetchStats() {
