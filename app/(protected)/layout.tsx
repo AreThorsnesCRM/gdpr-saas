@@ -1,6 +1,7 @@
 "use client"
 
 export const dynamic = "force-dynamic"
+export const dynamicParams = true
 
 import Sidebar from "./_components/sidebar"
 import Header from "./_components/Header"
