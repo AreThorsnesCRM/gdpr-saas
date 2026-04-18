@@ -1,6 +1,7 @@
 "use client"
 
 export const dynamic = "force-dynamic"
+export const dynamicParams = true
 
 import { useEffect, useState } from "react"
 import Link from "next/link"
@@ -34,9 +35,34 @@ export default function CustomersPage() {
   const [customers, setCustomers] = useState<CustomerWithMeta[]>([])
   const [filteredCustomers, setFilteredCustomers] = useState<CustomerWithMeta[]>([])
 
+  // ⭐ Session hydrering
+  const [sessionReady, setSessionReady] = useState(false)
+
   useEffect(() => {
-    loadCustomers()
+    async function waitForSession() {
+      const { data } = await supabase.auth.getSession()
+      if (data?.session) {
+        setSessionReady(true)
+        return
+      }
+
+      const {
+        data: { subscription },
+      } = supabase.auth.onAuthStateChange((_event, session) => {
+        if (session) setSessionReady(true)
+      })
+
+      return () => subscription.unsubscribe()
+    }
+
+    waitForSession()
   }, [])
+
+  // ⭐ Hent kunder KUN når session er klar
+  useEffect(() => {
+    if (!sessionReady) return
+    loadCustomers()
+  }, [sessionReady])
 
   useEffect(() => {
     applyFilters()
@@ -157,14 +183,12 @@ export default function CustomersPage() {
     router.push(`/customers?${param}=true`)
   }
 
-  // ⭐ Lagt til — dette var feilen
   async function deleteCustomer(customerId: string) {
     const confirmed = window.confirm("Er du sikker på at du vil slette denne kunden?")
     if (!confirmed) return
 
     await supabase.from("customers").delete().eq("id", customerId)
 
-    // Oppdater listen
     loadCustomers()
   }
 

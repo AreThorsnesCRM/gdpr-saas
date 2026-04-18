@@ -1,6 +1,9 @@
 "use client"
 
-import { useState } from "react"
+export const dynamic = "force-dynamic"
+export const dynamicParams = true
+
+import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { supabase } from "@/lib/supabaseClient"
 import Link from "next/link"
@@ -8,12 +11,45 @@ import Link from "next/link"
 export default function NewCustomerPage() {
   const router = useRouter()
 
+  const [sessionReady, setSessionReady] = useState(false)
+
+  // -----------------------------
+  // SESSION HYDRERING
+  // -----------------------------
+  useEffect(() => {
+    async function waitForSession() {
+      const { data } = await supabase.auth.getSession()
+      if (data?.session) {
+        setSessionReady(true)
+        return
+      }
+
+      const {
+        data: { subscription },
+      } = supabase.auth.onAuthStateChange((_event, session) => {
+        if (session) setSessionReady(true)
+      })
+
+      return () => subscription.unsubscribe()
+    }
+
+    waitForSession()
+  }, [])
+
+  // -----------------------------
+  // STATE
+  // -----------------------------
   const [name, setName] = useState("")
   const [email, setEmail] = useState("")
   const [phone, setPhone] = useState("")
   const [loading, setLoading] = useState(false)
 
+  // -----------------------------
+  // CREATE CUSTOMER
+  // -----------------------------
   async function createCustomer() {
+    if (!sessionReady) return
+
     if (!name.trim()) {
       alert("Navn er påkrevd.")
       return
@@ -23,7 +59,15 @@ export default function NewCustomerPage() {
 
     const {
       data: { user },
+      error: userError,
     } = await supabase.auth.getUser()
+
+    if (userError) {
+      console.error("getUser error:", userError)
+      alert("Kunne ikke hente bruker.")
+      setLoading(false)
+      return
+    }
 
     if (!user) {
       alert("Ingen bruker funnet.")
@@ -43,7 +87,7 @@ export default function NewCustomerPage() {
     setLoading(false)
 
     if (error) {
-      console.error(error)
+      console.error("createCustomer error:", error)
       alert("Kunne ikke opprette kunde.")
       return
     }
@@ -51,6 +95,9 @@ export default function NewCustomerPage() {
     router.push("/customers")
   }
 
+  // -----------------------------
+  // RENDER
+  // -----------------------------
   return (
     <div className="p-6 max-w-xl mx-auto space-y-6">
 
@@ -99,7 +146,7 @@ export default function NewCustomerPage() {
 
         <button
           onClick={createCustomer}
-          disabled={loading}
+          disabled={loading || !sessionReady}
           className="bg-blue-600 text-white px-4 py-2 rounded w-full hover:bg-blue-700 transition disabled:opacity-50"
         >
           {loading ? "Lagrer..." : "Opprett kunde"}

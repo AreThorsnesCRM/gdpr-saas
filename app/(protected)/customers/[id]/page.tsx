@@ -1,5 +1,8 @@
 "use client"
 
+export const dynamic = "force-dynamic"
+export const dynamicParams = true
+
 import { useState, useEffect, use } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
@@ -41,6 +44,7 @@ export default function CustomerPage(props: CustomerPageProps) {
   const params = use(props.params)
   const id = params.id
 
+  // Query param for auto-open agreement
   const searchParams =
     typeof window !== "undefined"
       ? new URLSearchParams(window.location.search)
@@ -48,6 +52,34 @@ export default function CustomerPage(props: CustomerPageProps) {
 
   const agreementId = searchParams?.get("agreementId") || null
 
+  // -----------------------------
+  // SESSION HYDRERING
+  // -----------------------------
+  const [sessionReady, setSessionReady] = useState(false)
+
+  useEffect(() => {
+    async function waitForSession() {
+      const { data } = await supabase.auth.getSession()
+      if (data?.session) {
+        setSessionReady(true)
+        return
+      }
+
+      const {
+        data: { subscription },
+      } = supabase.auth.onAuthStateChange((_event, session) => {
+        if (session) setSessionReady(true)
+      })
+
+      return () => subscription.unsubscribe()
+    }
+
+    waitForSession()
+  }, [])
+
+  // -----------------------------
+  // STATE
+  // -----------------------------
   const [customer, setCustomer] = useState<Customer | null>(null)
   const [name, setName] = useState("")
   const [email, setEmail] = useState("")
@@ -61,8 +93,8 @@ export default function CustomerPage(props: CustomerPageProps) {
   const archivedAgreements = agreements.filter((a) => a.archived)
 
   const [slideOverOpen, setSlideOverOpen] = useState(false)
-
   const [editingAgreement, setEditingAgreement] = useState<Agreement | null>(null)
+
   const [newTitle, setNewTitle] = useState("")
   const [newStart, setNewStart] = useState("")
   const [newEnd, setNewEnd] = useState("")
@@ -73,6 +105,90 @@ export default function CustomerPage(props: CustomerPageProps) {
   const [newFile, setNewFile] = useState<File | null>(null)
   const [removeExistingFile, setRemoveExistingFile] = useState(false)
 
+  // -----------------------------
+  // FETCH FUNCTIONS
+  // -----------------------------
+  async function fetchCustomer() {
+    const { data, error } = await supabase
+      .from("customers")
+      .select("*")
+      .eq("id", id)
+      .single()
+
+    if (error) {
+      console.error("fetchCustomer error:", error)
+      return
+    }
+
+    if (data) {
+      setCustomer(data)
+      setName(data.name)
+      setEmail(data.email)
+      setPhone(data.phone)
+    }
+  }
+
+  async function fetchNotes() {
+    const { data, error } = await supabase
+      .from("notes")
+      .select("*")
+      .eq("customer_id", id)
+      .order("created_at", { ascending: false })
+
+    if (error) {
+      console.error("fetchNotes error:", error)
+      return
+    }
+
+    if (data) setNotes(data)
+  }
+
+  async function fetchAgreements() {
+    const { data, error } = await supabase
+      .from("agreements")
+      .select("*")
+      .eq("customer_id", id)
+      .order("start_date", { ascending: true })
+
+    if (error) {
+      console.error("fetchAgreements error:", error)
+      return
+    }
+
+    if (data) setAgreements(data as Agreement[])
+  }
+
+  // -----------------------------
+  // LOAD DATA WHEN SESSION IS READY
+  // -----------------------------
+  useEffect(() => {
+    if (!sessionReady || !id) return
+    fetchCustomer()
+    fetchNotes()
+    fetchAgreements()
+  }, [sessionReady, id])
+
+  // -----------------------------
+  // AUTO-OPEN AGREEMENT
+  // -----------------------------
+  useEffect(() => {
+    if (!agreementId) return
+    if (agreements.length === 0) return
+
+    const target = agreements.find((a) => a.id === agreementId)
+    if (target) {
+      handleEditAgreement(target)
+
+      document.getElementById("agreements-section")?.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      })
+    }
+  }, [agreements, agreementId])
+
+  // -----------------------------
+  // AGREEMENT HELPERS
+  // -----------------------------
   function resetAgreementForm() {
     setEditingAgreement(null)
     setNewTitle("")
@@ -112,109 +228,56 @@ export default function CustomerPage(props: CustomerPageProps) {
     openSlideOver()
   }
 
-  useEffect(() => {
-    if (!id) return
-    fetchCustomer()
-    fetchNotes()
-    fetchAgreements()
-  }, [id])
+  function getAgreementStatus(a: Agreement) {
+    const today = new Date().toISOString().split("T")[0]
 
-  async function fetchCustomer() {
-    const { data } = await supabase
-      .from("customers")
-      .select("*")
-      .eq("id", id)
-      .single()
-
-    if (data) {
-      setCustomer(data)
-      setName(data.name)
-      setEmail(data.email)
-      setPhone(data.phone)
-    }
-  }
-
-  async function fetchNotes() {
-    const { data } = await supabase
-      .from("notes")
-      .select("*")
-      .eq("customer_id", id)
-      .order("created_at", { ascending: false })
-
-    if (data) setNotes(data)
-  }
-
-  async function fetchAgreements() {
-    const { data } = await supabase
-      .from("agreements")
-      .select("*")
-      .eq("customer_id", id)
-      .order("start_date", { ascending: true })
-
-    if (data) setAgreements(data as Agreement[])
-  }
-
-  useEffect(() => {
-    if (!agreementId) return
-    if (agreements.length === 0) return
-
-    const target = agreements.find((a) => a.id === agreementId)
-    if (target) {
-      handleEditAgreement(target)
-
-      document.getElementById("agreements-section")?.scrollIntoView({
-        behavior: "smooth",
-        block: "start",
-      })
-    }
-  }, [agreements, agreementId])
-
-  async function updateCustomer() {
-    await supabase
-      .from("customers")
-      .update({ name, email, phone })
-      .eq("id", id)
-
-    fetchCustomer()
-  }
-
-  async function deleteCustomer() {
-    const confirmed = window.confirm("Er du sikker på at du vil slette denne kunden?")
-    if (!confirmed) return
-
-    await supabase.from("customers").delete().eq("id", id)
-    router.push("/customers")
-  }
-
-  async function addNote() {
-    if (!newNote.trim()) return
-
-    const {
-      data: { user },
-    } = await supabase.auth.getUser()
-
-    if (!user) return
-
-    const { error } = await supabase.from("notes").insert({
-      customer_id: id,
-      content: newNote,
-      user_id: user.id,
-    })
-
-    if (error) {
-      console.error("addNote error:", error)
-      return
+    if (a.end_date < today) {
+      return { label: "Utløpt", color: "red", emoji: "⛔" }
     }
 
-    setNewNote("")
-    fetchNotes()
+    if (a.start_date > today) {
+      return { label: "Kommende", color: "yellow", emoji: "⏳" }
+    }
+
+    return { label: "Aktiv", color: "green", emoji: "✔️" }
   }
 
-  async function deleteNote(noteId: string) {
-    await supabase.from("notes").delete().eq("id", noteId)
-    fetchNotes()
+  function daysUntil(dateStr: string) {
+    const today = new Date()
+    const target = new Date(dateStr)
+    return Math.ceil((target.getTime() - today.getTime()) / (1000 * 60 * 60 * 24))
   }
 
+  function getExpiryBadge(a: Agreement) {
+    const days = daysUntil(a.end_date)
+
+    if (days < 0) {
+      return {
+        text: "Utløpt",
+        color: "bg-red-100 text-red-700 border-red-300",
+      }
+    }
+
+    if (days <= 7) {
+      return {
+        text: `Utløper om ${days} dager`,
+        color: "bg-red-100 text-red-700 border-red-300",
+      }
+    }
+
+    if (days <= 30) {
+      return {
+        text: `Utløper om ${days} dager`,
+        color: "bg-yellow-100 text-yellow-700 border-yellow-300",
+      }
+    }
+
+    return null
+  }
+
+  // -----------------------------
+  // AGREEMENT SAVE
+  // -----------------------------
   async function uploadAgreementFile(existingUrl: string | null) {
     let file_url = existingUrl || null
 
@@ -281,7 +344,7 @@ export default function CustomerPage(props: CustomerPageProps) {
 
     const file_url = await uploadAgreementFile(editingAgreement.file_url)
 
-    await supabase
+    const { error } = await supabase
       .from("agreements")
       .update({
         title: newTitle,
@@ -295,66 +358,12 @@ export default function CustomerPage(props: CustomerPageProps) {
       })
       .eq("id", editingAgreement.id)
 
+    if (error) {
+      console.error("updateAgreement error:", error)
+      return
+    }
+
     fetchAgreements()
-  }
-  async function archiveAgreement(agreementId: string) {
-    await supabase.from("agreements").update({ archived: true }).eq("id", agreementId)
-    fetchAgreements()
-  }
-
-  async function unarchiveAgreement(agreementId: string) {
-    await supabase.from("agreements").update({ archived: false }).eq("id", agreementId)
-    fetchAgreements()
-  }
-
-  // ⭐ Denne manglet – nå er den tilbake
-  function getAgreementStatus(a: Agreement) {
-    const today = new Date().toISOString().split("T")[0]
-
-    if (a.end_date < today) {
-      return { label: "Utløpt", color: "red", emoji: "⛔" }
-    }
-
-    if (a.start_date > today) {
-      return { label: "Kommende", color: "yellow", emoji: "⏳" }
-    }
-
-    return { label: "Aktiv", color: "green", emoji: "✔️" }
-  }
-
-  function daysUntil(dateStr: string) {
-    const today = new Date()
-    const target = new Date(dateStr)
-
-    const diff = target.getTime() - today.getTime()
-    return Math.ceil(diff / (1000 * 60 * 60 * 24))
-  }
-
-  function getExpiryBadge(a: Agreement) {
-    const days = daysUntil(a.end_date)
-
-    if (days < 0) {
-      return {
-        text: "Utløpt",
-        color: "bg-red-100 text-red-700 border-red-300",
-      }
-    }
-
-    if (days <= 7) {
-      return {
-        text: `Utløper om ${days} dager`,
-        color: "bg-red-100 text-red-700 border-red-300",
-      }
-    }
-
-    if (days <= 30) {
-      return {
-        text: `Utløper om ${days} dager`,
-        color: "bg-yellow-100 text-yellow-700 border-yellow-300",
-      }
-    }
-
-    return null
   }
 
   async function handleSaveAgreement() {
@@ -366,6 +375,66 @@ export default function CustomerPage(props: CustomerPageProps) {
     closeSlideOver()
   }
 
+  // -----------------------------
+  // CUSTOMER ACTIONS
+  // -----------------------------
+  async function updateCustomer() {
+    const { error } = await supabase
+      .from("customers")
+      .update({ name, email, phone })
+      .eq("id", id)
+
+    if (error) {
+      console.error("updateCustomer error:", error)
+      return
+    }
+
+    fetchCustomer()
+  }
+
+  async function deleteCustomer() {
+    const confirmed = window.confirm("Er du sikker på at du vil slette denne kunden?")
+    if (!confirmed) return
+
+    await supabase.from("customers").delete().eq("id", id)
+    router.push("/customers")
+  }
+
+  // -----------------------------
+  // NOTES
+  // -----------------------------
+  async function addNote() {
+    if (!newNote.trim()) return
+
+    const {
+      data: { user },
+    } = await supabase.auth.getUser()
+
+    if (!user) return
+
+    const { error } = await supabase.from("notes").insert({
+      customer_id: id,
+      content: newNote,
+      user_id: user.id,
+    })
+
+    if (error) {
+      console.error("addNote error:", error)
+      return
+    }
+
+    setNewNote("")
+    fetchNotes()
+  }
+
+  async function deleteNote(noteId: string) {
+    await supabase.from("notes").delete().eq("id", noteId)
+    fetchNotes()
+  }
+
+  // -----------------------------
+  // RENDER
+  // -----------------------------
   return (
     <div className="p-6 space-y-6">
 
@@ -535,7 +604,7 @@ export default function CustomerPage(props: CustomerPageProps) {
             </ul>
           </div>
 
-          {/* Arkiverte avtaler */}
+                    {/* Arkiverte avtaler */}
           <div className="bg-white rounded-lg shadow p-6 space-y-4">
             <h3 className="font-semibold">Arkiverte avtaler</h3>
             <ul className="space-y-2">
@@ -586,6 +655,7 @@ export default function CustomerPage(props: CustomerPageProps) {
           </div>
         </div>
       </div>
+
       {/* SLIDE-OVER */}
       <AgreementSlideOver
         open={slideOverOpen}
