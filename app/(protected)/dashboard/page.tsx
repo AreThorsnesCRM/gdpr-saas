@@ -583,8 +583,7 @@ export default function Page() {
           {upcoming.map((a: any) => (
             <li key={a.id} className="border rounded p-3">
               <div className="font-medium">{a.title}</div>
-              <div className="text-sm
-              <div className="text-sm text-gray-600">
+                            <div className="text-sm text-gray-600">
                 Utløper: {a.end_date}
               </div>
             </li>
@@ -698,3 +697,4 @@ const chartOptions = {
     },
   },
 }
+
