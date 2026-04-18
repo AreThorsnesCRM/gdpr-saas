@@ -2,21 +2,18 @@
 
 export const dynamic = "force-dynamic"
 
-
 import "../../styles/dashboard.css"
 
 import Link from "next/link"
 import { useEffect, useState } from "react"
 import { supabase } from "@/lib/supabaseClient"
 
-// Icons
 import {
   UserGroupIcon,
   CheckCircleIcon,
   ExclamationTriangleIcon,
 } from "@heroicons/react/24/outline"
 
-// Chart.js
 import { Line } from "react-chartjs-2"
 import {
   Chart as ChartJS,
@@ -28,7 +25,6 @@ import {
   Legend,
 } from "chart.js"
 
-// Stripe subscription button
 import SubscribeButton from "../../components/SubscribeButton"
 
 ChartJS.register(
@@ -71,11 +67,9 @@ type ChartDataState = {
 }
 
 export default function Page() {
-  // Profil og abonnement (fra profiles-tabellen)
   const [profile, setProfile] = useState<Profile | null>(null)
   const [subscription, setSubscription] = useState<SubscriptionView | null>(null)
 
-  // Dashboard-data
   const [stats, setStats] = useState<StatsState>({
     customers: 0,
     agreements: 0,
@@ -88,20 +82,17 @@ export default function Page() {
   const [upcoming, setUpcoming] = useState<any[]>([])
   const [criticalCustomers, setCriticalCustomers] = useState<any[]>([])
 
-  // Graf
-  const [graphType, setGraphType] = useState<"agreements" | "customers" | "activity" | "archived">("agreements")
+  const [graphType, setGraphType] = useState<
+    "agreements" | "customers" | "activity" | "archived"
+  >("agreements")
+
   const [chartData, setChartData] = useState<ChartDataState>({
     labels: [],
     datasets: [],
   })
 
-  // Loading + session-ready
   const [isLoadingProfile, setIsLoadingProfile] = useState(true)
   const [sessionReady, setSessionReady] = useState(false)
-
-  // -----------------------------
-  // HJELPERE
-  // -----------------------------
 
   function daysLeft(dateString: string | null) {
     if (!dateString) return null
@@ -112,13 +103,12 @@ export default function Page() {
   }
 
   // -----------------------------
-  // SESSION-READY: vent på session før vi henter profil
+  // SESSION READY
   // -----------------------------
   useEffect(() => {
     async function waitForSession() {
-      const { data: sessionData } = await supabase.auth.getSession()
-
-      if (sessionData?.session) {
+      const { data } = await supabase.auth.getSession()
+      if (data?.session) {
         setSessionReady(true)
         return
       }
@@ -126,9 +116,7 @@ export default function Page() {
       const {
         data: { subscription },
       } = supabase.auth.onAuthStateChange((_event, session) => {
-        if (session) {
-          setSessionReady(true)
-        }
+        if (session) setSessionReady(true)
       })
 
       return () => subscription.unsubscribe()
@@ -138,29 +126,29 @@ export default function Page() {
   }, [])
 
   // -----------------------------
-  // PROFIL + ABONNEMENT når session er klar
+  // PROFILE + SUBSCRIPTION
   // -----------------------------
   useEffect(() => {
     if (!sessionReady) return
 
-    async function loadProfileAndSubscription() {
+    async function loadProfile() {
       setIsLoadingProfile(true)
 
-      const { data: userData, error: userError } = await supabase.auth.getUser()
-      if (userError || !userData?.user) {
+      const { data: userData } = await supabase.auth.getUser()
+      if (!userData?.user) {
         setProfile(null)
         setSubscription(null)
         setIsLoadingProfile(false)
         return
       }
 
-      const { data: profileData, error: profileError } = await supabase
+      const { data: profileData } = await supabase
         .from("profiles")
         .select("*")
         .eq("user_id", userData.user.id)
         .single<Profile>()
 
-      if (profileError || !profileData) {
+      if (!profileData) {
         setProfile(null)
         setSubscription(null)
         setIsLoadingProfile(false)
@@ -176,75 +164,35 @@ export default function Page() {
       setIsLoadingProfile(false)
     }
 
-    loadProfileAndSubscription()
+    loadProfile()
   }, [sessionReady])
 
   // -----------------------------
-  // Oppdater profil/abonnement ved session-endringer (login/logout/Stripe-retur)
+  // DASHBOARD DATA
   // -----------------------------
   useEffect(() => {
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (_event, session) => {
-      if (!session?.user) {
-        setProfile(null)
-        setSubscription(null)
-        return
-      }
+    if (!sessionReady) return
 
-      const { data: profileData } = await supabase
-        .from("profiles")
-        .select("*")
-        .eq("user_id", session.user.id)
-        .single<Profile>()
-
-      if (!profileData) {
-        setProfile(null)
-        setSubscription(null)
-        return
-      }
-
-      setProfile(profileData)
-      setSubscription({
-        status: profileData.subscription_status,
-        trial_end: profileData.trial_end,
-      })
-    })
-
-    return () => subscription.unsubscribe()
-  }, [])
-
-  // -----------------------------
-  // DASHBOARD-DATA (stats, aktivitet, kommende, kritiske, graf)
-  // -----------------------------
-  useEffect(() => {
-  if (!sessionReady) return
-
-  fetchStats()
-  fetchRecentActivity()
-  fetchUpcoming()
-  fetchCriticalCustomers()
-}, [sessionReady])
+    fetchStats()
+    fetchRecentActivity()
+    fetchUpcoming()
+    fetchCriticalCustomers()
+  }, [sessionReady])
 
   useEffect(() => {
-  if (!sessionReady) return
-  fetchGraphData()
-}, [graphType, sessionReady])
+    if (!sessionReady) return
+    fetchGraphData()
+  }, [graphType, sessionReady])
 
-
-  // Fetch stats
+  // -----------------------------
+  // FETCH FUNCTIONS
+  // -----------------------------
   async function fetchStats() {
-    const { data: customers } = await supabase
-      .from("customers")
-      .select("id")
-
-    const { data: agreements } = await supabase
-      .from("agreements")
-      .select("*")
+    const { data: customers } = await supabase.from("customers").select("id")
+    const { data: agreements } = await supabase.from("agreements").select("*")
 
     const customerCount = customers?.length || 0
     const agreementCount = agreements?.length || 0
-
     const active = agreements?.filter((a: any) => !a.archived).length || 0
 
     const today = new Date()
@@ -255,15 +203,12 @@ export default function Page() {
     const in30DaysStr = in30Days.toISOString().split("T")[0]
 
     const soon =
-      agreements?.filter((a: any) =>
-        a.end_date >= todayStr &&
-        a.end_date <= in30DaysStr
+      agreements?.filter(
+        (a: any) => a.end_date >= todayStr && a.end_date <= in30DaysStr
       ).length || 0
 
     const customersWithActive = new Set(
-      agreements
-        ?.filter((a: any) => !a.archived)
-        .map((a: any) => a.customer_id)
+      agreements?.filter((a: any) => !a.archived).map((a: any) => a.customer_id)
     )
 
     const customersWithoutActive =
@@ -278,7 +223,6 @@ export default function Page() {
     })
   }
 
-  // Fetch recent activity
   async function fetchRecentActivity() {
     const { data: notes } = await supabase
       .from("notes")
@@ -289,7 +233,6 @@ export default function Page() {
     setRecentActivity(notes || [])
   }
 
-  // Fetch upcoming deadlines
   async function fetchUpcoming() {
     const today = new Date().toISOString().split("T")[0]
 
@@ -303,7 +246,6 @@ export default function Page() {
     setUpcoming(data || [])
   }
 
-  // Fetch critical customers
   async function fetchCriticalCustomers() {
     const { data: userData } = await supabase.auth.getUser()
     if (!userData?.user) return
@@ -323,7 +265,9 @@ export default function Page() {
     }
 
     const enriched = customers.map((c: any) => {
-      const customerAgreements = agreements.filter((a: any) => a.customer_id === c.id)
+      const customerAgreements = agreements.filter(
+        (a: any) => a.customer_id === c.id
+      )
 
       if (customerAgreements.length === 0) {
         return {
@@ -354,7 +298,7 @@ export default function Page() {
       const lastEnd = ended[0].end_date
       const days = Math.ceil(
         (new Date().getTime() - new Date(lastEnd).getTime()) /
-        (1000 * 60 * 60 * 24)
+          (1000 * 60 * 60 * 24)
       )
 
       return {
@@ -381,7 +325,6 @@ export default function Page() {
     setCriticalCustomers(withoutActive.slice(0, 3))
   }
 
-  // Fetch graph data
   async function fetchGraphData() {
     let data: any[] = []
 
@@ -400,9 +343,7 @@ export default function Page() {
     }
 
     if (graphType === "activity") {
-      const { data: notes } = await supabase
-        .from("notes")
-        .select("created_at")
+      const { data: notes } = await supabase.from("notes").select("created_at")
       data = notes || []
     }
 
@@ -417,9 +358,7 @@ export default function Page() {
 
     data.forEach((item: any) => {
       const date =
-        item.start_date ||
-        item.created_at ||
-        item.end_date
+        item.start_date || item.created_at || item.end_date
 
       if (!date) return
 
@@ -454,7 +393,6 @@ export default function Page() {
   // -----------------------------
   return (
     <div className="p-8 space-y-10">
-
       {/* Subscription Section */}
       {sessionReady && !isLoadingProfile && subscription && (
         <div className="bg-white rounded-xl shadow p-6 border border-gray-100">
@@ -469,13 +407,15 @@ export default function Page() {
                 {subscription.status === "trialing" && "Prøveperiode aktiv"}
                 {subscription.status === "past_due" && "Betaling feilet"}
                 {subscription.status === "canceled" && "Abonnement avsluttet"}
-                {subscription.status === "incomplete" && "Betaling ikke fullført"}
+                {subscription.status === "incomplete" &&
+                  "Betaling ikke fullført"}
                 {subscription.status === "unpaid" && "Abonnement ubetalt"}
               </h2>
 
               {subscription.status === "trialing" && (
                 <p className="text-gray-600 mt-1">
-                  {daysLeft(subscription.trial_end)} dager igjen av prøveperioden
+                  {daysLeft(subscription.trial_end)} dager igjen av
+                  prøveperioden
                 </p>
               )}
 
@@ -487,44 +427,59 @@ export default function Page() {
 
               {subscription.status === "past_due" && (
                 <p className="text-gray-600 mt-1">
-                  Betalingen feilet – oppdater betalingsmetode for å fortsette
+                  Betalingen feilet – oppdater betalingsmetode
                 </p>
               )}
 
               {subscription.status === "canceled" && (
                 <p className="text-gray-600 mt-1">
-                  Abonnementet er avsluttet – aktiver på nytt for å få tilgang
+                  Abonnementet er avsluttet – aktiver på nytt
                 </p>
               )}
 
               {(subscription.status === "incomplete" ||
                 subscription.status === "unpaid") && (
                 <p className="text-gray-600 mt-1">
-                  Betalingen ble ikke fullført – fullfør kjøpet for å aktivere abonnementet
+                  Betalingen ble ikke fullført – fullfør kjøpet
                 </p>
               )}
             </div>
 
             <div>
               {subscription.status === "trialing" && (
-                <SubscribeButton label="Start abonnement" mode="checkout" />
+                <SubscribeButton
+                  label="Start abonnement"
+                  mode="checkout"
+                />
               )}
 
               {subscription.status === "active" && (
-                <SubscribeButton label="Administrer abonnement" mode="portal" />
+                <SubscribeButton
+                  label="Administrer abonnement"
+                  mode="portal"
+                />
               )}
 
               {subscription.status === "past_due" && (
-                <SubscribeButton label="Oppdater betalingsmetode" mode="portal" />
+                <SubscribeButton
+                  label="Oppdater betalingsmetode"
+                  mode="portal"
+                />
               )}
 
               {subscription.status === "canceled" && (
-                <SubscribeButton label="Start abonnement på nytt" mode="checkout" />
+                <SubscribeButton
+                  label="Start abonnement på nytt"
+                  mode="checkout"
+                />
               )}
 
               {(subscription.status === "incomplete" ||
                 subscription.status === "unpaid") && (
-                <SubscribeButton label="Fullfør betaling" mode="checkout" />
+                <SubscribeButton
+                  label="Fullfør betaling"
+                  mode="checkout"
+                />
               )}
             </div>
           </div>
@@ -535,9 +490,7 @@ export default function Page() {
       <div className="flex items-center justify-between">
         <div>
           <div className="text-sm text-gray-400 mb-1">Dashboard</div>
-
           <h1 className="text-3xl font-bold tracking-tight">Oversikt</h1>
-
           <p className="text-gray-600 mt-1">
             Kunder, avtaler og aktivitet samlet på ett sted
           </p>
@@ -630,6 +583,7 @@ export default function Page() {
           {upcoming.map((a: any) => (
             <li key={a.id} className="border rounded p-3">
               <div className="font-medium">{a.title}</div>
+              <div className="text-sm
               <div className="text-sm text-gray-600">
                 Utløper: {a.end_date}
               </div>
@@ -648,7 +602,10 @@ export default function Page() {
 
         <ul className="space-y-3">
           {criticalCustomers.map((c: any) => (
-            <li key={c.id} className="border rounded p-3 flex justify-between items-center">
+            <li
+              key={c.id}
+              className="border rounded p-3 flex justify-between items-center"
+            >
               <div>
                 <Link href={`/customers/${c.id}`}>
                   <span className="font-medium text-blue-600 cursor-pointer">
@@ -662,7 +619,8 @@ export default function Page() {
 
                 <div className="mt-1 text-xs text-gray-500">
                   {c.hasNeverHadAgreement && "Aldri hatt avtale"}
-                  {!c.hasNeverHadAgreement && c.daysSinceEnd != null &&
+                  {!c.hasNeverHadAgreement &&
+                    c.daysSinceEnd != null &&
                     `Sist avtale utløp for ${c.daysSinceEnd} dager siden`}
                 </div>
               </div>
@@ -695,7 +653,6 @@ export default function Page() {
           ))}
         </ul>
       </div>
-
     </div>
   )
 }
@@ -721,9 +678,7 @@ function StatCard({
   return (
     <div className="bg-white shadow-sm rounded-xl p-6 border border-gray-100 hover:shadow-md transition-shadow">
       <div className="flex items-center justify-between">
-        <div className={`p-3 rounded-lg ${bg}`}>
-          {icon}
-        </div>
+        <div className={`p-3 rounded-lg ${bg}`}>{icon}</div>
       </div>
       <div className="mt-4 text-gray-500 text-sm">{title}</div>
       <div className="text-3xl font-bold mt-1">{value}</div>
