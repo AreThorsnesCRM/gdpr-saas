@@ -6,13 +6,17 @@ import { supabase } from "@/lib/supabaseClient"
 
 export default function AuthGuard() {
   const router = useRouter()
-  const [checked, setChecked] = useState(false)
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
+    let isMounted = true
+
     async function run() {
-      // 1. Vent på session
+      // 1. Vent på at Supabase faktisk er hydrert
       const { data: sessionData } = await supabase.auth.getSession()
       const session = sessionData?.session
+
+      if (!isMounted) return
 
       if (!session?.user) {
         router.replace("/login")
@@ -25,6 +29,8 @@ export default function AuthGuard() {
         .select("*")
         .eq("user_id", session.user.id)
         .maybeSingle()
+
+      if (!isMounted) return
 
       if (!profile) {
         router.replace("/subscribe")
@@ -47,14 +53,19 @@ export default function AuthGuard() {
         return
       }
 
-      setChecked(true)
+      // 4. Ferdig
+      setLoading(false)
     }
 
     run()
+
+    return () => {
+      isMounted = false
+    }
   }, [router])
 
-  // Ikke render children før auth er sjekket
-  if (!checked) return null
+  // Ikke blokker UI – bare vent stille
+  if (loading) return null
 
   return null
 }
