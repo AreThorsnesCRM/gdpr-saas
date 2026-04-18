@@ -188,8 +188,19 @@ export default function Page() {
   // FETCH FUNCTIONS
   // -----------------------------
   async function fetchStats() {
-    const { data: customers } = await supabase.from("customers").select("id")
-    const { data: agreements } = await supabase.from("agreements").select("*")
+    const { data: customers, error: customersError } = await supabase
+    .from("customers")
+    .select("id")
+
+  console.log("CUSTOMERS ERROR:", customersError)
+  console.log("CUSTOMERS DATA:", customers)
+
+  const { data: agreements, error: agreementsError } = await supabase
+    .from("agreements")
+    .select("*")
+
+  console.log("AGREEMENTS ERROR:", agreementsError)
+  console.log("AGREEMENTS DATA:", agreements)
 
     const customerCount = customers?.length || 0
     const agreementCount = agreements?.length || 0
