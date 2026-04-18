@@ -1,5 +1,7 @@
 "use client"
 
+export const dynamic = "force-dynamic"
+
 import Sidebar from "./_components/sidebar"
 import Header from "./_components/Header"
 import AuthGuard from "./_components/AuthGuard"
