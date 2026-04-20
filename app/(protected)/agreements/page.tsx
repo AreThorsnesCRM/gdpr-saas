@@ -1,3 +1,5 @@
+//TEST TEST
+
 import { Suspense } from "react"
 import AgreementsPage from "./AgreementsPage"
 
