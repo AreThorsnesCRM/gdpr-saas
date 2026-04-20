@@ -44,7 +44,6 @@ export default function CustomerPage(props: CustomerPageProps) {
   const params = use(props.params)
   const id = params.id
 
-  // Query param for auto-open agreement
   const searchParams =
     typeof window !== "undefined"
       ? new URLSearchParams(window.location.search)
@@ -376,28 +375,34 @@ export default function CustomerPage(props: CustomerPageProps) {
   }
 
   // -----------------------------
-  // CUSTOMER ACTIONS
+  // ARCHIVE / UNARCHIVE
   // -----------------------------
-  async function updateCustomer() {
+  async function archiveAgreement(agreementId: string) {
     const { error } = await supabase
-      .from("customers")
-      .update({ name, email, phone })
-      .eq("id", id)
+      .from("agreements")
+      .update({ archived: true })
+      .eq("id", agreementId)
 
     if (error) {
-      console.error("updateCustomer error:", error)
+      console.error("archiveAgreement error:", error)
       return
     }
 
-    fetchCustomer()
+    fetchAgreements()
   }
 
-  async function deleteCustomer() {
-    const confirmed = window.confirm("Er du sikker på at du vil slette denne kunden?")
-    if (!confirmed) return
+  async function unarchiveAgreement(agreementId: string) {
+    const { error } = await supabase
+      .from("agreements")
+      .update({ archived: false })
+      .eq("id", agreementId)
 
-    await supabase.from("customers").delete().eq("id", id)
-    router.push("/customers")
+    if (error) {
+      console.error("unarchiveAgreement error:", error)
+      return
+    }
+
+    fetchAgreements()
   }
 
   // -----------------------------
@@ -604,7 +609,7 @@ export default function CustomerPage(props: CustomerPageProps) {
             </ul>
           </div>
 
-                    {/* Arkiverte avtaler */}
+          {/* Arkiverte avtaler */}
           <div className="bg-white rounded-lg shadow p-6 space-y-4">
             <h3 className="font-semibold">Arkiverte avtaler</h3>
             <ul className="space-y-2">
@@ -628,7 +633,7 @@ export default function CustomerPage(props: CustomerPageProps) {
                         )}
                       </div>
                       <div className="text-sm text-gray-600">
-                        {a.start_date} – {a.end_date}
+                                                {a.start_date} – {a.end_date}
                       </div>
                       {a.file_url && (
                         <a
