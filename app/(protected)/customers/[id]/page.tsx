@@ -406,6 +406,17 @@ export default function CustomerPage(props: CustomerPageProps) {
   }
 
   // -----------------------------
+  // DELETE CUSTOMER
+  // -----------------------------
+  async function deleteCustomer() {
+    const confirmed = window.confirm("Er du sikker på at du vil slette denne kunden?")
+    if (!confirmed) return
+
+    await supabase.from("customers").delete().eq("id", id)
+    router.push("/customers")
+  }
+
+  // -----------------------------
   // NOTES
   // -----------------------------
   async function addNote() {
@@ -442,7 +453,6 @@ export default function CustomerPage(props: CustomerPageProps) {
   // -----------------------------
   return (
     <div className="p-6 space-y-6">
-
       <Link
         href="/customers"
         className="text-blue-600 underline text-sm mb-2 inline-block"
@@ -633,7 +643,7 @@ export default function CustomerPage(props: CustomerPageProps) {
                         )}
                       </div>
                       <div className="text-sm text-gray-600">
-                                                {a.start_date} – {a.end_date}
+                        {a.start_date} – {a.end_date}
                       </div>
                       {a.file_url && (
                         <a
