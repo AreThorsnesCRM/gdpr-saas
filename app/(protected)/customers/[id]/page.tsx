@@ -416,6 +416,22 @@ export default function CustomerPage(props: CustomerPageProps) {
     router.push("/customers")
   }
 
+  async function updateCustomer() {
+    const { error } = await supabase
+      .from("customers")
+      .update({ name, email, phone })
+      .eq("id", id)
+
+    if (error) {
+      console.error("updateCustomer error:", error)
+      return
+    }
+
+    fetchCustomer()
+  }
+
+
+
   // -----------------------------
   // NOTES
   // -----------------------------
