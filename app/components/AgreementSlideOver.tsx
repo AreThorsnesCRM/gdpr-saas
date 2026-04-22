@@ -26,17 +26,29 @@ export default function AgreementSlideOver({
   setRemoveExistingFile,
   onSave,
 }: any) {
+  const panelRef = useRef<HTMLDivElement | null>(null)
 
-  if (!open) return null
+  useEffect(() => {
+    function handleKey(e: KeyboardEvent) {
+      if (e.key === "Escape") onClose()
+    }
+    if (open) document.addEventListener("keydown", handleKey)
+    return () => document.removeEventListener("keydown", handleKey)
+  }, [open, onClose])
+
+  function handleBackdropClick(e: any) {
+    if (panelRef.current && !panelRef.current.contains(e.target)) {
+      onClose()
+    }
+  }
 
   if (!open) return null
 
   return (
-    <div>
-      <div
-        className="fixed inset-0 z-50 flex justify-end bg-black/40 backdrop-blur-sm"
-        onMouseDown={handleBackdropClick}
-      >
+    <div
+      className="fixed inset-0 z-50 flex justify-end bg-black/40 backdrop-blur-sm"
+      onMouseDown={handleBackdropClick}
+    >
       <div
         ref={panelRef}
         className="h-full w-full max-w-md bg-white shadow-xl border-l border-gray-200 overflow-y-auto animate-slideIn"
@@ -148,12 +160,14 @@ export default function AgreementSlideOver({
           {editingAgreement && editingAgreement.file_url && !removeExistingFile && (
             <div className="rounded-md bg-gray-50 px-3 py-2 text-sm">
               <p className="font-medium text-gray-800">Eksisterende fil:</p>
-              <button
-                onClick={() => openPdfModal(editingAgreement.file_url)}
+              <a
+                href={editingAgreement.file_url}
+                target="_blank"
+                rel="noopener noreferrer"
                 className="text-gray-900 underline"
               >
                 Åpne avtale
-              </button>
+              </a>
               <button
                 type="button"
                 onClick={() => setRemoveExistingFile(true)}
@@ -200,7 +214,6 @@ export default function AgreementSlideOver({
           </button>
         </div>
       </div>
-
     </div>
   )
 }
