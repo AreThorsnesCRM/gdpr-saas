@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useRef } from "react"
 
 export default function AgreementSlideOver({
   open,
@@ -26,42 +26,6 @@ export default function AgreementSlideOver({
   setRemoveExistingFile,
   onSave,
 }: any) {
-  const panelRef = useRef<HTMLDivElement | null>(null)
-  const [pdfModalOpen, setPdfModalOpen] = useState(false)
-  const [pdfUrl, setPdfUrl] = useState<string | null>(null)
-
-  // ESC to close
-  useEffect(() => {
-    function handleKey(e: KeyboardEvent) {
-      if (e.key === "Escape") {
-        if (pdfModalOpen) {
-          setPdfModalOpen(false)
-          setPdfUrl(null)
-        } else {
-          onClose()
-        }
-      }
-    }
-    if (open || pdfModalOpen) document.addEventListener("keydown", handleKey)
-    return () => document.removeEventListener("keydown", handleKey)
-  }, [open, pdfModalOpen, onClose])
-
-  // Click outside to close
-  function handleBackdropClick(e: any) {
-    if (panelRef.current && !panelRef.current.contains(e.target)) {
-      onClose()
-    }
-  }
-
-  function openPdfModal(url: string) {
-    setPdfUrl(url)
-    setPdfModalOpen(true)
-  }
-
-  function closePdfModal() {
-    setPdfModalOpen(false)
-    setPdfUrl(null)
-  }
 
   if (!open) return null
 

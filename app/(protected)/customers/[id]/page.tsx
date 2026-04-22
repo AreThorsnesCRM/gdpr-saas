@@ -88,18 +88,6 @@ export default function CustomerPage(props: CustomerPageProps) {
   const [newNote, setNewNote] = useState("")
 
   const [agreements, setAgreements] = useState<Agreement[]>([])
-  const [pdfModalOpen, setPdfModalOpen] = useState(false)
-  const [pdfUrl, setPdfUrl] = useState<string | null>(null)
-
-  function openPdfModal(url: string) {
-    setPdfUrl(url)
-    setPdfModalOpen(true)
-  }
-
-  function closePdfModal() {
-    setPdfModalOpen(false)
-    setPdfUrl(null)
-  }
   const activeAgreements = agreements.filter((a) => !a.archived)
   const archivedAgreements = agreements.filter((a) => a.archived)
 
@@ -616,12 +604,14 @@ export default function CustomerPage(props: CustomerPageProps) {
                         {a.start_date} – {a.end_date}
                       </div>
                       {a.file_url && (
-                        <button
-                          onClick={() => openPdfModal(a.file_url)}
+                        <a
+                          href={a.file_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
                           className="text-blue-600 underline text-sm"
                         >
                           Se avtale (fil)
-                        </button>
+                        </a>
                       )}
                     </div>
 
@@ -672,12 +662,14 @@ export default function CustomerPage(props: CustomerPageProps) {
                         {a.start_date} – {a.end_date}
                       </div>
                       {a.file_url && (
-                        <button
-                          onClick={() => openPdfModal(a.file_url)}
+                        <a
+                          href={a.file_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
                           className="text-blue-600 underline text-sm"
                         >
                           Se avtale (fil)
-                        </button>
+                        </a>
                       )}
                     </div>
 
@@ -720,30 +712,6 @@ export default function CustomerPage(props: CustomerPageProps) {
         setRemoveExistingFile={setRemoveExistingFile}
         onSave={handleSaveAgreement}
       />
-
-      {/* PDF Modal */}
-      {pdfModalOpen && pdfUrl && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="bg-white rounded-lg shadow-lg max-w-4xl w-full max-h-[90vh] overflow-hidden">
-            <div className="flex justify-between items-center px-4 py-2 border-b">
-              <h3 className="text-lg font-semibold">Avtale PDF</h3>
-              <button
-                onClick={closePdfModal}
-                className="text-gray-500 hover:text-gray-700"
-              >
-                ✕
-              </button>
-            </div>
-            <div className="p-4">
-              <iframe
-                src={pdfUrl}
-                className="w-full h-[70vh]"
-                title="Avtale PDF"
-              />
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   )
 }
