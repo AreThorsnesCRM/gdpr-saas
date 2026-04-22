@@ -72,6 +72,8 @@ export async function GET(request: NextRequest) {
     .eq("user_id", user.id)
     .maybeSingle();
 
+  let profile = existingProfile;
+
   // ⭐ 7: Opprett profil + Stripe-kunde hvis ny bruker
   if (!existingProfile) {
     const now = new Date();
@@ -82,26 +84,42 @@ export async function GET(request: NextRequest) {
       metadata: { user_id: user.id },
     });
 
-    await supabase.from("profiles").insert({
-      user_id: user.id,
-      company_name,
-      full_name,
-      stripe_customer_id: customer.id,
-      subscription_status: "trialing",
-      trial_start: now.toISOString(),
-      trial_end: trialEnd.toISOString(),
+    const { data: newProfile } = await supabase
+      .from("profiles")
+      .insert({
+        user_id: user.id,
+        company_name,
+        full_name,
+        stripe_customer_id: customer.id,
+        subscription_status: "trialing",
+        trial_start: now.toISOString(),
+        trial_end: trialEnd.toISOString(),
+      })
+      .select()
+      .single();
+
+    profile = newProfile;
+  }
+
+  // ⭐ 8: Legg inn subscription-status i JWT (viktig for middleware)
+  if (profile) {
+    await supabase.auth.updateUser({
+      data: {
+        subscription_status: profile.subscription_status,
+        trial_end: profile.trial_end,
+      },
     });
   }
 
-  // ⭐ 8: Hent session for å sette cookies manuelt
+  // ⭐ 9: Hent session for å sette cookies manuelt
   const {
     data: { session },
   } = await supabase.auth.getSession();
 
-  // ⭐ 9: Lag redirect-response ETTER at session er klar
+  // ⭐ 10: Lag redirect-response ETTER at session er klar
   const response = NextResponse.redirect(new URL("/dashboard", request.url));
 
-  // ⭐ 10: Sett cookies manuelt (Next.js 16 krever dette)
+  // ⭐ 11: Sett cookies manuelt (Next.js 16 krever dette)
   if (session) {
     response.cookies.set("sb-access-token", session.access_token, {
       path: "/",
