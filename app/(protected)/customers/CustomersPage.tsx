@@ -1,6 +1,5 @@
 "use client"
 
-export const dynamic = "force-dynamic"
 export const dynamicParams = true
 
 import { useEffect, useState } from "react"
@@ -71,19 +70,36 @@ export default function CustomersPage() {
   async function loadCustomers() {
     const {
       data: { user },
+      error: userError,
     } = await supabase.auth.getUser()
 
-    if (!user) return
+    if (userError || !user) {
+      console.error("Error getting user:", userError)
+      setCustomers([])
+      return
+    }
 
-    const { data: customerData } = await supabase
+    const { data: customerData, error: customerError } = await supabase
       .from("customers")
       .select("*")
       .eq("user_id", user.id)
       .order("created_at", { ascending: false })
 
-    const { data: agreements } = await supabase
+    const { data: agreements, error: agreementError } = await supabase
       .from("agreements")
       .select("customer_id, archived, end_date")
+
+    if (customerError) {
+      console.error("Error fetching customers:", customerError)
+      setCustomers([])
+      return
+    }
+
+    if (agreementError) {
+      console.error("Error fetching agreements:", agreementError)
+      setCustomers([])
+      return
+    }
 
     if (!customerData || !agreements) {
       setCustomers([])

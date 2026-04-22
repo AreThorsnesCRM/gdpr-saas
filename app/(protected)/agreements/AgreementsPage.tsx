@@ -41,7 +41,10 @@ export default function AgreementsPage() {
         .select("*, customers(name)")
         .order("start_date", { ascending: true })
 
-      if (!error && data) {
+      if (error) {
+        console.error("Error fetching agreements:", error)
+        setAgreements([])
+      } else if (data) {
         setAgreements(data)
       }
 

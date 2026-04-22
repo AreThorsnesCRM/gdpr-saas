@@ -1,9 +1,6 @@
-//TEST TEST
-
 import { Suspense } from "react"
 import AgreementsPage from "./AgreementsPage"
 
-export const dynamic = "force-dynamic"
 export const dynamicParams = true
 
 export default function AgreementsPageWrapper() {
