@@ -26,6 +26,8 @@ export default function Sidebar() {
   // 1. Vent på session før vi henter profil
   // -----------------------------
   useEffect(() => {
+    let cleanup: (() => void) | undefined
+
     async function waitForSession() {
       const { data: sessionData } = await supabase.auth.getSession()
 
@@ -43,10 +45,12 @@ export default function Sidebar() {
         }
       })
 
-      return () => subscription.unsubscribe()
+      cleanup = () => subscription.unsubscribe()
     }
 
     waitForSession()
+
+    return () => cleanup?.()
   }, [])
 
   // -----------------------------
@@ -87,18 +91,18 @@ export default function Sidebar() {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (event, session) => {
       console.log("[Sidebar] Auth event:", event)
-      
-      // Hvis sessionen forsvinner, tøm profildata.
+
       if (!session?.user) {
-        setStatus("unknown")
-        setFullName(null)
-        setEmail(null)
-        setCompanyName(null)
+        // Kun oppdater profil når session faktisk finnes.
         return
       }
 
-      // Bare hent profil når brukeren er logget inn eller oppdatert.
-      if (event === "SIGNED_IN" || event === "USER_UPDATED") {
+      if (
+        event === "SIGNED_IN" ||
+        event === "USER_UPDATED" ||
+        event === "INITIAL_SESSION" ||
+        event === "TOKEN_REFRESHED"
+      ) {
         setEmail(session.user.email ?? null)
 
         const { data } = await supabase

@@ -106,6 +106,8 @@ export default function Page() {
   // SESSION READY
   // -----------------------------
   useEffect(() => {
+    let cleanup: (() => void) | undefined
+
     async function waitForSession() {
       const { data } = await supabase.auth.getSession()
       if (data?.session) {
@@ -119,10 +121,12 @@ export default function Page() {
         if (session) setSessionReady(true)
       })
 
-      return () => subscription.unsubscribe()
+      cleanup = () => subscription.unsubscribe()
     }
 
     waitForSession()
+
+    return () => cleanup?.()
   }, [])
 
   // -----------------------------

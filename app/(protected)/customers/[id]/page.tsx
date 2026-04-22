@@ -57,6 +57,8 @@ export default function CustomerPage(props: CustomerPageProps) {
   const [sessionReady, setSessionReady] = useState(false)
 
   useEffect(() => {
+    let cleanup: (() => void) | undefined
+
     async function waitForSession() {
       const { data } = await supabase.auth.getSession()
       if (data?.session) {
@@ -70,10 +72,12 @@ export default function CustomerPage(props: CustomerPageProps) {
         if (session) setSessionReady(true)
       })
 
-      return () => subscription.unsubscribe()
+      cleanup = () => subscription.unsubscribe()
     }
 
     waitForSession()
+
+    return () => cleanup?.()
   }, [])
 
   // -----------------------------
