@@ -65,8 +65,10 @@ export default function AgreementSlideOver({
 
   if (!open) return null
 
+  if (!open) return null
+
   return (
-    <div>
+    <>
       <div
         className="fixed inset-0 z-50 flex justify-end bg-black/40 backdrop-blur-sm"
         onMouseDown={handleBackdropClick}
@@ -259,6 +261,6 @@ export default function AgreementSlideOver({
         </div>
       )}
 
-    </div>
+    </>
   )
 }
