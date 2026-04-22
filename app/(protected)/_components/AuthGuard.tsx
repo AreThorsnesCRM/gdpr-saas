@@ -12,48 +12,20 @@ export default function AuthGuard() {
     let isMounted = true
 
     async function run() {
-      // 1. Vent på at Supabase faktisk er hydrert
+      // Bare sjekk at brukeren er logget inn
+      // La middleware.ts og backend håndtere subscription-status
       const { data: sessionData } = await supabase.auth.getSession()
       const session = sessionData?.session
 
       if (!isMounted) return
 
       if (!session?.user) {
+        console.log("[AuthGuard] No session, redirecting to login")
         router.replace("/login")
         return
       }
 
-      // 2. Hent profil
-      const { data: profile } = await supabase
-        .from("profiles")
-        .select("*")
-        .eq("user_id", session.user.id)
-        .maybeSingle()
-
-      if (!isMounted) return
-
-      if (!profile) {
-        router.replace("/subscribe")
-        return
-      }
-
-      // 3. Sjekk abonnement
-      const now = new Date()
-      const trialEnd = profile.trial_end ? new Date(profile.trial_end) : null
-
-      const trialActive =
-        profile.subscription_status === "trialing" &&
-        trialEnd &&
-        trialEnd > now
-
-      const subscriptionActive = profile.subscription_status === "active"
-
-      if (!trialActive && !subscriptionActive) {
-        router.replace("/subscribe")
-        return
-      }
-
-      // 4. Ferdig
+      console.log("[AuthGuard] User authenticated")
       setLoading(false)
     }
 

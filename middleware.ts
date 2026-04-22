@@ -25,28 +25,34 @@ export function middleware(req: NextRequest) {
 
   // Trial expired?
   if (status === "trialing" && trialEnd && new Date() > trialEnd) {
+    console.log("[middleware] Trial expired, redirecting to upgrade");
     url.pathname = "/billing/upgrade";
     return NextResponse.redirect(url);
   }
 
   // Past due → må oppdatere betalingsmetode
   if (status === "past_due") {
+    console.log("[middleware] Subscription past due, redirecting to payment-required");
     url.pathname = "/billing/payment-required";
     return NextResponse.redirect(url);
   }
 
   // Canceled → må kjøpe abonnement
   if (status === "canceled") {
+    console.log("[middleware] Subscription canceled, redirecting to upgrade");
     url.pathname = "/billing/upgrade";
     return NextResponse.redirect(url);
   }
 
   // Incomplete / unpaid → send til checkout
   if (status === "incomplete" || status === "unpaid") {
+    console.log("[middleware] Subscription incomplete/unpaid, redirecting to upgrade");
     url.pathname = "/billing/upgrade";
     return NextResponse.redirect(url);
   }
 
+  // active eller trialing (og ikke expired) → tillat videre
+  console.log("[middleware] Subscription status:", status, "- allowing access");
   return NextResponse.next();
 }
 

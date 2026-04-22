@@ -38,6 +38,7 @@ export async function POST() {
 
   // IMPORTANT: Use NEXT_PUBLIC_APP_URL (the one you added in Vercel)
   const returnUrl = `${process.env.NEXT_PUBLIC_APP_URL}/dashboard`
+  console.log("[create-portal-session] Return URL:", returnUrl)
 
   const session = await stripe.billingPortal.sessions.create({
     customer: profile.stripe_customer_id,

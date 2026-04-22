@@ -85,8 +85,11 @@ export default function Sidebar() {
   useEffect(() => {
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (_event, session) => {
-      if (!session?.user) {
+    } = supabase.auth.onAuthStateChange(async (event, session) => {
+      console.log("[Sidebar] Auth event:", event)
+      
+      // Bare reagerer på login/logout events, ikke token refresh
+      if (event === "SIGNED_OUT" || event === "USER_DELETED") {
         setStatus("unknown")
         setFullName(null)
         setEmail(null)
@@ -94,17 +97,20 @@ export default function Sidebar() {
         return
       }
 
-      setEmail(session.user.email ?? null)
+      if (event === "SIGNED_IN" || event === "USER_UPDATED") {
+        if (!session?.user) return
+        setEmail(session.user.email ?? null)
 
-      const { data } = await supabase
-        .from("profiles")
-        .select("subscription_status, full_name, company_name")
-        .eq("user_id", session.user.id)
-        .single()
+        const { data } = await supabase
+          .from("profiles")
+          .select("subscription_status, full_name, company_name")
+          .eq("user_id", session.user.id)
+          .single()
 
-      setStatus(data?.subscription_status ?? "unknown")
-      setFullName(data?.full_name ?? null)
-      setCompanyName(data?.company_name ?? null)
+        setStatus(data?.subscription_status ?? "unknown")
+        setFullName(data?.full_name ?? null)
+        setCompanyName(data?.company_name ?? null)
+      }
     })
 
     return () => subscription.unsubscribe()
