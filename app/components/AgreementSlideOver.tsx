@@ -201,30 +201,6 @@ export default function AgreementSlideOver({
         </div>
       </div>
 
-      {/* PDF Modal */}
-      {pdfModalOpen && pdfUrl && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="bg-white rounded-lg shadow-lg max-w-4xl w-full max-h-[90vh] overflow-hidden">
-            <div className="flex justify-between items-center px-4 py-2 border-b">
-              <h3 className="text-lg font-semibold">Avtale PDF</h3>
-              <button
-                onClick={closePdfModal}
-                className="text-gray-500 hover:text-gray-700"
-              >
-                ✕
-              </button>
-            </div>
-            <div className="p-4">
-              <iframe
-                src={pdfUrl}
-                className="w-full h-[70vh]"
-                title="Avtale PDF"
-              />
-            </div>
-          </div>
-        </div>
-      )}
-
     </div>
   )
 }
