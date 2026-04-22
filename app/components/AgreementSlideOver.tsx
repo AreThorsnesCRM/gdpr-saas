@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useRef } from "react"
+import { useEffect, useRef, useState } from "react"
 
 export default function AgreementSlideOver({
   open,
@@ -27,15 +27,24 @@ export default function AgreementSlideOver({
   onSave,
 }: any) {
   const panelRef = useRef<HTMLDivElement | null>(null)
+  const [pdfModalOpen, setPdfModalOpen] = useState(false)
+  const [pdfUrl, setPdfUrl] = useState<string | null>(null)
 
   // ESC to close
   useEffect(() => {
     function handleKey(e: KeyboardEvent) {
-      if (e.key === "Escape") onClose()
+      if (e.key === "Escape") {
+        if (pdfModalOpen) {
+          setPdfModalOpen(false)
+          setPdfUrl(null)
+        } else {
+          onClose()
+        }
+      }
     }
-    if (open) document.addEventListener("keydown", handleKey)
+    if (open || pdfModalOpen) document.addEventListener("keydown", handleKey)
     return () => document.removeEventListener("keydown", handleKey)
-  }, [open, onClose])
+  }, [open, pdfModalOpen, onClose])
 
   // Click outside to close
   function handleBackdropClick(e: any) {
@@ -44,13 +53,24 @@ export default function AgreementSlideOver({
     }
   }
 
+  function openPdfModal(url: string) {
+    setPdfUrl(url)
+    setPdfModalOpen(true)
+  }
+
+  function closePdfModal() {
+    setPdfModalOpen(false)
+    setPdfUrl(null)
+  }
+
   if (!open) return null
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex justify-end bg-black/40 backdrop-blur-sm"
-      onMouseDown={handleBackdropClick}
-    >
+    <>
+      <div
+        className="fixed inset-0 z-50 flex justify-end bg-black/40 backdrop-blur-sm"
+        onMouseDown={handleBackdropClick}
+      >
       <div
         ref={panelRef}
         className="h-full w-full max-w-md bg-white shadow-xl border-l border-gray-200 overflow-y-auto animate-slideIn"
@@ -162,14 +182,12 @@ export default function AgreementSlideOver({
           {editingAgreement && editingAgreement.file_url && !removeExistingFile && (
             <div className="rounded-md bg-gray-50 px-3 py-2 text-sm">
               <p className="font-medium text-gray-800">Eksisterende fil:</p>
-              <a
-                href={editingAgreement.file_url}
-                target="_blank"
-                rel="noopener noreferrer"
+              <button
+                onClick={() => openPdfModal(editingAgreement.file_url)}
                 className="text-gray-900 underline"
               >
                 Åpne avtale
-              </a>
+              </button>
               <button
                 type="button"
                 onClick={() => setRemoveExistingFile(true)}
@@ -216,6 +234,30 @@ export default function AgreementSlideOver({
           </button>
         </div>
       </div>
-    </div>
+
+      {/* PDF Modal */}
+      {pdfModalOpen && pdfUrl && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+          <div className="bg-white rounded-lg shadow-lg max-w-4xl w-full max-h-[90vh] overflow-hidden">
+            <div className="flex justify-between items-center px-4 py-2 border-b">
+              <h3 className="text-lg font-semibold">Avtale PDF</h3>
+              <button
+                onClick={closePdfModal}
+                className="text-gray-500 hover:text-gray-700"
+              >
+                ✕
+              </button>
+            </div>
+            <div className="p-4">
+              <iframe
+                src={pdfUrl}
+                className="w-full h-[70vh]"
+                title="Avtale PDF"
+              />
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   )
 }
