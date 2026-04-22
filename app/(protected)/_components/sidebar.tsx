@@ -88,8 +88,8 @@ export default function Sidebar() {
     } = supabase.auth.onAuthStateChange(async (event, session) => {
       console.log("[Sidebar] Auth event:", event)
       
-      // Bare reagerer på login/logout events, ikke token refresh
-      if (event === "SIGNED_OUT" || event === "USER_DELETED") {
+      // Hvis sessionen forsvinner, tøm profildata.
+      if (!session?.user) {
         setStatus("unknown")
         setFullName(null)
         setEmail(null)
@@ -97,8 +97,8 @@ export default function Sidebar() {
         return
       }
 
+      // Bare hent profil når brukeren er logget inn eller oppdatert.
       if (event === "SIGNED_IN" || event === "USER_UPDATED") {
-        if (!session?.user) return
         setEmail(session.user.email ?? null)
 
         const { data } = await supabase
