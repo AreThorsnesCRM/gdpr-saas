@@ -14,17 +14,26 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // Hent profil fra database
   const fetchProfile = useCallback(async (userId: string) => {
     try {
-      const { data } = await supabase
+      console.log("[AuthProvider] Fetching profile for user:", userId)
+      const { data, error } = await supabase
         .from("profiles")
         .select("*")
         .eq("user_id", userId)
         .single<Profile>()
 
+      if (error) {
+        console.error("[AuthProvider] Error fetching profile - DB error:", error)
+        return
+      }
+
       if (data) {
+        console.log("[AuthProvider] Profile loaded:", data.company_name, data.full_name)
         setProfile(data)
+      } else {
+        console.warn("[AuthProvider] No profile data returned")
       }
     } catch (error) {
-      console.error("[AuthProvider] Error fetching profile:", error)
+      console.error("[AuthProvider] Error fetching profile - Exception:", error)
     }
   }, [])
 
@@ -104,6 +113,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         console.log("[AuthProvider] No user session")
         setUser(null)
         setProfile(null)
+        setLoading(false)
         return
       }
 
@@ -124,7 +134,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       ) {
         console.log("[AuthProvider] Fetching profile for event:", event)
         await fetchProfile(session.user.id)
+        console.log("[AuthProvider] Profile fetch complete")
       }
+
+      setLoading(false)
     })
 
     return () => {
