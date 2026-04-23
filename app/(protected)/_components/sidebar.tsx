@@ -20,7 +20,7 @@ export default function Sidebar() {
     { href: "/dashboard", label: "Dashboard", icon: <HomeIcon className="h-5 w-5" /> },
     { href: "/customers", label: "Kunder", icon: <UserGroupIcon className="h-5 w-5" /> },
     { href: "/agreements", label: "Avtaler", icon: <DocumentTextIcon className="h-5 w-5" /> },
-    { href: "/archive", label: "Arkiv", icon: <ArchiveBoxIcon className="h-5 w-5" /> },
+    { href: "/agreements?filter=archived", label: "Arkiv", icon: <ArchiveBoxIcon className="h-5 w-5" /> },
     { href: "/settings", label: "Innstillinger", icon: <Cog6ToothIcon className="h-5 w-5" /> },
   ]
 
