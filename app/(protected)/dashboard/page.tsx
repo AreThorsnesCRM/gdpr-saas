@@ -7,6 +7,7 @@ import "../../styles/dashboard.css"
 import Link from "next/link"
 import { useEffect, useState } from "react"
 import { supabase } from "@/lib/supabaseClient"
+import { useAuth } from "@/lib/AuthContext"
 
 import {
   UserGroupIcon,
@@ -36,23 +37,6 @@ ChartJS.register(
   Legend
 )
 
-type Profile = {
-  id: string
-  user_id: string
-  full_name: string | null
-  company_name: string | null
-  subscription_status: string | null
-  trial_start: string | null
-  trial_end: string | null
-  stripe_customer_id: string | null
-  stripe_subscription_id: string | null
-}
-
-type SubscriptionView = {
-  status: string | null
-  trial_end: string | null
-}
-
 type StatsState = {
   customers: number
   agreements: number
@@ -67,8 +51,8 @@ type ChartDataState = {
 }
 
 export default function Page() {
-  const [profile, setProfile] = useState<Profile | null>(null)
-  const [subscription, setSubscription] = useState<SubscriptionView | null>(null)
+  const { user, profile, loading: authLoading } = useAuth()
+  const [subscription, setSubscription] = useState<{ status: string | null; trial_end: string | null } | null>(null)
 
   const [stats, setStats] = useState<StatsState>({
     customers: 0,
@@ -91,9 +75,6 @@ export default function Page() {
     datasets: [],
   })
 
-  const [isLoadingProfile, setIsLoadingProfile] = useState(true)
-  const [sessionReady, setSessionReady] = useState(false)
-
   function daysLeft(dateString: string | null) {
     if (!dateString) return null
     const end = new Date(dateString)
@@ -102,91 +83,33 @@ export default function Page() {
     return Math.ceil(diff / (1000 * 60 * 60 * 24))
   }
 
-  // -----------------------------
-  // SESSION READY
-  // -----------------------------
+  // Update subscription when profile is ready
   useEffect(() => {
-    let cleanup: (() => void) | undefined
-
-    async function waitForSession() {
-      const { data } = await supabase.auth.getSession()
-      if (data?.session) {
-        setSessionReady(true)
-        return
-      }
-
-      const {
-        data: { subscription },
-      } = supabase.auth.onAuthStateChange((_event, session) => {
-        if (session) setSessionReady(true)
-      })
-
-      cleanup = () => subscription.unsubscribe()
+    if (!profile) {
+      setSubscription(null)
+      return
     }
 
-    waitForSession()
+    setSubscription({
+      status: profile.subscription_status,
+      trial_end: profile.trial_end,
+    })
+  }, [profile])
 
-    return () => cleanup?.()
-  }, [])
-
-  // -----------------------------
-  // PROFILE + SUBSCRIPTION
-  // -----------------------------
+  // Fetch dashboard data when user is ready
   useEffect(() => {
-    if (!sessionReady) return
-
-    async function loadProfile() {
-      setIsLoadingProfile(true)
-
-      const { data: userData } = await supabase.auth.getUser()
-      if (!userData?.user) {
-        setProfile(null)
-        setSubscription(null)
-        setIsLoadingProfile(false)
-        return
-      }
-
-      const { data: profileData } = await supabase
-        .from("profiles")
-        .select("*")
-        .eq("user_id", userData.user.id)
-        .single<Profile>()
-
-      if (!profileData) {
-        setProfile(null)
-        setSubscription(null)
-        setIsLoadingProfile(false)
-        return
-      }
-
-      setProfile(profileData)
-      setSubscription({
-        status: profileData.subscription_status,
-        trial_end: profileData.trial_end,
-      })
-
-      setIsLoadingProfile(false)
-    }
-
-    loadProfile()
-  }, [sessionReady])
-
-  // -----------------------------
-  // DASHBOARD DATA
-  // -----------------------------
-  useEffect(() => {
-    if (!sessionReady) return
+    if (!user) return
 
     fetchStats()
     fetchRecentActivity()
     fetchUpcoming()
     fetchCriticalCustomers()
-  }, [sessionReady])
+  }, [user])
 
   useEffect(() => {
-    if (!sessionReady) return
+    if (!user) return
     fetchGraphData()
-  }, [graphType, sessionReady])
+  }, [graphType, user])
 
   // -----------------------------
   // FETCH FUNCTIONS
@@ -262,13 +185,12 @@ export default function Page() {
   }
 
   async function fetchCriticalCustomers() {
-    const { data: userData } = await supabase.auth.getUser()
-    if (!userData?.user) return
+    if (!user) return
 
     const { data: customers } = await supabase
       .from("customers")
       .select("*")
-      .eq("user_id", userData.user.id)
+      .eq("user_id", user.id)
 
     const { data: agreements } = await supabase
       .from("agreements")
@@ -403,13 +325,12 @@ export default function Page() {
     })
   }
 
-  // -----------------------------
   // RENDER
-  // -----------------------------
+  // ----
   return (
     <div className="p-8 space-y-10">
       {/* Subscription Section */}
-      {sessionReady && !isLoadingProfile && subscription && (
+      {!authLoading && subscription && (
         <div className="bg-white rounded-xl shadow p-6 border border-gray-100">
           <div className="flex items-center justify-between">
             <div>

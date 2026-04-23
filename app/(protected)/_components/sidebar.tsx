@@ -10,115 +10,11 @@ import {
   Cog6ToothIcon,
 } from "@heroicons/react/24/outline"
 import LogoutButton from "../logout/LogoutButton"
-import { useEffect, useState } from "react"
-import { supabase } from "@/lib/supabaseClient"
+import { useAuth } from "@/lib/AuthContext"
 
 export default function Sidebar() {
   const pathname = usePathname()
-
-  const [status, setStatus] = useState<string>("loading")
-  const [fullName, setFullName] = useState<string | null>(null)
-  const [email, setEmail] = useState<string | null>(null)
-  const [companyName, setCompanyName] = useState<string | null>(null)
-  const [sessionReady, setSessionReady] = useState(false)
-
-  // -----------------------------
-  // 1. Vent på session før vi henter profil
-  // -----------------------------
-  useEffect(() => {
-    let cleanup: (() => void) | undefined
-
-    async function waitForSession() {
-      const { data: sessionData } = await supabase.auth.getSession()
-
-      if (sessionData?.session) {
-        setSessionReady(true)
-        return
-      }
-
-      // Hvis session ikke er klar, vent på onAuthStateChange
-      const {
-        data: { subscription },
-      } = supabase.auth.onAuthStateChange((_event, session) => {
-        if (session) {
-          setSessionReady(true)
-        }
-      })
-
-      cleanup = () => subscription.unsubscribe()
-    }
-
-    waitForSession()
-
-    return () => cleanup?.()
-  }, [])
-
-  // -----------------------------
-  // 2. Når session er klar → hent profil
-  // -----------------------------
-  useEffect(() => {
-    if (!sessionReady) return
-
-    async function loadProfile() {
-      const { data: userData } = await supabase.auth.getUser()
-
-      if (!userData?.user) {
-        setStatus("unknown")
-        return
-      }
-
-      setEmail(userData.user.email ?? null)
-
-      const { data } = await supabase
-        .from("profiles")
-        .select("subscription_status, full_name, company_name")
-        .eq("user_id", userData.user.id)
-        .single()
-
-      setStatus(data?.subscription_status ?? "unknown")
-      setFullName(data?.full_name ?? null)
-      setCompanyName(data?.company_name ?? null)
-    }
-
-    loadProfile()
-  }, [sessionReady])
-
-  // -----------------------------
-  // 3. Oppdater profil ved login/logout
-  // -----------------------------
-  useEffect(() => {
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (event, session) => {
-      console.log("[Sidebar] Auth event:", event)
-
-      if (!session?.user) {
-        // Kun oppdater profil når session faktisk finnes.
-        return
-      }
-
-      if (
-        event === "SIGNED_IN" ||
-        event === "USER_UPDATED" ||
-        event === "INITIAL_SESSION" ||
-        event === "TOKEN_REFRESHED"
-      ) {
-        setEmail(session.user.email ?? null)
-
-        const { data } = await supabase
-          .from("profiles")
-          .select("subscription_status, full_name, company_name")
-          .eq("user_id", session.user.id)
-          .single()
-
-        setStatus(data?.subscription_status ?? "unknown")
-        setFullName(data?.full_name ?? null)
-        setCompanyName(data?.company_name ?? null)
-      }
-    })
-
-    return () => subscription.unsubscribe()
-  }, [])
+  const { profile, loading } = useAuth()
 
   const navItems = [
     { href: "/dashboard", label: "Dashboard", icon: <HomeIcon className="h-5 w-5" /> },
@@ -146,6 +42,11 @@ export default function Sidebar() {
     loading: "Loading...",
   }
 
+  const status = loading ? "loading" : profile?.subscription_status ?? "unknown"
+  const fullName = profile?.full_name ?? "Bruker"
+  const email = profile?.user_id ? "" : "" // Will be populated via context if needed
+  const companyName = profile?.company_name ?? ""
+
   return (
     <aside className="w-64 h-screen bg-white border-r border-gray-200 p-6 flex flex-col fixed left-0 top-0">
       <div className="text-2xl font-bold mb-6">AreCRM</div>
@@ -153,15 +54,15 @@ export default function Sidebar() {
       {/* Profilseksjon */}
       <div className="mb-6">
         <div className="text-lg font-bold text-gray-900">
-          {companyName ?? ""}
+          {companyName}
         </div>
 
         <div className="font-semibold text-gray-800">
-          {fullName ?? "Bruker"}
+          {fullName}
         </div>
 
         <div className="text-sm text-gray-500 truncate">
-          {email ?? ""}
+          {email}
         </div>
 
         <span

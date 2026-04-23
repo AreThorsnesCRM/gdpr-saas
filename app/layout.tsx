@@ -1,4 +1,5 @@
 import "./globals.css"
+import { AuthProvider } from "@/lib/AuthProvider"
 
 export const metadata = {
   title: "AreCRM",
@@ -9,7 +10,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="no">
       <body>
-        {children}
+        <AuthProvider>
+          {children}
+        </AuthProvider>
       </body>
     </html>
   )
