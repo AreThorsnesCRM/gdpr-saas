@@ -4,6 +4,7 @@ import React, { useEffect, useState, useCallback } from "react"
 import { useRouter } from "next/navigation"
 import { supabase } from "@/lib/supabaseClient"
 import { AuthContext, type AuthContextType, type Profile } from "./AuthContext"
+import { getProfile } from "./actions"
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const router = useRouter()
@@ -11,43 +12,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [profile, setProfile] = useState<Profile | null>(null)
   const [loading, setLoading] = useState(true)
 
-  // Hent profil fra database
-  const fetchProfile = useCallback(async (userId: string) => {
-    try {
-      console.log("[AuthProvider] Fetching profile for user:", userId)
-      console.log("[AuthProvider] Supabase client:", !!supabase)
-
-      console.log("[AuthProvider] Starting DB query...")
-
-      const query = supabase
-        .from("profiles")
-        .select("*")
-        .eq("user_id", userId)
-        .single<Profile>()
-
-      console.log("[AuthProvider] Query object created, executing...")
-
-      const { data, error } = await query
-
-      console.log("[AuthProvider] Query result - error:", error, "data:", data)
-
-      if (error) {
-        console.error("[AuthProvider] DB Query error:", error)
+  // Hent profil fra server action
+  const fetchProfile = useCallback(async (retries = 3) => {
+    for (let i = 0; i < retries; i++) {
+      try {
+        console.log(`[AuthProvider] Fetching profile via server action (attempt ${i + 1})`)
+        const profile = await getProfile()
+        console.log("[AuthProvider] Profile fetched:", profile)
+        setProfile(profile)
         return
+      } catch (error) {
+        console.error(`[AuthProvider] Exception in fetchProfile (attempt ${i + 1}):`, error)
+        if (i === retries - 1) {
+          setProfile(null)
+        } else {
+          await new Promise(resolve => setTimeout(resolve, 1000 * (i + 1))) // Exponential backoff
+        }
       }
-
-      if (data) {
-        console.log("[AuthProvider] Profile loaded successfully:", {
-          company: data.company_name,
-          name: data.full_name,
-          status: data.subscription_status,
-        })
-        setProfile(data)
-      } else {
-        console.warn("[AuthProvider] No profile data returned (data is null)")
-      }
-    } catch (error) {
-      console.error("[AuthProvider] Exception in fetchProfile:", error)
     }
   }, [])
 
@@ -69,7 +50,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             id: sessionData.session.user.id,
             email: sessionData.session.user.email,
           })
-          await fetchProfile(sessionData.session.user.id)
+          await fetchProfile()
           setLoading(false)
           return
         }
@@ -89,7 +70,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
               id: session.user.id,
               email: session.user.email,
             })
-            await fetchProfile(session.user.id)
+            await fetchProfile()
           } else {
             setUser(null)
             setProfile(null)
@@ -112,53 +93,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }, [fetchProfile])
 
-  // Listen for auth state changes (login, logout, token refresh, etc)
+  // Listen for page visibility changes (e.g., returning from external site)
   useEffect(() => {
-    let mounted = true
-
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (event, session) => {
-      if (!mounted) return
-
-      console.log("[AuthProvider] Auth state changed:", event)
-
-      if (!session?.user) {
-        console.log("[AuthProvider] No user session")
-        setUser(null)
-        setProfile(null)
-        setLoading(false)
-        return
+    const handleVisibilityChange = () => {
+      if (!document.hidden && user) {
+        console.log("[AuthProvider] Page became visible, refetching profile")
+        fetchProfile()
       }
-
-      console.log("[AuthProvider] User session updated:", session.user.id)
-
-      // Oppdater user info
-      setUser({
-        id: session.user.id,
-        email: session.user.email,
-      })
-
-      // Re-fetch profil på viktige events
-      if (
-        event === "SIGNED_IN" ||
-        event === "USER_UPDATED" ||
-        event === "INITIAL_SESSION" ||
-        event === "TOKEN_REFRESHED"
-      ) {
-        console.log("[AuthProvider] Fetching profile for event:", event)
-        await fetchProfile(session.user.id)
-        console.log("[AuthProvider] Profile fetch complete")
-      }
-
-      setLoading(false)
-    })
-
-    return () => {
-      mounted = false
-      subscription.unsubscribe()
     }
-  }, [fetchProfile])
+
+    document.addEventListener("visibilitychange", handleVisibilityChange)
+    return () => document.removeEventListener("visibilitychange", handleVisibilityChange)
+  }, [user, fetchProfile])
 
   const logout = async () => {
     try {
