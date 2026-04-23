@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabaseClient";
-import { createStripeCustomer } from "@/app/actions/createStripeCustomer";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -24,6 +23,12 @@ export default function RegisterPage() {
     const { data, error: signUpError } = await supabase.auth.signUp({
       email,
       password,
+      options: {
+        data: {
+          full_name: name,
+          company_name: company,
+        },
+      },
     });
 
     if (signUpError) {
@@ -40,30 +45,7 @@ export default function RegisterPage() {
       return;
     }
 
-    // 2. Opprett profil-rad i Supabase (KRITISK!)
-    const { error: profileError } = await supabase.from("profiles").insert({
-      user_id: user.id,
-      full_name: name,
-      company_name: company,
-      subscription_status: "trialing",
-      trial_start: new Date().toISOString(),
-      trial_end: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
-    });
-
-    if (profileError) {
-      console.error("Profile creation failed:", profileError);
-      setError("Kunne ikke opprette profil.");
-      setLoading(false);
-      return;
-    }
-
-    // 3. Opprett Stripe customer (oppdaterer profilen videre)
-    try {
-      await createStripeCustomer(user.id, email);
-    } catch (err) {
-      console.error("Stripe customer creation failed:", err);
-      // Ikke stopp registreringen – brukeren kan fortsatt verifisere e-post
-    }
+    // Profil og Stripe customer opprettes i callback etter e-post verifisering
 
     // 4. Send bruker videre til "check email"
     router.push("/check-email");
