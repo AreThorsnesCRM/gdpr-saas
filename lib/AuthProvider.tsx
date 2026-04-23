@@ -15,25 +15,36 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const fetchProfile = useCallback(async (userId: string) => {
     try {
       console.log("[AuthProvider] Fetching profile for user:", userId)
+
       const { data, error } = await supabase
         .from("profiles")
         .select("*")
         .eq("user_id", userId)
         .single<Profile>()
 
+      console.log("[AuthProvider] Query result - error:", error, "data:", data)
+
       if (error) {
-        console.error("[AuthProvider] Error fetching profile - DB error:", error)
+        console.error("[AuthProvider] DB Query error:", error.message)
+        // Sjekk om det er PGRST116 (no rows returned) - det betyr profil finnes ikke
+        if (error.code === "PGRST116") {
+          console.warn("[AuthProvider] Profile not found for user, might need to create it")
+        }
         return
       }
 
       if (data) {
-        console.log("[AuthProvider] Profile loaded:", data.company_name, data.full_name)
+        console.log("[AuthProvider] Profile loaded successfully:", {
+          company: data.company_name,
+          name: data.full_name,
+          status: data.subscription_status,
+        })
         setProfile(data)
       } else {
-        console.warn("[AuthProvider] No profile data returned")
+        console.warn("[AuthProvider] No profile data returned (data is null)")
       }
     } catch (error) {
-      console.error("[AuthProvider] Error fetching profile - Exception:", error)
+      console.error("[AuthProvider] Exception in fetchProfile:", error)
     }
   }, [])
 
