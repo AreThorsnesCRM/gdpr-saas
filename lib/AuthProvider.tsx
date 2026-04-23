@@ -31,13 +31,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // Initialisér session på mount
   useEffect(() => {
     let cleanup: (() => void) | undefined
+    let mounted = true
 
     async function initAuth() {
       try {
-        // Prøv å hent session fra cookies (raskest)
+        // Prøv å hent session fra cookies
         const { data: sessionData } = await supabase.auth.getSession()
 
+        if (!mounted) return
+
         if (sessionData?.session?.user) {
+          console.log("[AuthProvider] Session found from cookies, fetching profile...")
           setUser({
             id: sessionData.session.user.id,
             email: sessionData.session.user.email,
@@ -47,10 +51,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           return
         }
 
-        // Hvis ingen session, vent på onAuthStateChange
+        console.log("[AuthProvider] No session in cookies, waiting for auth state change...")
+
+        // Hvis ingen session, sett opp listener
         const {
           data: { subscription },
-        } = supabase.auth.onAuthStateChange(async (_event, session) => {
+        } = supabase.auth.onAuthStateChange(async (event, session) => {
+          console.log("[AuthProvider] Auth event:", event, "- Session:", !!session?.user)
+
+          if (!mounted) return
+
           if (session?.user) {
             setUser({
               id: session.user.id,
@@ -67,27 +77,37 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         cleanup = () => subscription.unsubscribe()
       } catch (error) {
         console.error("[AuthProvider] Error during init:", error)
-        setLoading(false)
+        if (mounted) setLoading(false)
       }
     }
 
     initAuth()
 
-    return () => cleanup?.()
+    return () => {
+      mounted = false
+      cleanup?.()
+    }
   }, [fetchProfile])
 
-  // Listen for auth state changes (loggen ut, token refresh, etc)
+  // Listen for auth state changes (login, logout, token refresh, etc)
   useEffect(() => {
+    let mounted = true
+
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (event, session) => {
-      console.log("[AuthProvider] Auth event:", event)
+      if (!mounted) return
+
+      console.log("[AuthProvider] Auth state changed:", event)
 
       if (!session?.user) {
+        console.log("[AuthProvider] No user session")
         setUser(null)
         setProfile(null)
         return
       }
+
+      console.log("[AuthProvider] User session updated:", session.user.id)
 
       // Oppdater user info
       setUser({
@@ -102,11 +122,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         event === "INITIAL_SESSION" ||
         event === "TOKEN_REFRESHED"
       ) {
+        console.log("[AuthProvider] Fetching profile for event:", event)
         await fetchProfile(session.user.id)
       }
     })
 
-    return () => subscription.unsubscribe()
+    return () => {
+      mounted = false
+      subscription.unsubscribe()
+    }
   }, [fetchProfile])
 
   const logout = async () => {

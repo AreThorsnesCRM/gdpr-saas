@@ -35,8 +35,32 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: error.message }, { status: 400 })
   }
 
-  // 2. Verifiser bruker (fjerner advarselen)
+  // 2. Verifiser bruker
   await supabase.auth.getUser()
 
-  return NextResponse.json({ success: true })
+  // 3. Hent session og sett cookies manuelt (sikrer at de blir sendt til klient)
+  const {
+    data: { session },
+  } = await supabase.auth.getSession()
+
+  const response = NextResponse.json({ success: true })
+
+  // 4. Sett cookies manuelt på response (sikrer at de blir sendt til browser)
+  if (session) {
+    response.cookies.set("sb-access-token", session.access_token, {
+      path: "/",
+      httpOnly: true,
+      secure: true,
+      sameSite: "lax",
+    })
+
+    response.cookies.set("sb-refresh-token", session.refresh_token, {
+      path: "/",
+      httpOnly: true,
+      secure: true,
+      sameSite: "lax",
+    })
+  }
+
+  return response
 }
