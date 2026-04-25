@@ -63,6 +63,11 @@ export default function CustomerPage(props: CustomerPageProps) {
     let cleanup: (() => void) | undefined
 
     async function waitForSession() {
+      if (!supabase) {
+        console.error("[CustomerPage] Supabase not available")
+        return
+      }
+
       const { data } = await supabase.auth.getSession()
       if (data?.session) {
         setSessionReady(true)
@@ -115,6 +120,11 @@ export default function CustomerPage(props: CustomerPageProps) {
   // FETCH FUNCTIONS
   // -----------------------------
   async function fetchCustomer() {
+    if (!supabase) {
+      console.error("[CustomerPage] Supabase not available")
+      return
+    }
+
     const { data, error } = await supabase
       .from("customers")
       .select("*")
@@ -135,6 +145,11 @@ export default function CustomerPage(props: CustomerPageProps) {
   }
 
   async function fetchNotes() {
+    if (!supabase) {
+      console.error("[CustomerPage] Supabase not available")
+      return
+    }
+
     const { data, error } = await supabase
       .from("notes")
       .select("*")
@@ -150,6 +165,11 @@ export default function CustomerPage(props: CustomerPageProps) {
   }
 
   async function fetchAgreements() {
+    if (!supabase) {
+      console.error("[CustomerPage] Supabase not available")
+      return
+    }
+
     const { data, error } = await supabase
       .from("agreements")
       .select("*")
@@ -222,6 +242,18 @@ export default function CustomerPage(props: CustomerPageProps) {
     openSlideOver()
   }
 
+  function handleEditAgreement(a: Agreement) {
+    setEditingAgreement(a)
+    setNewTitle(a.title)
+    setNewStart(a.start_date)
+    setNewEnd(a.end_date)
+    setNewSigned(a.signed)
+    setNewContactName(a.contact_name || "")
+    setNewContactEmail(a.contact_email || "")
+    setNewContactPhone(a.contact_phone || "")
+    openSlideOver()
+  }
+
   function handleGeneratePDF(agreement: Agreement) {
     generateAgreementPDF(agreement, customer, profile)
   }
@@ -277,6 +309,11 @@ export default function CustomerPage(props: CustomerPageProps) {
   // AGREEMENT SAVE
   // -----------------------------
   async function uploadAgreementFile(existingUrl: string | null) {
+    if (!supabase) {
+      console.error("[CustomerPage] Supabase not available")
+      return existingUrl
+    }
+
     let file_url = existingUrl || null
 
     if (removeExistingFile) {
@@ -307,6 +344,11 @@ export default function CustomerPage(props: CustomerPageProps) {
   }
 
   async function addAgreement() {
+    if (!supabase) {
+      console.error("[CustomerPage] Supabase not available")
+      return
+    }
+
     const {
       data: { user },
     } = await supabase.auth.getUser()
@@ -338,6 +380,11 @@ export default function CustomerPage(props: CustomerPageProps) {
   }
 
   async function updateAgreement() {
+    if (!supabase) {
+      console.error("[CustomerPage] Supabase not available")
+      return
+    }
+
     if (!editingAgreement) return
 
     const file_url = await uploadAgreementFile(editingAgreement.file_url)
@@ -377,6 +424,11 @@ export default function CustomerPage(props: CustomerPageProps) {
   // ARCHIVE / UNARCHIVE
   // -----------------------------
   async function archiveAgreement(agreementId: string) {
+    if (!supabase) {
+      console.error("[CustomerPage] Supabase not available")
+      return
+    }
+
     const { error } = await supabase
       .from("agreements")
       .update({ archived: true })
@@ -391,6 +443,11 @@ export default function CustomerPage(props: CustomerPageProps) {
   }
 
   async function unarchiveAgreement(agreementId: string) {
+    if (!supabase) {
+      console.error("[CustomerPage] Supabase not available")
+      return
+    }
+
     const { error } = await supabase
       .from("agreements")
       .update({ archived: false })
@@ -408,6 +465,11 @@ export default function CustomerPage(props: CustomerPageProps) {
   // DELETE CUSTOMER
   // -----------------------------
   async function deleteCustomer() {
+    if (!supabase) {
+      console.error("[CustomerPage] Supabase not available")
+      return
+    }
+
     const confirmed = window.confirm("Er du sikker på at du vil slette denne kunden?")
     if (!confirmed) return
 
@@ -416,6 +478,11 @@ export default function CustomerPage(props: CustomerPageProps) {
   }
 
   async function updateCustomer() {
+    if (!supabase) {
+      console.error("[CustomerPage] Supabase not available")
+      return
+    }
+
     const { error } = await supabase
       .from("customers")
       .update({ name, email, phone })
@@ -436,6 +503,11 @@ export default function CustomerPage(props: CustomerPageProps) {
   // -----------------------------
   async function addNote() {
     if (!newNote.trim()) return
+
+    if (!supabase) {
+      console.error("[CustomerPage] Supabase not available")
+      return
+    }
 
     const {
       data: { user },
@@ -459,6 +531,11 @@ export default function CustomerPage(props: CustomerPageProps) {
   }
 
   async function deleteNote(noteId: string) {
+    if (!supabase) {
+      console.error("[CustomerPage] Supabase not available")
+      return
+    }
+
     await supabase.from("notes").delete().eq("id", noteId)
     fetchNotes()
   }

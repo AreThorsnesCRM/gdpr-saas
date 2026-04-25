@@ -5,9 +5,17 @@ import { createServerClient } from "@supabase/ssr";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import Stripe from "stripe";
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
+const stripe = process.env.STRIPE_SECRET_KEY ? new Stripe(process.env.STRIPE_SECRET_KEY) : null;
 
 export async function GET(request: NextRequest) {
+  if (!stripe) {
+    return NextResponse.redirect(new URL("/login", request.url));
+  }
+
+  if (!supabaseAdmin) {
+    return NextResponse.redirect(new URL("/login", request.url));
+  }
+
   const url = new URL(request.url);
   const code = url.searchParams.get("code");
   const token = url.searchParams.get("token");

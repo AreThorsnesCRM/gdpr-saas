@@ -20,6 +20,11 @@ export default function NewCustomerPage() {
     let cleanup: (() => void) | undefined
 
     async function waitForSession() {
+      if (!supabase) {
+        console.error("[NewCustomerPage] Supabase not available")
+        return
+      }
+
       const { data } = await supabase.auth.getSession()
       if (data?.session) {
         setSessionReady(true)
@@ -60,6 +65,12 @@ export default function NewCustomerPage() {
     }
 
     setLoading(true)
+
+    if (!supabase) {
+      alert("Tjeneste ikke tilgjengelig")
+      setLoading(false)
+      return
+    }
 
     const {
       data: { user },

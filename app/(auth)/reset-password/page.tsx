@@ -15,6 +15,11 @@ export default function ResetPasswordPage() {
     setMessage("")
     setError("")
 
+    if (!supabase) {
+      setError("Tjeneste ikke tilgjengelig")
+      return
+    }
+
     const { error } = await supabase.auth.updateUser({ password })
 
     if (error) {

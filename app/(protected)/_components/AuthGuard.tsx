@@ -12,6 +12,12 @@ export default function AuthGuard() {
     let isMounted = true
 
     async function run() {
+      if (!supabase) {
+        console.error("[AuthGuard] Supabase not available")
+        router.replace("/login")
+        return
+      }
+
       // Bare sjekk at brukeren er logget inn
       // La middleware.ts og backend håndtere subscription-status
       const { data: sessionData } = await supabase.auth.getSession()

@@ -115,6 +115,11 @@ export default function Page() {
   // FETCH FUNCTIONS
   // -----------------------------
   async function fetchStats() {
+    if (!supabase) {
+      console.error("[Dashboard] Supabase not available")
+      return
+    }
+
     const { data: customers, error: customersError } = await supabase
     .from("customers")
     .select("id")
@@ -162,6 +167,11 @@ export default function Page() {
   }
 
   async function fetchRecentActivity() {
+    if (!supabase) {
+      console.error("[Dashboard] Supabase not available")
+      return
+    }
+
     const { data: notes } = await supabase
       .from("notes")
       .select("*")
@@ -172,6 +182,11 @@ export default function Page() {
   }
 
   async function fetchUpcoming() {
+    if (!supabase) {
+      console.error("[Dashboard] Supabase not available")
+      return
+    }
+
     const today = new Date().toISOString().split("T")[0]
 
     const { data } = await supabase
@@ -186,6 +201,11 @@ export default function Page() {
 
   async function fetchCriticalCustomers() {
     if (!user) return
+
+    if (!supabase) {
+      console.error("[Dashboard] Supabase not available")
+      return
+    }
 
     const { data: customers } = await supabase
       .from("customers")
@@ -263,6 +283,11 @@ export default function Page() {
   }
 
   async function fetchGraphData() {
+    if (!supabase) {
+      console.error("[Dashboard] Supabase not available")
+      return
+    }
+
     let data: any[] = []
 
     if (graphType === "agreements") {

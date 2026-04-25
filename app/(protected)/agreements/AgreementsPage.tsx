@@ -21,6 +21,9 @@ export default function AgreementsPage() {
     let session = null
 
     while (!session) {
+      if (!supabase) {
+        throw new Error("Supabase not available")
+      }
       const { data } = await supabase.auth.getSession()
       session = data.session
       if (!session) await new Promise((r) => setTimeout(r, 50))
@@ -32,6 +35,13 @@ export default function AgreementsPage() {
   // Hent avtaler
   useEffect(() => {
     async function fetchAgreements() {
+      if (!supabase) {
+        console.error("[AgreementsPage] Supabase not available")
+        setAgreements([])
+        setLoading(false)
+        return
+      }
+
       setLoading(true)
 
       await waitForSession()

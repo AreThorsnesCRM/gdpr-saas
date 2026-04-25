@@ -42,6 +42,11 @@ export default function CustomersPage() {
     let cleanup: (() => void) | undefined
 
     async function waitForSession() {
+      if (!supabase) {
+        console.error("[CustomersPage] Supabase not available")
+        return
+      }
+
       const { data } = await supabase.auth.getSession()
       if (data?.session) {
         setSessionReady(true)
@@ -73,6 +78,12 @@ export default function CustomersPage() {
   }, [customers, filterNoActive, filterActive, filterNever])
 
   async function loadCustomers() {
+    if (!supabase) {
+      console.error("[CustomersPage] Supabase not available")
+      setCustomers([])
+      return
+    }
+
     const {
       data: { user },
       error: userError,
@@ -205,6 +216,11 @@ export default function CustomersPage() {
   }
 
   async function deleteCustomer(customerId: string) {
+    if (!supabase) {
+      console.error("[CustomersPage] Supabase not available")
+      return
+    }
+
     const confirmed = window.confirm("Er du sikker på at du vil slette denne kunden?")
     if (!confirmed) return
 

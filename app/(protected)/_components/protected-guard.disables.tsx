@@ -12,6 +12,12 @@ export function ProtectedGuard({ children }: { children: React.ReactNode }) {
     let mounted = true
 
     const init = async () => {
+      if (!supabase) {
+        console.error("[ProtectedGuard] Supabase not available")
+        router.replace("/login")
+        return
+      }
+
       // 1. Vent på session
       const { data: sessionData } = await supabase.auth.getSession()
 

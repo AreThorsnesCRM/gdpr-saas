@@ -3,18 +3,20 @@ import Stripe from "stripe";
 import { createClient } from "@supabase/supabase-js";
 import { headers } from "next/headers";
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
+const stripe = process.env.STRIPE_SECRET_KEY ? new Stripe(process.env.STRIPE_SECRET_KEY) : null;
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
+const supabase = process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY
+  ? createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL,
+      process.env.SUPABASE_SERVICE_ROLE_KEY
+    )
+  : null;
 
 // 🔍 Hjelpefunksjon: Finn user_id basert på stripe_customer_id
 async function getUserIdFromCustomer(customerId: string | null) {
   if (!customerId) return null;
 
-  const { data, error } = await supabase
+  const { data, error } = await supabase!
     .from("profiles")
     .select("user_id")
     .eq("stripe_customer_id", customerId)
@@ -25,6 +27,16 @@ async function getUserIdFromCustomer(customerId: string | null) {
 }
 
 export async function POST(req: Request) {
+  if (!stripe) {
+    console.error("❌ Stripe not configured");
+    return new NextResponse("Stripe not configured", { status: 500 });
+  }
+
+  if (!supabase) {
+    console.error("❌ Supabase not configured");
+    return new NextResponse("Supabase not configured", { status: 500 });
+  }
+
   const body = await req.text();
   const headerList = await headers();
   const sig = headerList.get("stripe-signature");

@@ -14,6 +14,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   // Hent profil fra server action
   const fetchProfile = useCallback(async (retries = 3) => {
+    if (!supabase) {
+      console.error("[AuthProvider] Supabase not configured")
+      setProfile(null)
+      return
+    }
+
     for (let i = 0; i < retries; i++) {
       try {
         console.log(`[AuthProvider] Fetching profile via server action (attempt ${i + 1})`)
@@ -38,6 +44,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     let mounted = true
 
     async function initAuth() {
+      if (!supabase) {
+        console.error("[AuthProvider] Supabase not configured, skipping auth init")
+        setLoading(false)
+        return
+      }
+
       try {
         // Prøv å hent session fra cookies
         const { data: sessionData } = await supabase.auth.getSession()
@@ -107,6 +119,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [user, fetchProfile])
 
   const logout = async () => {
+    if (!supabase) {
+      console.error("[AuthProvider] Supabase not configured")
+      router.replace("/login")
+      return
+    }
+
     try {
       await supabase.auth.signOut()
       setUser(null)

@@ -32,6 +32,11 @@ export default function NewAgreementPage() {
     let cleanup: (() => void) | undefined
 
     async function waitForSession() {
+      if (!supabase) {
+        console.error("[NewAgreementPage] Supabase not available")
+        return
+      }
+
       const { data } = await supabase.auth.getSession()
       if (data?.session) {
         setSessionReady(true)
@@ -59,6 +64,11 @@ export default function NewAgreementPage() {
   }, [sessionReady])
 
   async function loadCustomers() {
+    if (!supabase) {
+      console.error("[NewAgreementPage] Supabase not available")
+      return
+    }
+
     const {
       data: { user },
       error: userError,
@@ -86,6 +96,12 @@ export default function NewAgreementPage() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     setLoading(true)
+
+    if (!supabase) {
+      alert("Tjeneste ikke tilgjengelig")
+      setLoading(false)
+      return
+    }
 
     const {
       data: { user },

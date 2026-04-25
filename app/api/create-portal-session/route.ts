@@ -3,9 +3,13 @@ import Stripe from "stripe"
 import { createServerClient } from "@supabase/ssr"
 import { cookies } from "next/headers"
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!)
+const stripe = process.env.STRIPE_SECRET_KEY ? new Stripe(process.env.STRIPE_SECRET_KEY) : null
 
 export async function POST() {
+  if (!stripe) {
+    return NextResponse.json({ error: "Stripe not configured" }, { status: 500 });
+  }
+
   const cookieStore = await cookies()
 
   const supabase = createServerClient(

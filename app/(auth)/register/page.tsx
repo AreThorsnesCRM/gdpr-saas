@@ -19,6 +19,12 @@ export default function RegisterPage() {
     setLoading(true);
     setError("");
 
+    if (!supabase) {
+      setError("Tjeneste ikke tilgjengelig");
+      setLoading(false);
+      return;
+    }
+
     // 1. Opprett bruker i Supabase Auth
     const { data, error: signUpError } = await supabase.auth.signUp({
       email,
