@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation"
 import { useState } from "react"
+import { supabase } from "@/lib/supabaseClient"
 
 export default function LoginForm() {
   const router = useRouter()
@@ -27,6 +28,14 @@ export default function LoginForm() {
     if (!res.ok) {
       setError("Feil e‑post eller passord")
       return
+    }
+
+    const body = await res.json()
+    if (body.session && supabase) {
+      await supabase.auth.setSession({
+        access_token: body.session.access_token,
+        refresh_token: body.session.refresh_token,
+      })
     }
 
     router.push("/dashboard")

@@ -51,12 +51,20 @@ export async function GET(request: NextRequest) {
   // ⭐ 3: Email verification
   if (token && type === "signup") {
     const email = url.searchParams.get("email");
+    const verifyPayload: any = {
+      token,
+      type: "signup",
+    }
+
     if (email) {
-      await supabase.auth.verifyOtp({
-        email,
-        token,
-        type: "signup",
-      });
+      verifyPayload.email = email
+    }
+
+    const { data: verifyData, error: verifyError } = await supabase.auth.verifyOtp(verifyPayload)
+    if (verifyError) {
+      console.error("[callback] verifyOtp error:", verifyError)
+    } else {
+      console.log("[callback] verifyOtp data:", verifyData)
     }
   }
 
@@ -180,14 +188,20 @@ export async function GET(request: NextRequest) {
 
   // ⭐ 11: Sett cookies manuelt (Next.js 16 krever dette)
   if (session) {
+    const secure = process.env.NODE_ENV === "production"
+
     response.cookies.set("sb-access-token", session.access_token, {
       path: "/",
       httpOnly: true,
-    });
+      secure,
+      sameSite: "lax",
+    })
 
     response.cookies.set("sb-refresh-token", session.refresh_token, {
       path: "/",
       httpOnly: true,
+      secure,
+      sameSite: "lax",
     });
   }
 

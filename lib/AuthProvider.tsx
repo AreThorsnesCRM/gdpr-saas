@@ -126,13 +126,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
 
     try {
+      await fetch("/api/logout", { method: "POST" })
       await supabase.auth.signOut()
       setUser(null)
       setProfile(null)
       router.replace("/login")
     } catch (error) {
       console.error("[AuthProvider] Logout error:", error)
-      // Fallback
+      setUser(null)
+      setProfile(null)
       router.replace("/login")
     }
   }

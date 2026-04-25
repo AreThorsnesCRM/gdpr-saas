@@ -43,21 +43,23 @@ export async function POST(req: Request) {
     data: { session },
   } = await supabase.auth.getSession()
 
-  const response = NextResponse.json({ success: true })
+  const response = NextResponse.json({ success: true, session })
 
   // 4. Sett cookies manuelt på response (sikrer at de blir sendt til browser)
   if (session) {
+    const secure = process.env.NODE_ENV === "production"
+
     response.cookies.set("sb-access-token", session.access_token, {
       path: "/",
       httpOnly: true,
-      secure: true,
+      secure,
       sameSite: "lax",
     })
 
     response.cookies.set("sb-refresh-token", session.refresh_token, {
       path: "/",
       httpOnly: true,
-      secure: true,
+      secure,
       sameSite: "lax",
     })
   }
