@@ -121,7 +121,15 @@ export default function AgreementsPage() {
 
   return (
     <div className="p-8 space-y-6">
-      <h1 className="text-2xl font-bold">Avtaler</h1>
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-bold">Avtaler</h1>
+        <Link
+          href="/agreements/new"
+          className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+        >
+          Ny avtale
+        </Link>
+      </div>
 
       <div className="flex flex-wrap gap-3 items-center bg-white p-4 rounded shadow">
         <span className="font-medium">Vis:</span>

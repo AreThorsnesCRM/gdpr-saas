@@ -31,6 +31,8 @@ export default function RegisterPage() {
       },
     });
 
+    console.log("[register] SignUp response:", data, "Error:", signUpError);
+
     if (signUpError) {
       setError(signUpError.message);
       setLoading(false);

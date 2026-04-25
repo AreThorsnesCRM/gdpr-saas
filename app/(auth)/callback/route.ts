@@ -56,14 +56,18 @@ export async function GET(request: NextRequest) {
   }
 
   // ⭐ 5: Hent metadata fra auth.users
-  const { data: authUser } = await supabaseAdmin
+  const { data: authUser, error: authError } = await supabaseAdmin
     .from("auth.users")
     .select("raw_user_meta_data")
     .eq("id", user.id)
     .single();
 
+  console.log("[callback] Auth user data:", authUser, "Error:", authError);
+
   const company_name = authUser?.raw_user_meta_data?.company_name ?? null;
   const full_name = authUser?.raw_user_meta_data?.full_name ?? null;
+
+  console.log("[callback] Extracted metadata - company_name:", company_name, "full_name:", full_name);
 
   // ⭐ 6: Sjekk om profil finnes
   const { data: existingProfile } = await supabase

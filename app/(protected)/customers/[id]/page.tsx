@@ -8,6 +8,8 @@ import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { supabase } from "@/lib/supabaseClient"
 import AgreementSlideOver from "@/app/components/AgreementSlideOver"
+import { generateAgreementPDF } from "@/lib/pdfGenerator"
+import { useAuth } from "@/lib/AuthContext"
 
 interface Customer {
   id: string
@@ -43,6 +45,7 @@ export default function CustomerPage(props: CustomerPageProps) {
   const router = useRouter()
   const params = use(props.params)
   const id = params.id
+  const { profile } = useAuth()
 
   const searchParams =
     typeof window !== "undefined"
@@ -219,16 +222,8 @@ export default function CustomerPage(props: CustomerPageProps) {
     openSlideOver()
   }
 
-  function handleEditAgreement(a: Agreement) {
-    setEditingAgreement(a)
-    setNewTitle(a.title)
-    setNewStart(a.start_date)
-    setNewEnd(a.end_date)
-    setNewSigned(a.signed)
-    setNewContactName(a.contact_name || "")
-    setNewContactEmail(a.contact_email || "")
-    setNewContactPhone(a.contact_phone || "")
-    openSlideOver()
+  function handleGeneratePDF(agreement: Agreement) {
+    generateAgreementPDF(agreement, customer, profile)
   }
 
   function getAgreementStatus(a: Agreement) {
@@ -621,6 +616,12 @@ export default function CustomerPage(props: CustomerPageProps) {
 
                     <div className="flex gap-3">
                       <button
+                        onClick={() => handleGeneratePDF(a)}
+                        className="text-green-600"
+                      >
+                        PDF
+                      </button>
+                      <button
                         onClick={() => handleEditAgreement(a)}
                         className="text-blue-600"
                       >
@@ -677,12 +678,20 @@ export default function CustomerPage(props: CustomerPageProps) {
                       )}
                     </div>
 
-                    <button
-                      onClick={() => unarchiveAgreement(a.id)}
-                      className="text-green-600"
-                    >
-                      Gjenopprett
-                    </button>
+                    <div className="flex gap-3">
+                      <button
+                        onClick={() => handleGeneratePDF(a)}
+                        className="text-green-600"
+                      >
+                        PDF
+                      </button>
+                      <button
+                        onClick={() => unarchiveAgreement(a.id)}
+                        className="text-green-600"
+                      >
+                        Gjenopprett
+                      </button>
+                    </div>
                   </li>
                 )
               })}
