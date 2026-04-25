@@ -21,6 +21,12 @@ export async function GET(request: NextRequest) {
   const token = url.searchParams.get("token");
   const type = url.searchParams.get("type");
 
+  // ⭐ 1: Hent metadata fra query parameters (fra registrering)
+  const queryCompanyName = url.searchParams.get("company_name");
+  const queryFullName = url.searchParams.get("full_name");
+
+  console.log("[callback] Query params - company_name:", queryCompanyName, "full_name:", queryFullName);
+
   // ⭐ 1: Opprett supabase-klient FØR vi lager response
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -63,21 +69,29 @@ export async function GET(request: NextRequest) {
     return NextResponse.redirect(new URL("/login", request.url));
   }
 
-  // ⭐ 5: Hent metadata fra auth.users
-  const { data: authUser, error: authError } = await supabaseAdmin
-    .from("auth.users")
-    .select("raw_user_meta_data")
-    .eq("id", user.id)
-    .single();
+  console.log("[callback] User object:", user);
+  console.log("[callback] User metadata:", user.user_metadata);
 
-  console.log("[callback] Auth user data:", authUser, "Error:", authError);
+  // ⭐ 5: Prøv å hente metadata fra bruker-objektet direkte
+  let company_name = user.user_metadata?.company_name ?? null;
+  let full_name = user.user_metadata?.full_name ?? null;
 
-  const company_name = authUser?.raw_user_meta_data?.company_name ?? null;
-  const full_name = authUser?.raw_user_meta_data?.full_name ?? null;
+  console.log("[callback] Metadata from user object - company_name:", company_name, "full_name:", full_name);
 
-  console.log("[callback] Extracted metadata - company_name:", company_name, "full_name:", full_name);
+  // ⭐ 6: Hvis ikke funnet, prøv query params (fra registrering)
+  if (!company_name && queryCompanyName) {
+    company_name = queryCompanyName;
+    console.log("[callback] Using company_name from query params:", company_name);
+  }
 
-  // ⭐ 6: Sjekk om profil finnes
+  if (!full_name && queryFullName) {
+    full_name = queryFullName;
+    console.log("[callback] Using full_name from query params:", full_name);
+  }
+
+  console.log("[callback] Final metadata - company_name:", company_name, "full_name:", full_name);
+
+  // ⭐ 7: Sjekk om profil finnes
   const { data: existingProfile } = await supabase
     .from("profiles")
     .select("*")
@@ -86,8 +100,32 @@ export async function GET(request: NextRequest) {
 
   let profile = existingProfile;
 
-  // ⭐ 7: Opprett profil + Stripe-kunde hvis ny bruker
+  // ⭐ 8: Opprett profil + Stripe-kunde hvis ny bruker
   if (!existingProfile) {
+    // ⭐ 8.1: Sørg for at metadata er tilgjengelig
+    if (!company_name || !full_name) {
+      console.log("[callback] Missing metadata, trying to update user metadata first...");
+
+      // Prøv å oppdatere brukerens metadata først
+      const { error: updateError } = await supabase.auth.updateUser({
+        data: {
+          full_name: full_name || user.user_metadata?.full_name,
+          company_name: company_name || user.user_metadata?.company_name,
+        }
+      });
+
+      if (updateError) {
+        console.error("[callback] Failed to update user metadata:", updateError);
+      } else {
+        console.log("[callback] Updated user metadata successfully");
+        // Hent metadata på nytt
+        const { data: { user: updatedUser } } = await supabase.auth.getUser();
+        company_name = updatedUser?.user_metadata?.company_name ?? company_name;
+        full_name = updatedUser?.user_metadata?.full_name ?? full_name;
+        console.log("[callback] Updated metadata:", { company_name, full_name });
+      }
+    }
+
     const now = new Date();
     const trialEnd = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
 
@@ -100,8 +138,8 @@ export async function GET(request: NextRequest) {
       .from("profiles")
       .insert({
         user_id: user.id,
-        company_name,
-        full_name,
+        company_name: company_name || "Firma mangler",
+        full_name: full_name || user.email?.split('@')[0] || "Bruker",
         stripe_customer_id: customer.id,
         subscription_status: "trialing",
         trial_start: now.toISOString(),
@@ -127,6 +165,15 @@ export async function GET(request: NextRequest) {
   const {
     data: { session },
   } = await supabase.auth.getSession();
+
+  console.log("[callback] Session metadata:", session?.user?.user_metadata);
+
+  // ⭐ 10: Prøv å hente metadata fra session også
+  if (!company_name && session?.user?.user_metadata) {
+    company_name = session.user.user_metadata.company_name ?? null;
+    full_name = session.user.user_metadata.full_name ?? null;
+    console.log("[callback] Got metadata from session:", { company_name, full_name });
+  }
 
   // ⭐ 10: Lag redirect-response ETTER at session er klar
   const response = NextResponse.redirect(new URL("/dashboard", request.url));

@@ -34,9 +34,11 @@ export default function RegisterPage() {
           full_name: name,
           company_name: company,
         },
+        emailRedirectTo: `${window.location.origin}/callback?full_name=${encodeURIComponent(name)}&company_name=${encodeURIComponent(company)}`,
       },
     });
 
+    console.log("[register] SignUp request data:", { email, full_name: name, company_name: company });
     console.log("[register] SignUp response:", data, "Error:", signUpError);
 
     if (signUpError) {
