@@ -4,7 +4,6 @@ import React, { useEffect, useState, useCallback } from "react"
 import { useRouter } from "next/navigation"
 import { supabase } from "@/lib/supabaseClient"
 import { AuthContext, type AuthContextType, type Profile } from "./AuthContext"
-import { getProfile } from "./actions"
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const router = useRouter()
@@ -12,18 +11,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [profile, setProfile] = useState<Profile | null>(null)
   const [loading, setLoading] = useState(true)
 
-  // Hent profil fra klient
+  // Hent profil fra klient når bruker er til stede
   const fetchProfile = useCallback(async (retries = 3) => {
     if (!supabase || !user) {
       console.error("[AuthProvider] Supabase not configured or no user")
-      setProfile(null)
-      return
-    }
-
-    // Check if session is ready
-    const { data: sessionData } = await supabase.auth.getSession()
-    if (!sessionData?.session) {
-      console.error("[AuthProvider] No session available")
       setProfile(null)
       return
     }
@@ -60,6 +51,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }, [user])
 
+  useEffect(() => {
+    if (!user) return
+
+    fetchProfile()
+  }, [user, fetchProfile])
+
   // Initialisér session på mount
   useEffect(() => {
     let cleanup: (() => void) | undefined
@@ -93,12 +90,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         if (!mounted) return
 
         if (sessionData?.session?.user) {
-          console.log("[AuthProvider] Session found from cookies, fetching profile...")
+          console.log("[AuthProvider] Session found from cookies")
           setUser({
             id: sessionData.session.user.id,
             email: sessionData.session.user.email,
           })
-          await fetchProfile()
           setLoading(false)
           return
         }
@@ -108,7 +104,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         // Hvis ingen session, sett opp listener
         const {
           data: { subscription },
-        } = supabase.auth.onAuthStateChange(async (event, session) => {
+        } = supabase.auth.onAuthStateChange((event, session) => {
           console.log("[AuthProvider] Auth event:", event, "- Session:", !!session?.user)
 
           if (!mounted) return
@@ -118,7 +114,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
               id: session.user.id,
               email: session.user.email,
             })
-            await fetchProfile()
           } else {
             setUser(null)
             setProfile(null)
