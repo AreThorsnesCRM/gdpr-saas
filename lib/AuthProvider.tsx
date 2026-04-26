@@ -12,31 +12,53 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [profile, setProfile] = useState<Profile | null>(null)
   const [loading, setLoading] = useState(true)
 
-  // Hent profil fra server action
+  // Hent profil fra klient
   const fetchProfile = useCallback(async (retries = 3) => {
-    if (!supabase) {
-      console.error("[AuthProvider] Supabase not configured")
+    if (!supabase || !user) {
+      console.error("[AuthProvider] Supabase not configured or no user")
+      setProfile(null)
+      return
+    }
+
+    // Check if session is ready
+    const { data: sessionData } = await supabase.auth.getSession()
+    if (!sessionData?.session) {
+      console.error("[AuthProvider] No session available")
       setProfile(null)
       return
     }
 
     for (let i = 0; i < retries; i++) {
       try {
-        console.log(`[AuthProvider] Fetching profile via server action (attempt ${i + 1})`)
-        const profile = await getProfile()
-        console.log("[AuthProvider] Profile fetched:", profile)
-        setProfile(profile)
-        return
+        console.log(`[AuthProvider] Fetching profile via client (attempt ${i + 1}) for user ${user.id}`)
+        const { data: profile, error } = await supabase
+          .from("profiles")
+          .select("*")
+          .eq("user_id", user.id)
+          .single()
+
+        if (error) {
+          console.error("Error fetching profile:", error)
+          if (i === retries - 1) {
+            setProfile(null)
+          } else {
+            await new Promise(resolve => setTimeout(resolve, 1000 * (i + 1)))
+          }
+        } else {
+          console.log("[AuthProvider] Profile fetched:", profile)
+          setProfile(profile)
+          return
+        }
       } catch (error) {
         console.error(`[AuthProvider] Exception in fetchProfile (attempt ${i + 1}):`, error)
         if (i === retries - 1) {
           setProfile(null)
         } else {
-          await new Promise(resolve => setTimeout(resolve, 1000 * (i + 1))) // Exponential backoff
+          await new Promise(resolve => setTimeout(resolve, 1000 * (i + 1)))
         }
       }
     }
-  }, [])
+  }, [user])
 
   // Initialisér session på mount
   useEffect(() => {
@@ -48,6 +70,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         console.error("[AuthProvider] Supabase not configured, skipping auth init")
         setLoading(false)
         return
+      }
+
+      // Check for temporary session cookie from callback
+      const tempSessionCookie = document.cookie.split('; ').find(row => row.startsWith('temp_session='))
+      if (tempSessionCookie) {
+        const tempSessionValue = tempSessionCookie.split('=')[1]
+        try {
+          const sessionData = JSON.parse(decodeURIComponent(tempSessionValue))
+          await supabase.auth.setSession(sessionData)
+          // Delete the cookie
+          document.cookie = 'temp_session=; path=/; maxAge=0'
+        } catch (error) {
+          console.error("[AuthProvider] Failed to parse temp session:", error)
+        }
       }
 
       try {

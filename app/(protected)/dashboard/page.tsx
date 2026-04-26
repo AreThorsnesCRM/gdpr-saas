@@ -75,6 +75,38 @@ export default function Page() {
     datasets: [],
   })
 
+  // ⭐ Session hydrering
+  const [sessionReady, setSessionReady] = useState(false)
+
+  useEffect(() => {
+    let cleanup: (() => void) | undefined
+
+    async function waitForSession() {
+      if (!supabase) {
+        console.error("[Dashboard] Supabase not available")
+        return
+      }
+
+      const { data } = await supabase.auth.getSession()
+      if (data?.session) {
+        setSessionReady(true)
+        return
+      }
+
+      const {
+        data: { subscription },
+      } = supabase.auth.onAuthStateChange((_event, session) => {
+        if (session) setSessionReady(true)
+      })
+
+      cleanup = () => subscription.unsubscribe()
+    }
+
+    waitForSession()
+
+    return () => cleanup?.()
+  }, [])
+
   function daysLeft(dateString: string | null) {
     if (!dateString) return null
     const end = new Date(dateString)
@@ -96,20 +128,20 @@ export default function Page() {
     })
   }, [profile])
 
-  // Fetch dashboard data when user is ready
+  // Fetch dashboard data when user and session are ready
   useEffect(() => {
-    if (!user) return
+    if (!user || !sessionReady) return
 
     fetchStats()
     fetchRecentActivity()
     fetchUpcoming()
     fetchCriticalCustomers()
-  }, [user])
+  }, [user, sessionReady])
 
   useEffect(() => {
-    if (!user) return
+    if (!user || !sessionReady) return
     fetchGraphData()
-  }, [graphType, user])
+  }, [graphType, user, sessionReady])
 
   // -----------------------------
   // FETCH FUNCTIONS

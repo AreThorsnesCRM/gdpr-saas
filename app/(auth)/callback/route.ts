@@ -183,10 +183,10 @@ export async function GET(request: NextRequest) {
     console.log("[callback] Got metadata from session:", { company_name, full_name });
   }
 
-  // ⭐ 10: Lag redirect-response ETTER at session er klar
+  // ⭐ 11: Lag redirect-response ETTER at session er klar
   const response = NextResponse.redirect(new URL("/dashboard", request.url));
 
-  // ⭐ 11: Sett cookies manuelt (Next.js 16 krever dette)
+  // ⭐ 12: Sett cookies manuelt (Next.js 16 krever dette)
   if (session) {
     const secure = process.env.NODE_ENV === "production"
 
@@ -202,6 +202,18 @@ export async function GET(request: NextRequest) {
       httpOnly: true,
       secure,
       sameSite: "lax",
+    });
+
+    // Temporary cookie for client to set session
+    response.cookies.set("temp_session", JSON.stringify({
+      access_token: session.access_token,
+      refresh_token: session.refresh_token,
+    }), {
+      path: "/",
+      httpOnly: false,
+      secure,
+      sameSite: "lax",
+      maxAge: 60, // 1 minute
     });
   }
 
