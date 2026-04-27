@@ -51,7 +51,7 @@ type ChartDataState = {
 }
 
 export default function Page() {
-  const { user, profile, loading: authLoading } = useAuth()
+  const { user, account, loading: authLoading } = useAuth()
   const [subscription, setSubscription] = useState<{ status: string | null; trial_end: string | null } | null>(null)
 
   const [stats, setStats] = useState<StatsState>({
@@ -75,38 +75,6 @@ export default function Page() {
     datasets: [],
   })
 
-  // ⭐ Session hydrering
-  const [sessionReady, setSessionReady] = useState(false)
-
-  useEffect(() => {
-    let cleanup: (() => void) | undefined
-
-    async function waitForSession() {
-      if (!supabase) {
-        console.error("[Dashboard] Supabase not available")
-        return
-      }
-
-      const { data } = await supabase.auth.getSession()
-      if (data?.session) {
-        setSessionReady(true)
-        return
-      }
-
-      const {
-        data: { subscription },
-      } = supabase.auth.onAuthStateChange((_event, session) => {
-        if (session) setSessionReady(true)
-      })
-
-      cleanup = () => subscription.unsubscribe()
-    }
-
-    waitForSession()
-
-    return () => cleanup?.()
-  }, [])
-
   function daysLeft(dateString: string | null) {
     if (!dateString) return null
     const end = new Date(dateString)
@@ -115,33 +83,22 @@ export default function Page() {
     return Math.ceil(diff / (1000 * 60 * 60 * 24))
   }
 
-  // Update subscription when profile is ready
   useEffect(() => {
-    if (!profile) {
-      setSubscription(null)
-      return
-    }
+    setSubscription(account ? { status: account.subscription_status, trial_end: account.trial_end } : null)
+  }, [account])
 
-    setSubscription({
-      status: profile.subscription_status,
-      trial_end: profile.trial_end,
-    })
-  }, [profile])
-
-  // Fetch dashboard data when user and session are ready
   useEffect(() => {
-    if (!user || !sessionReady) return
-
+    if (!user) return
     fetchStats()
     fetchRecentActivity()
     fetchUpcoming()
     fetchCriticalCustomers()
-  }, [user, sessionReady])
+  }, [user])
 
   useEffect(() => {
-    if (!user || !sessionReady) return
+    if (!user) return
     fetchGraphData()
-  }, [graphType, user, sessionReady])
+  }, [graphType, user])
 
   // -----------------------------
   // FETCH FUNCTIONS
@@ -392,7 +349,7 @@ export default function Page() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-gray-700 font-medium">
-                {profile?.company_name}
+                {account?.name}
               </p>
 
               <h2 className="text-2xl font-bold mt-1">

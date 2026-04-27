@@ -3,47 +3,56 @@
 import React, { useEffect, useState, useCallback } from "react"
 import { useRouter } from "next/navigation"
 import { supabase } from "@/lib/supabaseClient"
-import { AuthContext, type AuthContextType, type Profile } from "./AuthContext"
+import { AuthContext, type AuthContextType, type Profile, type Account } from "./AuthContext"
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const router = useRouter()
   const [user, setUser] = useState<{ id: string; email?: string } | null>(null)
   const [profile, setProfile] = useState<Profile | null>(null)
+  const [account, setAccount] = useState<Account | null>(null)
   const [loading, setLoading] = useState(true)
 
-  // Hent profil fra klient når bruker er til stede
   const fetchProfile = useCallback(async (retries = 3) => {
     if (!supabase || !user) {
-      console.error("[AuthProvider] Supabase not configured or no user")
       setProfile(null)
+      setAccount(null)
       return
     }
 
     for (let i = 0; i < retries; i++) {
       try {
-        console.log(`[AuthProvider] Fetching profile via client (attempt ${i + 1}) for user ${user.id}`)
-        const { data: profile, error } = await supabase
+        const { data: profileData, error } = await supabase
           .from("profiles")
           .select("*")
           .eq("user_id", user.id)
           .single()
 
         if (error) {
-          console.error("Error fetching profile:", error)
           if (i === retries - 1) {
             setProfile(null)
+            setAccount(null)
           } else {
             await new Promise(resolve => setTimeout(resolve, 1000 * (i + 1)))
           }
         } else {
-          console.log("[AuthProvider] Profile fetched:", profile)
-          setProfile(profile)
+          setProfile(profileData)
+
+          if (profileData?.account_id) {
+            const { data: accountData } = await supabase
+              .from("accounts")
+              .select("*")
+              .eq("id", profileData.account_id)
+              .single()
+            setAccount(accountData ?? null)
+          } else {
+            setAccount(null)
+          }
           return
         }
       } catch (error) {
-        console.error(`[AuthProvider] Exception in fetchProfile (attempt ${i + 1}):`, error)
         if (i === retries - 1) {
           setProfile(null)
+          setAccount(null)
         } else {
           await new Promise(resolve => setTimeout(resolve, 1000 * (i + 1)))
         }
@@ -53,7 +62,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     if (!user) return
-
     fetchProfile()
   }, [user, fetchProfile])
 
@@ -64,7 +72,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     async function initAuth() {
       if (!supabase) {
-        console.error("[AuthProvider] Supabase not configured, skipping auth init")
         setLoading(false)
         return
       }
@@ -76,7 +83,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         try {
           const sessionData = JSON.parse(decodeURIComponent(tempSessionValue))
           await supabase.auth.setSession(sessionData)
-          // Delete the cookie
           document.cookie = 'temp_session=; path=/; maxAge=0'
         } catch (error) {
           console.error("[AuthProvider] Failed to parse temp session:", error)
@@ -96,6 +102,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         } else {
           setUser(null)
           setProfile(null)
+          setAccount(null)
         }
         setLoading(false)
       })
@@ -103,11 +110,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       cleanup = () => subscription.unsubscribe()
 
       try {
-        // Hent initiell session fra cookies for rask hydration
         const { data: sessionData } = await supabase.auth.getSession()
-
         if (!mounted) return
-
         if (sessionData?.session?.user) {
           setUser({
             id: sessionData.session.user.id,
@@ -129,36 +133,32 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }, [])
 
-  // Listen for page visibility changes (e.g., returning from external site)
+  // Oppdater profil når siden blir synlig igjen
   useEffect(() => {
     const handleVisibilityChange = () => {
-      if (!document.hidden && user) {
-        console.log("[AuthProvider] Page became visible, refetching profile")
-        fetchProfile()
-      }
+      if (!document.hidden && user) fetchProfile()
     }
-
     document.addEventListener("visibilitychange", handleVisibilityChange)
     return () => document.removeEventListener("visibilitychange", handleVisibilityChange)
   }, [user, fetchProfile])
 
   const logout = async () => {
     if (!supabase) {
-      console.error("[AuthProvider] Supabase not configured")
       router.replace("/login")
       return
     }
-
     try {
       await fetch("/api/logout", { method: "POST" })
       await supabase.auth.signOut()
       setUser(null)
       setProfile(null)
+      setAccount(null)
       router.replace("/login")
     } catch (error) {
       console.error("[AuthProvider] Logout error:", error)
       setUser(null)
       setProfile(null)
+      setAccount(null)
       router.replace("/login")
     }
   }
@@ -166,6 +166,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const value: AuthContextType = {
     user,
     profile,
+    account,
     loading,
     logout,
   }

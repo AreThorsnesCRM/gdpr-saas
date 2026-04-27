@@ -14,7 +14,7 @@ import { useAuth } from "@/lib/AuthContext"
 
 export default function Sidebar() {
   const pathname = usePathname()
-  const { profile, loading } = useAuth()
+  const { profile, account, loading } = useAuth()
 
   const navItems = [
     { href: "/dashboard", label: "Dashboard", icon: <HomeIcon className="h-5 w-5" /> },
@@ -42,10 +42,9 @@ export default function Sidebar() {
     loading: "Loading...",
   }
 
-  const status = loading ? "loading" : profile?.subscription_status ?? "unknown"
+  const status = loading ? "loading" : account?.subscription_status ?? "unknown"
   const fullName = profile?.full_name ?? "Bruker"
-  const email = profile?.user_id ? "" : "" // Will be populated via context if needed
-  const companyName = profile?.company_name ?? ""
+  const companyName = account?.name ?? ""
 
   return (
     <aside className="w-64 h-screen bg-white border-r border-gray-200 p-6 flex flex-col fixed left-0 top-0">
@@ -61,9 +60,6 @@ export default function Sidebar() {
           {fullName}
         </div>
 
-        <div className="text-sm text-gray-500 truncate">
-          {email}
-        </div>
 
         <span
           className={`inline-block mt-2 rounded px-2 py-0.5 text-xs font-medium ${badgeStyles[status]}`}
