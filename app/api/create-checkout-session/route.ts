@@ -39,25 +39,25 @@ export async function POST() {
       );
     }
 
-    // 2. Hent profil
+    // 2. Hent account via profil
     const { data: profile } = await supabase
       .from("profiles")
-      .select("*")
+      .select("account_id")
       .eq("user_id", user.id)
       .single();
 
-    if (!profile) {
-      return NextResponse.json(
-        { error: "Profile not found" },
-        { status: 404 }
-      );
+    if (!profile?.account_id) {
+      return NextResponse.json({ error: "Profile or account not found" }, { status: 404 });
     }
 
-    if (!profile.stripe_customer_id) {
-      return NextResponse.json(
-        { error: "Missing stripe_customer_id" },
-        { status: 400 }
-      );
+    const { data: account } = await supabase
+      .from("accounts")
+      .select("stripe_customer_id")
+      .eq("id", profile.account_id)
+      .single();
+
+    if (!account?.stripe_customer_id) {
+      return NextResponse.json({ error: "Missing stripe_customer_id" }, { status: 400 });
     }
 
     // 3. Base URL
@@ -66,7 +66,7 @@ export async function POST() {
     // 4. Lag checkout-session
     const session = await stripe.checkout.sessions.create({
       mode: "subscription",
-      customer: profile.stripe_customer_id,
+      customer: account.stripe_customer_id,
       line_items: [
         {
           price: process.env.STRIPE_PRICE_ID!,
