@@ -83,45 +83,38 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
       }
 
+      // Sett alltid opp lytteren — fanger SIGNED_IN, SIGNED_OUT, TOKEN_REFRESHED
+      const {
+        data: { subscription },
+      } = supabase.auth.onAuthStateChange((event, session) => {
+        if (!mounted) return
+        if (session?.user) {
+          setUser({
+            id: session.user.id,
+            email: session.user.email,
+          })
+        } else {
+          setUser(null)
+          setProfile(null)
+        }
+        setLoading(false)
+      })
+
+      cleanup = () => subscription.unsubscribe()
+
       try {
-        // Prøv å hent session fra cookies
+        // Hent initiell session fra cookies for rask hydration
         const { data: sessionData } = await supabase.auth.getSession()
 
         if (!mounted) return
 
         if (sessionData?.session?.user) {
-          console.log("[AuthProvider] Session found from cookies")
           setUser({
             id: sessionData.session.user.id,
             email: sessionData.session.user.email,
           })
-          setLoading(false)
-          return
         }
-
-        console.log("[AuthProvider] No session in cookies, waiting for auth state change...")
-
-        // Hvis ingen session, sett opp listener
-        const {
-          data: { subscription },
-        } = supabase.auth.onAuthStateChange((event, session) => {
-          console.log("[AuthProvider] Auth event:", event, "- Session:", !!session?.user)
-
-          if (!mounted) return
-
-          if (session?.user) {
-            setUser({
-              id: session.user.id,
-              email: session.user.email,
-            })
-          } else {
-            setUser(null)
-            setProfile(null)
-          }
-          setLoading(false)
-        })
-
-        cleanup = () => subscription.unsubscribe()
+        setLoading(false)
       } catch (error) {
         console.error("[AuthProvider] Error during init:", error)
         if (mounted) setLoading(false)
