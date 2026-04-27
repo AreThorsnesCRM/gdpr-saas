@@ -134,7 +134,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       mounted = false
       cleanup?.()
     }
-  }, [fetchProfile])
+  }, [])
 
   // Listen for page visibility changes (e.g., returning from external site)
   useEffect(() => {
