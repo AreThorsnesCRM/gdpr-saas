@@ -20,7 +20,6 @@ export async function GET(request: NextRequest) {
 
   const queryCompanyName = url.searchParams.get("company_name");
   const queryFullName = url.searchParams.get("full_name");
-  const inviteAccountId = url.searchParams.get("account_id"); // satt ved bruker-invitasjon
 
   // Opprett supabase-klient for auth-operasjoner
   const supabase = createServerClient(
@@ -41,9 +40,9 @@ export async function GET(request: NextRequest) {
     await supabase.auth.exchangeCodeForSession(code);
   }
 
-  if (token && type === "signup") {
+  if (token && (type === "signup" || type === "invite")) {
     const email = url.searchParams.get("email");
-    const verifyPayload: any = { token, type: "signup" };
+    const verifyPayload: any = { token, type: type === "invite" ? "invite" : "signup" };
     if (email) verifyPayload.email = email;
     const { error } = await supabase.auth.verifyOtp(verifyPayload);
     if (error) console.error("[callback] verifyOtp error:", error);
@@ -74,16 +73,26 @@ export async function GET(request: NextRequest) {
 
   let accountId = existingAccountUser?.account_id ?? null;
 
-  // Invitert bruker — koble til eksisterende firma
+  // Invitert bruker — slå opp pending_invite via e-post og koble til firmakonto
   let isInvitedUser = false;
-  if (!accountId && inviteAccountId) {
-    await supabaseAdmin.from("account_users").insert({
-      account_id: inviteAccountId,
-      user_id: user.id,
-      role: "member",
-    });
-    accountId = inviteAccountId;
-    isInvitedUser = true;
+  if (!accountId && user.email) {
+    const { data: pendingInvite } = await supabaseAdmin
+      .from("pending_invites")
+      .select("account_id")
+      .eq("email", user.email)
+      .maybeSingle();
+
+    if (pendingInvite) {
+      await supabaseAdmin.from("account_users").insert({
+        account_id: pendingInvite.account_id,
+        user_id: user.id,
+        role: "member",
+      });
+      await supabaseAdmin.from("pending_invites").delete().eq("email", user.email);
+      accountId = pendingInvite.account_id;
+      isInvitedUser = true;
+      console.log("[callback] Invited user linked to account:", accountId);
+    }
   }
 
   if (!accountId) {

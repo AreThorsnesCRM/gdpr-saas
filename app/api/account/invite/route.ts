@@ -49,13 +49,21 @@ export async function POST(req: Request) {
     }
   }
 
+  // Lagre invitasjonen slik at callback kan slå opp account_id via e-post
+  // (Supabase-invitasjonslenker bevarer ikke egne query params pålitelig)
+  await supabaseAdmin
+    .from("pending_invites")
+    .upsert({ email, account_id: accountUser.account_id }, { onConflict: "email" })
+
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL!
-  const redirectTo = `${baseUrl}/callback?account_id=${accountUser.account_id}`
+  const redirectTo = `${baseUrl}/callback`
 
   const { error } = await supabaseAdmin.auth.admin.inviteUserByEmail(email, { redirectTo })
 
   if (error) {
     console.error("[invite] Error:", error)
+    // Rull tilbake pending_invite hvis invitasjonen feilet
+    await supabaseAdmin.from("pending_invites").delete().eq("email", email)
     return NextResponse.json({ error: error.message }, { status: 500 })
   }
 
