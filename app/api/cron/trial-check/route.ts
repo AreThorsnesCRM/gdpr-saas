@@ -39,7 +39,7 @@ export async function GET(req: Request) {
     const diffMs = trialEnd.getTime() - now.getTime()
     const diffDays = Math.ceil(diffMs / (1000 * 60 * 60 * 24))
 
-    if (diffDays !== 3 && diffDays !== 1) continue
+    if (diffDays !== 14 && diffDays !== 7) continue
 
     // Hent admin-bruker for denne kontoen
     const { data: adminUser } = await supabaseAdmin
