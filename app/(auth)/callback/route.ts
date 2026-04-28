@@ -80,6 +80,7 @@ export async function GET(request: NextRequest) {
   let accountId = existingAccountUser?.account_id ?? null;
 
   // Invitert bruker — koble til eksisterende firma
+  let isInvitedUser = false;
   if (!accountId && inviteAccountId) {
     await supabaseAdmin.from("account_users").insert({
       account_id: inviteAccountId,
@@ -87,6 +88,7 @@ export async function GET(request: NextRequest) {
       role: "member",
     });
     accountId = inviteAccountId;
+    isInvitedUser = true;
   }
 
   if (!accountId) {
@@ -165,7 +167,8 @@ export async function GET(request: NextRequest) {
   // Hent session for cookies
   const { data: { session } } = await supabase.auth.getSession();
 
-  const response = NextResponse.redirect(new URL("/dashboard", request.url));
+  const redirectPath = isInvitedUser ? "/set-password" : "/dashboard";
+  const response = NextResponse.redirect(new URL(redirectPath, request.url));
 
   if (session) {
     const secure = process.env.NODE_ENV === "production";
