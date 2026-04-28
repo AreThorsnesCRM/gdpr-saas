@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import Stripe from "stripe";
 import { createClient } from "@supabase/supabase-js";
 import { headers } from "next/headers";
+import { sendPaymentFailedEmail } from "@/lib/email";
 
 const stripe = process.env.STRIPE_SECRET_KEY ? new Stripe(process.env.STRIPE_SECRET_KEY) : null;
 
@@ -117,6 +118,45 @@ export async function POST(req: Request) {
         .eq("id", accountId);
 
       console.log("✅ customer.subscription.deleted — account updated:", accountId);
+      break;
+    }
+
+    case "invoice.payment_failed": {
+      const invoice = event.data.object as Stripe.Invoice;
+      const customerId = invoice.customer as string;
+
+      const accountId = await getAccountIdFromCustomer(customerId);
+      if (!accountId) break;
+
+      const { data: account } = await supabase
+        .from("accounts")
+        .select("notify_payment_failed")
+        .eq("id", accountId)
+        .single();
+
+      if (!account?.notify_payment_failed) break;
+
+      const { data: adminUser } = await supabase
+        .from("account_users")
+        .select("user_id")
+        .eq("account_id", accountId)
+        .eq("role", "admin")
+        .single();
+
+      if (!adminUser) break;
+
+      const { data: authUser } = await supabase.auth.admin.getUserById(adminUser.user_id);
+      if (!authUser?.user?.email) break;
+
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("full_name")
+        .eq("user_id", adminUser.user_id)
+        .single();
+
+      const name = profile?.full_name ?? authUser.user.email.split("@")[0];
+      await sendPaymentFailedEmail(authUser.user.email, name);
+      console.log("✅ invoice.payment_failed — email sent to:", authUser.user.email);
       break;
     }
 

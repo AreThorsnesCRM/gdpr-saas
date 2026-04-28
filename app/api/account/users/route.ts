@@ -27,6 +27,13 @@ export async function GET() {
 
   if (!accountUser) return NextResponse.json({ error: "No account found" }, { status: 404 })
 
+  // Hent notification preferences for kontoen
+  const { data: accountData } = await supabaseAdmin
+    .from("accounts")
+    .select("notify_trial_ending, notify_payment_failed")
+    .eq("id", accountUser.account_id)
+    .single()
+
   // Hent alle brukere i samme account
   const { data: members } = await supabaseAdmin
     .from("account_users")
@@ -56,5 +63,10 @@ export async function GET() {
     }
   })
 
-  return NextResponse.json({ users, currentUserRole: accountUser.role })
+  return NextResponse.json({
+    users,
+    currentUserRole: accountUser.role,
+    notify_trial_ending: accountData?.notify_trial_ending ?? true,
+    notify_payment_failed: accountData?.notify_payment_failed ?? true,
+  })
 }

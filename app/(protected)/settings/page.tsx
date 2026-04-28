@@ -12,6 +12,11 @@ type Member = {
   role: string
 }
 
+type NotificationPrefs = {
+  notify_trial_ending: boolean
+  notify_payment_failed: boolean
+}
+
 export default function SettingsPage() {
   const { account } = useAuth()
   const [members, setMembers] = useState<Member[]>([])
@@ -20,6 +25,11 @@ export default function SettingsPage() {
   const [loading, setLoading] = useState(true)
   const [inviting, setInviting] = useState(false)
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null)
+  const [prefs, setPrefs] = useState<NotificationPrefs>({
+    notify_trial_ending: true,
+    notify_payment_failed: true,
+  })
+  const [savingPrefs, setSavingPrefs] = useState(false)
 
   useEffect(() => {
     fetchUsers()
@@ -32,6 +42,10 @@ export default function SettingsPage() {
       const data = await res.json()
       setMembers(data.users)
       setCurrentUserRole(data.currentUserRole)
+      setPrefs({
+        notify_trial_ending: data.notify_trial_ending ?? true,
+        notify_payment_failed: data.notify_payment_failed ?? true,
+      })
     }
     setLoading(false)
   }
@@ -57,6 +71,20 @@ export default function SettingsPage() {
     }
 
     setInviting(false)
+  }
+
+  async function handleToggle(key: keyof NotificationPrefs, value: boolean) {
+    const updated = { ...prefs, [key]: value }
+    setPrefs(updated)
+    setSavingPrefs(true)
+
+    await fetch("/api/account/notifications", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ [key]: value }),
+    })
+
+    setSavingPrefs(false)
   }
 
   return (
@@ -135,6 +163,68 @@ export default function SettingsPage() {
           )}
         </div>
       )}
+
+      {/* Varslingsinnstillinger — kun for admin */}
+      {currentUserRole === "admin" && (
+        <div>
+          <h2 className="text-lg font-semibold text-gray-800 mb-1">Varsler</h2>
+          <p className="text-sm text-gray-500 mb-4">Velg hvilke e-postvarsler du ønsker å motta.</p>
+
+          <div className="border border-gray-200 rounded-lg divide-y divide-gray-100">
+            <ToggleRow
+              label="Prøveperiode utløper snart"
+              description="Få beskjed 3 og 1 dag før prøveperioden avsluttes"
+              checked={prefs.notify_trial_ending}
+              onChange={(v) => handleToggle("notify_trial_ending", v)}
+            />
+            <ToggleRow
+              label="Betalingsproblemer"
+              description="Få beskjed dersom en betaling mislykkes"
+              checked={prefs.notify_payment_failed}
+              onChange={(v) => handleToggle("notify_payment_failed", v)}
+            />
+          </div>
+
+          {savingPrefs && (
+            <p className="text-xs text-gray-400 mt-2">Lagrer...</p>
+          )}
+        </div>
+      )}
+    </div>
+  )
+}
+
+function ToggleRow({
+  label,
+  description,
+  checked,
+  onChange,
+}: {
+  label: string
+  description: string
+  checked: boolean
+  onChange: (v: boolean) => void
+}) {
+  return (
+    <div className="flex items-center justify-between px-4 py-4">
+      <div>
+        <p className="text-sm font-medium text-gray-800">{label}</p>
+        <p className="text-xs text-gray-500 mt-0.5">{description}</p>
+      </div>
+      <button
+        role="switch"
+        aria-checked={checked}
+        onClick={() => onChange(!checked)}
+        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+          checked ? "bg-blue-600" : "bg-gray-200"
+        }`}
+      >
+        <span
+          className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+            checked ? "translate-x-6" : "translate-x-1"
+          }`}
+        />
+      </button>
     </div>
   )
 }
