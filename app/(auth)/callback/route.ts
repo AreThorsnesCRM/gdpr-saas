@@ -25,6 +25,7 @@ export async function GET(request: NextRequest) {
 
   const queryCompanyName = url.searchParams.get("company_name");
   const queryFullName = url.searchParams.get("full_name");
+  const inviteAccountId = url.searchParams.get("account_id"); // satt ved bruker-invitasjon
 
   // Opprett supabase-klient for auth-operasjoner
   const supabase = createServerClient(
@@ -69,7 +70,7 @@ export async function GET(request: NextRequest) {
 
   console.log("[callback] user:", user.id, "company:", company_name, "name:", full_name);
 
-  // Sjekk om bruker allerede har en konto (f.eks. ved re-login via magic link)
+  // Sjekk om bruker allerede har en konto
   const { data: existingAccountUser } = await supabaseAdmin
     .from("account_users")
     .select("account_id")
@@ -77,6 +78,16 @@ export async function GET(request: NextRequest) {
     .maybeSingle();
 
   let accountId = existingAccountUser?.account_id ?? null;
+
+  // Invitert bruker — koble til eksisterende firma
+  if (!accountId && inviteAccountId) {
+    await supabaseAdmin.from("account_users").insert({
+      account_id: inviteAccountId,
+      user_id: user.id,
+      role: "member",
+    });
+    accountId = inviteAccountId;
+  }
 
   if (!accountId) {
     // Ny bruker — opprett firma, koble bruker, opprett Stripe-kunde
