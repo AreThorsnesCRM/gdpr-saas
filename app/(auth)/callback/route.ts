@@ -8,11 +8,6 @@ import Stripe from "stripe";
 const stripe = process.env.STRIPE_SECRET_KEY ? new Stripe(process.env.STRIPE_SECRET_KEY) : null;
 
 export async function GET(request: NextRequest) {
-  if (!stripe) {
-    console.error("[callback] Stripe not configured");
-    return NextResponse.redirect(new URL("/login", request.url));
-  }
-
   if (!supabaseAdmin) {
     console.error("[callback] Supabase admin not configured");
     return NextResponse.redirect(new URL("/login", request.url));
@@ -93,6 +88,11 @@ export async function GET(request: NextRequest) {
 
   if (!accountId) {
     // Ny bruker — opprett firma, koble bruker, opprett Stripe-kunde
+    if (!stripe) {
+      console.error("[callback] Stripe not configured");
+      return NextResponse.redirect(new URL("/login", request.url));
+    }
+
     const now = new Date();
     const trialEnd = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
 
