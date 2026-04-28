@@ -8,91 +8,100 @@ import {
   DocumentTextIcon,
   ArchiveBoxIcon,
   Cog6ToothIcon,
+  ArrowLeftOnRectangleIcon,
 } from "@heroicons/react/24/outline"
-import LogoutButton from "../logout/LogoutButton"
 import { useAuth } from "@/lib/AuthContext"
+
+const navItems = [
+  { href: "/dashboard", label: "Dashboard", icon: HomeIcon },
+  { href: "/customers", label: "Kunder", icon: UserGroupIcon },
+  { href: "/agreements", label: "Avtaler", icon: DocumentTextIcon },
+  { href: "/agreements?filter=archived", label: "Arkiv", icon: ArchiveBoxIcon },
+  { href: "/settings", label: "Innstillinger", icon: Cog6ToothIcon },
+]
+
+const badgeStyles: Record<string, string> = {
+  active:   "bg-green-500/20 text-green-400 ring-1 ring-green-500/30",
+  trialing: "bg-blue-500/20 text-blue-400 ring-1 ring-blue-500/30",
+  past_due: "bg-red-500/20 text-red-400 ring-1 ring-red-500/30",
+  canceled: "bg-slate-500/20 text-slate-400 ring-1 ring-slate-500/30",
+  unknown:  "bg-slate-500/20 text-slate-400 ring-1 ring-slate-500/30",
+  loading:  "bg-slate-500/20 text-slate-400 ring-1 ring-slate-500/30",
+}
+
+const badgeLabel: Record<string, string> = {
+  active:   "Aktivt",
+  trialing: "Prøveperiode",
+  past_due: "Forfalt",
+  canceled: "Avsluttet",
+  unknown:  "Ukjent",
+  loading:  "Laster...",
+}
 
 export default function Sidebar() {
   const pathname = usePathname()
-  const { profile, account, loading } = useAuth()
-
-  const navItems = [
-    { href: "/dashboard", label: "Dashboard", icon: <HomeIcon className="h-5 w-5" /> },
-    { href: "/customers", label: "Kunder", icon: <UserGroupIcon className="h-5 w-5" /> },
-    { href: "/agreements", label: "Avtaler", icon: <DocumentTextIcon className="h-5 w-5" /> },
-    { href: "/agreements?filter=archived", label: "Arkiv", icon: <ArchiveBoxIcon className="h-5 w-5" /> },
-    { href: "/settings", label: "Innstillinger", icon: <Cog6ToothIcon className="h-5 w-5" /> },
-  ]
-
-  const badgeStyles: Record<string, string> = {
-    active: "bg-green-100 text-green-700",
-    trialing: "bg-blue-100 text-blue-700",
-    past_due: "bg-red-100 text-red-700",
-    canceled: "bg-gray-200 text-gray-600",
-    unknown: "bg-gray-200 text-gray-600",
-    loading: "bg-gray-200 text-gray-600",
-  }
-
-  const badgeLabel: Record<string, string> = {
-    active: "Active",
-    trialing: "Trial",
-    past_due: "Past due",
-    canceled: "Canceled",
-    unknown: "Unknown",
-    loading: "Loading...",
-  }
+  const { profile, account, loading, logout } = useAuth()
 
   const status = loading ? "loading" : account?.subscription_status ?? "unknown"
-  const fullName = profile?.full_name ?? "Bruker"
-  const companyName = account?.name ?? ""
+  const fullName = profile?.full_name ?? ""
+  const companyName = account?.name ?? "AreCRM"
 
   return (
-    <aside className="w-64 h-screen bg-white border-r border-gray-200 p-6 flex flex-col fixed left-0 top-0">
-      <div className="text-2xl font-bold mb-6">AreCRM</div>
+    <aside className="w-64 h-screen bg-slate-900 flex flex-col fixed left-0 top-0">
+      {/* Logo */}
+      <div className="px-6 py-5 border-b border-slate-700/50">
+        <span className="text-xl font-bold text-white tracking-tight">AreCRM</span>
+      </div>
 
-      {/* Profilseksjon */}
-      <div className="mb-6">
-        <div className="text-lg font-bold text-gray-900">
-          {companyName}
-        </div>
-
-        <div className="font-semibold text-gray-800">
-          {fullName}
-        </div>
-
-
-        <span
-          className={`inline-block mt-2 rounded px-2 py-0.5 text-xs font-medium ${badgeStyles[status]}`}
-        >
+      {/* Firma og bruker */}
+      <div className="px-6 py-4 border-b border-slate-700/50">
+        <div className="text-sm font-semibold text-white truncate">{companyName}</div>
+        {fullName && (
+          <div className="text-xs text-slate-400 mt-0.5 truncate">{fullName}</div>
+        )}
+        <span className={`inline-block mt-2.5 rounded-full px-2.5 py-0.5 text-xs font-medium ${badgeStyles[status]}`}>
           {badgeLabel[status]}
         </span>
       </div>
 
-      <nav className="flex flex-col gap-2">
-        {navItems.map((item) => {
-          const isActive = pathname === item.href
+      {/* Navigasjon */}
+      <nav className="flex-1 px-3 py-4 flex flex-col gap-0.5">
+        {navItems.map(({ href, label, icon: Icon }) => {
+          const basePath = href.split("?")[0]
+          const isActive =
+            pathname === href ||
+            (basePath !== "/dashboard" && pathname.startsWith(basePath) && !href.includes("?filter=archived")) ||
+            (href.includes("?filter=archived") && pathname === "/agreements" && false)
 
           return (
             <Link
-              key={item.href}
-              href={item.href}
-              className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition
-                ${isActive ? "bg-blue-100 text-blue-700" : "text-gray-700 hover:bg-gray-100"}
-              `}
+              key={href}
+              href={href}
+              className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                isActive
+                  ? "bg-slate-700 text-white"
+                  : "text-slate-400 hover:bg-slate-800 hover:text-white"
+              }`}
             >
-              {item.icon}
-              {item.label}
+              <Icon className="h-4 w-4 shrink-0" />
+              {label}
             </Link>
           )
         })}
       </nav>
 
-      <div className="mt-auto pt-6 border-t border-gray-200">
-        <LogoutButton />
-      </div>
-
-      <div className="mt-4 text-sm text-gray-400">
-        © {new Date().getFullYear()} AreCRM
+      {/* Bunn: logg ut + copyright */}
+      <div className="px-3 pb-4 pt-3 border-t border-slate-700/50">
+        <button
+          onClick={logout}
+          className="flex items-center gap-3 w-full px-3 py-2 rounded-lg text-sm font-medium text-slate-400 hover:bg-slate-800 hover:text-white transition-colors"
+        >
+          <ArrowLeftOnRectangleIcon className="h-4 w-4 shrink-0" />
+          Logg ut
+        </button>
+        <div className="text-xs text-slate-600 mt-3 px-3">
+          © {new Date().getFullYear()} AreCRM
+        </div>
       </div>
     </aside>
   )
