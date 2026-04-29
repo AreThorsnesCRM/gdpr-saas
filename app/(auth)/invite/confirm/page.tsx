@@ -1,10 +1,21 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { Suspense, useEffect, useState } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { supabase } from "@/lib/supabaseClient"
 
-export default function InviteConfirmPage() {
+function Spinner() {
+  return (
+    <div className="flex min-h-screen items-center justify-center bg-gray-50">
+      <div className="text-center">
+        <div className="animate-spin h-8 w-8 border-2 border-slate-800 border-t-transparent rounded-full mx-auto mb-4" />
+        <p className="text-gray-600 text-sm">Aktiverer konto...</p>
+      </div>
+    </div>
+  )
+}
+
+function InviteConfirm() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const [error, setError] = useState("")
@@ -21,7 +32,6 @@ export default function InviteConfirmPage() {
       if (done) return
       done = true
 
-      // PKCE-flyt: bytt code mot session
       const code = searchParams.get("code")
       if (code) {
         const { error } = await supabase!.auth.exchangeCodeForSession(code)
@@ -31,14 +41,12 @@ export default function InviteConfirmPage() {
         }
       }
 
-      // Hent bruker (fungerer etter code-bytte eller hash-fragment)
       const { data: { user } } = await supabase!.auth.getUser()
       if (!user) {
         setError("Kunne ikke verifisere brukeren. Prøv å klikke lenken i e-posten igjen.")
         return
       }
 
-      // Koble bruker til firmakonto via pending_invites
       const res = await fetch("/api/account/accept-invite", { method: "POST" })
       const data = await res.json()
 
@@ -50,12 +58,10 @@ export default function InviteConfirmPage() {
       router.replace(data.redirect)
     }
 
-    // Håndter hash-fragment (eldre Supabase-flyt: #access_token=...)
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
       if (event === "SIGNED_IN") handleSession()
     })
 
-    // Prøv også direkte (PKCE-flyt med code i URL)
     handleSession()
 
     return () => subscription.unsubscribe()
@@ -72,12 +78,13 @@ export default function InviteConfirmPage() {
     )
   }
 
+  return <Spinner />
+}
+
+export default function InviteConfirmPage() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-50">
-      <div className="text-center">
-        <div className="animate-spin h-8 w-8 border-2 border-slate-800 border-t-transparent rounded-full mx-auto mb-4" />
-        <p className="text-gray-600 text-sm">Aktiverer konto...</p>
-      </div>
-    </div>
+    <Suspense fallback={<Spinner />}>
+      <InviteConfirm />
+    </Suspense>
   )
 }
