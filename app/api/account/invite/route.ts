@@ -56,7 +56,7 @@ export async function POST(req: Request) {
     .upsert({ email, account_id: accountUser.account_id }, { onConflict: "email" })
 
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL!
-  const redirectTo = `${baseUrl}/callback`
+  const redirectTo = `${baseUrl}/invite/confirm`
 
   const { error } = await supabaseAdmin.auth.admin.inviteUserByEmail(email, { redirectTo })
 
