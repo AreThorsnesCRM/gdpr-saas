@@ -28,18 +28,9 @@ function InviteConfirm() {
 
     let done = false
 
-    async function handleSession() {
+    async function processUser() {
       if (done) return
       done = true
-
-      const code = searchParams.get("code")
-      if (code) {
-        const { error } = await supabase!.auth.exchangeCodeForSession(code)
-        if (error) {
-          setError("Ugyldig eller utløpt invitasjonslenke.")
-          return
-        }
-      }
 
       const { data: { user } } = await supabase!.auth.getUser()
       if (!user) {
@@ -58,11 +49,23 @@ function InviteConfirm() {
       router.replace(data.redirect)
     }
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
-      if (event === "SIGNED_IN") handleSession()
+    // Sett opp lytter FØR alt annet — fanger opp både hash-fragment og PKCE
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (session && (event === "SIGNED_IN" || event === "INITIAL_SESSION")) {
+        processUser()
+      }
     })
 
-    handleSession()
+    // PKCE-flyt: bytt code mot session (triggerer SIGNED_IN over)
+    const code = searchParams.get("code")
+    if (code) {
+      supabase.auth.exchangeCodeForSession(code).then(({ error }) => {
+        if (error) {
+          done = true
+          setError("Ugyldig eller utløpt invitasjonslenke.")
+        }
+      })
+    }
 
     return () => subscription.unsubscribe()
   }, [router, searchParams])
