@@ -73,6 +73,7 @@ export default function CustomerPage(props: CustomerPageProps) {
   const [city, setCity] = useState("")
   const [accountManagerId, setAccountManagerId] = useState("")
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>([])
+  const [saved, setSaved] = useState(false)
 
   const [notes, setNotes] = useState<Note[]>([])
   const [newNote, setNewNote] = useState("")
@@ -160,6 +161,8 @@ export default function CustomerPage(props: CustomerPageProps) {
       account_manager_id: accountManagerId || null,
     }).eq("id", id)
     fetchCustomer()
+    setSaved(true)
+    setTimeout(() => setSaved(false), 2000)
   }
 
   async function deleteCustomer() {
@@ -358,9 +361,13 @@ export default function CustomerPage(props: CustomerPageProps) {
 
             <button
               onClick={updateCustomer}
-              className="bg-slate-800 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-slate-700 transition-colors"
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                saved
+                  ? "bg-green-600 text-white"
+                  : "bg-slate-800 text-white hover:bg-slate-700"
+              }`}
             >
-              Lagre endringer
+              {saved ? "Lagret ✓" : "Lagre endringer"}
             </button>
           </div>
 
