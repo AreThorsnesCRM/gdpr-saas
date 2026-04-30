@@ -32,13 +32,17 @@ function InviteConfirm() {
       if (done) return
       done = true
 
-      const { data: { user } } = await supabase!.auth.getUser()
-      if (!user) {
+      // Hent session — access_token sendes i header så server slipper å lese cookies
+      const { data: { session } } = await supabase!.auth.getSession()
+      if (!session) {
         setError("Kunne ikke verifisere brukeren. Prøv å klikke lenken i e-posten igjen.")
         return
       }
 
-      const res = await fetch("/api/account/accept-invite", { method: "POST" })
+      const res = await fetch("/api/account/accept-invite", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${session.access_token}` },
+      })
       const data = await res.json()
 
       if (!res.ok) {
