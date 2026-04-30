@@ -38,6 +38,7 @@ export default function CustomersPage() {
 
   const [customers, setCustomers] = useState<Customer[]>([])
   const [loading, setLoading] = useState(true)
+  const [search, setSearch] = useState("")
 
   useEffect(() => {
     if (user) loadCustomers()
@@ -87,6 +88,10 @@ export default function CustomersPage() {
     if (activeFilter === "active")   return c.hasActiveAgreement
     if (activeFilter === "never")    return c.hasNeverHadAgreement
     return true
+  }).filter((c) => {
+    if (!search) return true
+    const q = search.toLowerCase()
+    return c.name.toLowerCase().includes(q) || c.email?.toLowerCase().includes(q) || false
   })
 
   function setFilter(id: string) {
@@ -123,6 +128,15 @@ export default function CustomersPage() {
           Ny kunde
         </Link>
       </div>
+
+      {/* Søkefelt */}
+      <input
+        type="text"
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
+        placeholder="Søk på navn eller e-post..."
+        className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-slate-400 bg-white"
+      />
 
       {/* Filterknapper */}
       <div className="flex flex-wrap gap-2">
