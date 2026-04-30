@@ -28,9 +28,10 @@ type CompanyProfile = {
 }
 
 const sections = [
-  { id: "firma", label: "Firmainformasjon" },
-  { id: "brukere", label: "Brukere" },
-  { id: "varsler", label: "Varsler" },
+  { id: "firma",       label: "Firmainformasjon" },
+  { id: "brukere",     label: "Brukere" },
+  { id: "varsler",     label: "Varsler" },
+  { id: "abonnement",  label: "Abonnement" },
 ]
 
 export default function SettingsPage() {
@@ -135,6 +136,23 @@ export default function SettingsPage() {
       setCompanyMessage({ type: "error", text: data.error ?? "Noe gikk galt" })
     }
     setSavingCompany(false)
+  }
+
+  async function openPortal() {
+    const res = await fetch("/api/create-portal-session", { method: "POST" })
+    const data = await res.json()
+    window.location.href = data.url
+  }
+
+  async function openCheckout() {
+    const res = await fetch("/api/create-checkout-session", { method: "POST" })
+    const data = await res.json()
+    window.location.href = data.url
+  }
+
+  function daysLeft(dateStr: string | null | undefined) {
+    if (!dateStr) return null
+    return Math.ceil((new Date(dateStr).getTime() - Date.now()) / 86400000)
   }
 
   function scrollTo(id: string) {
@@ -328,6 +346,54 @@ export default function SettingsPage() {
             {savingPrefs && <p className="text-xs text-gray-400 mt-2">Lagrer...</p>}
           </section>
 
+          <Divider />
+
+          {/* Abonnement */}
+          <section id="abonnement" className="scroll-mt-8">
+            <SectionHeader
+              title="Abonnement"
+              description="Administrer betaling, faktura og abonnement."
+              adminOnly
+              isAdmin={currentUserRole === "admin"}
+            />
+            {currentUserRole === "admin" && account && (
+              <div className="mt-4 space-y-4">
+                <div className="flex items-center gap-3">
+                  <StatusBadge status={account.subscription_status} />
+                  <p className="text-sm text-gray-500">
+                    {account.subscription_status === "active"   && "Abonnementet er aktivt."}
+                    {account.subscription_status === "trialing" && `${daysLeft(account.trial_end)} dager igjen av prøveperioden.`}
+                    {account.subscription_status === "past_due" && "Betaling feilet — oppdater betalingsmetode."}
+                    {account.subscription_status === "canceled" && "Abonnementet er avsluttet."}
+                    {account.subscription_status === "incomplete" && "Betaling ikke fullført."}
+                  </p>
+                </div>
+                <div className="flex gap-3">
+                  {(account.subscription_status === "active" || account.subscription_status === "past_due") && (
+                    <button onClick={openPortal} className={btnPrimary}>
+                      Administrer abonnement
+                    </button>
+                  )}
+                  {account.subscription_status === "trialing" && (
+                    <>
+                      <button onClick={openCheckout} className={btnPrimary}>
+                        Start abonnement nå
+                      </button>
+                      <button onClick={openPortal} className="border border-gray-200 text-gray-700 px-4 py-2 rounded-lg text-sm font-medium hover:border-gray-300 hover:text-gray-900 transition-colors">
+                        Administrer abonnement
+                      </button>
+                    </>
+                  )}
+                  {(account.subscription_status === "canceled" || account.subscription_status === "incomplete") && (
+                    <button onClick={openCheckout} className={btnPrimary}>
+                      Start abonnement
+                    </button>
+                  )}
+                </div>
+              </div>
+            )}
+          </section>
+
         </div>
       </div>
     </div>
@@ -366,6 +432,23 @@ function SectionHeader({ title, description, adminOnly, isAdmin }: {
 
 function Divider() {
   return <hr className="border-gray-200" />
+}
+
+function StatusBadge({ status }: { status: string | undefined }) {
+  const map: Record<string, { label: string; cls: string }> = {
+    active:     { label: "Aktivt",          cls: "bg-green-50 text-green-700 ring-green-200" },
+    trialing:   { label: "Prøveperiode",    cls: "bg-blue-50 text-blue-700 ring-blue-200" },
+    past_due:   { label: "Betaling feilet", cls: "bg-red-50 text-red-600 ring-red-200" },
+    canceled:   { label: "Avsluttet",       cls: "bg-gray-100 text-gray-600 ring-gray-200" },
+    incomplete: { label: "Ikke fullført",   cls: "bg-amber-50 text-amber-700 ring-amber-200" },
+  }
+  const s = status ? map[status] : null
+  if (!s) return null
+  return (
+    <span className={`text-xs font-medium px-2.5 py-0.5 rounded-full ring-1 ${s.cls}`}>
+      {s.label}
+    </span>
+  )
 }
 
 function ToggleRow({ label, description, checked, onChange }: {
