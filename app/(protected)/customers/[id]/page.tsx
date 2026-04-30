@@ -17,6 +17,11 @@ interface Customer {
   name: string
   email: string
   phone: string
+  org_nummer: string | null
+  address: string | null
+  postal_code: string | null
+  city: string | null
+  account_manager_id: string | null
 }
 
 interface Note {
@@ -38,6 +43,11 @@ interface Agreement {
   contact_phone: string | null
 }
 
+interface TeamMember {
+  user_id: string
+  full_name: string
+}
+
 interface CustomerPageProps {
   params: Promise<{ id: string }>
 }
@@ -46,7 +56,7 @@ export default function CustomerPage(props: CustomerPageProps) {
   const router = useRouter()
   const params = use(props.params)
   const id = params.id
-  const { user, profile } = useAuth()
+  const { user, profile, account } = useAuth()
 
   const agreementId =
     typeof window !== "undefined"
@@ -57,6 +67,12 @@ export default function CustomerPage(props: CustomerPageProps) {
   const [name, setName] = useState("")
   const [email, setEmail] = useState("")
   const [phone, setPhone] = useState("")
+  const [orgNummer, setOrgNummer] = useState("")
+  const [address, setAddress] = useState("")
+  const [postalCode, setPostalCode] = useState("")
+  const [city, setCity] = useState("")
+  const [accountManagerId, setAccountManagerId] = useState("")
+  const [teamMembers, setTeamMembers] = useState<TeamMember[]>([])
 
   const [notes, setNotes] = useState<Note[]>([])
   const [newNote, setNewNote] = useState("")
@@ -86,6 +102,15 @@ export default function CustomerPage(props: CustomerPageProps) {
   }, [user, id])
 
   useEffect(() => {
+    if (!account || !supabase) return
+    supabase
+      .from("profiles")
+      .select("user_id, full_name")
+      .eq("account_id", account.id)
+      .then(({ data }) => { if (data) setTeamMembers(data) })
+  }, [account])
+
+  useEffect(() => {
     if (!agreementId || agreements.length === 0) return
     const target = agreements.find((a) => a.id === agreementId)
     if (target) {
@@ -99,9 +124,14 @@ export default function CustomerPage(props: CustomerPageProps) {
     const { data } = await supabase.from("customers").select("*").eq("id", id).single()
     if (data) {
       setCustomer(data)
-      setName(data.name)
-      setEmail(data.email)
-      setPhone(data.phone)
+      setName(data.name ?? "")
+      setEmail(data.email ?? "")
+      setPhone(data.phone ?? "")
+      setOrgNummer(data.org_nummer ?? "")
+      setAddress(data.address ?? "")
+      setPostalCode(data.postal_code ?? "")
+      setCity(data.city ?? "")
+      setAccountManagerId(data.account_manager_id ?? "")
     }
   }
 
@@ -119,7 +149,16 @@ export default function CustomerPage(props: CustomerPageProps) {
 
   async function updateCustomer() {
     if (!supabase) return
-    await supabase.from("customers").update({ name, email, phone }).eq("id", id)
+    await supabase.from("customers").update({
+      name,
+      email: email || null,
+      phone: phone || null,
+      org_nummer: orgNummer || null,
+      address: address || null,
+      postal_code: postalCode || null,
+      city: city || null,
+      account_manager_id: accountManagerId || null,
+    }).eq("id", id)
     fetchCustomer()
   }
 
@@ -153,7 +192,6 @@ export default function CustomerPage(props: CustomerPageProps) {
   }
 
   function handleNewAgreement() { resetAgreementForm(); setSlideOverOpen(true) }
-
   function closeSlideOver() { resetAgreementForm(); setSlideOverOpen(false) }
 
   function handleEditAgreement(a: Agreement) {
@@ -223,15 +261,17 @@ export default function CustomerPage(props: CustomerPageProps) {
   function getExpiryBadge(a: Agreement) {
     if (!a.end_date) return null
     const days = Math.ceil((new Date(a.end_date).getTime() - Date.now()) / 86400000)
-    if (days < 0)   return { text: "Utløpt",                      color: "bg-red-50 text-red-600 ring-red-200" }
-    if (days <= 7)  return { text: `Utløper om ${days} dager`,    color: "bg-red-50 text-red-600 ring-red-200" }
-    if (days <= 30) return { text: `Utløper om ${days} dager`,    color: "bg-amber-50 text-amber-700 ring-amber-200" }
+    if (days < 0)   return { text: "Utløpt",                   color: "bg-red-50 text-red-600 ring-red-200" }
+    if (days <= 7)  return { text: `Utløper om ${days} dager`, color: "bg-red-50 text-red-600 ring-red-200" }
+    if (days <= 30) return { text: `Utløper om ${days} dager`, color: "bg-amber-50 text-amber-700 ring-amber-200" }
     return null
   }
 
   function formatDate(dateStr: string) {
     return new Date(dateStr).toLocaleDateString("no-NO", { day: "numeric", month: "short", year: "numeric" })
   }
+
+  const inputClass = "w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-400 bg-white"
 
   return (
     <div className="p-8 max-w-5xl space-y-6">
@@ -260,35 +300,62 @@ export default function CustomerPage(props: CustomerPageProps) {
           {/* Kundeinformasjon */}
           <div className="bg-white rounded-xl border border-gray-200 p-6 space-y-4">
             <h2 className="text-base font-semibold text-gray-900">Kundeinformasjon</h2>
+
             <div className="space-y-3">
               <div>
                 <label className="block text-xs font-medium text-gray-500 mb-1">Navn</label>
-                <input
-                  className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-400 bg-white"
-                  placeholder="Navn"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                />
+                <input className={inputClass} placeholder="Navn" value={name} onChange={(e) => setName(e.target.value)} />
               </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-medium text-gray-500 mb-1">E-post</label>
+                  <input className={inputClass} placeholder="E-post" value={email} onChange={(e) => setEmail(e.target.value)} />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-gray-500 mb-1">Telefon</label>
+                  <input className={inputClass} placeholder="Telefon" value={phone} onChange={(e) => setPhone(e.target.value)} />
+                </div>
+              </div>
+
               <div>
-                <label className="block text-xs font-medium text-gray-500 mb-1">E-post</label>
-                <input
-                  className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-400 bg-white"
-                  placeholder="E-post"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                />
+                <label className="block text-xs font-medium text-gray-500 mb-1">Org.nummer</label>
+                <input className={inputClass} placeholder="F.eks. 123456789 eller GB123456" value={orgNummer} onChange={(e) => setOrgNummer(e.target.value)} />
               </div>
+
               <div>
-                <label className="block text-xs font-medium text-gray-500 mb-1">Telefon</label>
-                <input
-                  className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-400 bg-white"
-                  placeholder="Telefon"
-                  value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
-                />
+                <label className="block text-xs font-medium text-gray-500 mb-1">Adresse</label>
+                <input className={inputClass} placeholder="Gateadresse" value={address} onChange={(e) => setAddress(e.target.value)} />
               </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-medium text-gray-500 mb-1">Postnummer</label>
+                  <input className={inputClass} placeholder="0000" value={postalCode} onChange={(e) => setPostalCode(e.target.value)} />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-gray-500 mb-1">Sted</label>
+                  <input className={inputClass} placeholder="By" value={city} onChange={(e) => setCity(e.target.value)} />
+                </div>
+              </div>
+
+              {teamMembers.length > 0 && (
+                <div>
+                  <label className="block text-xs font-medium text-gray-500 mb-1">Kundeansvarlig</label>
+                  <select
+                    className={inputClass}
+                    value={accountManagerId}
+                    onChange={(e) => setAccountManagerId(e.target.value)}
+                  >
+                    <option value="">Ingen ansvarlig valgt</option>
+                    {teamMembers.map((m) => (
+                      <option key={m.user_id} value={m.user_id}>{m.full_name}</option>
+                    ))}
+                  </select>
+                </div>
+              )}
             </div>
+
             <button
               onClick={updateCustomer}
               className="bg-slate-800 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-slate-700 transition-colors"
@@ -352,7 +419,7 @@ export default function CustomerPage(props: CustomerPageProps) {
                 {activeAgreements.map((a) => {
                   const badge = getExpiryBadge(a)
                   return (
-                    <li key={a.id} className="group border-t border-gray-100 first:border-0 py-3">
+                    <li key={a.id} className="border-t border-gray-100 first:border-0 py-3">
                       <div className="flex items-start justify-between gap-3">
                         <div className="min-w-0 flex-1">
                           <div className="flex items-center gap-2 flex-wrap">
