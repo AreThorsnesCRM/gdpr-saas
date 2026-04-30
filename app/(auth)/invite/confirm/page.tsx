@@ -35,7 +35,7 @@ function InviteConfirm() {
       // Hent session — access_token sendes i header så server slipper å lese cookies
       const { data: { session } } = await supabase!.auth.getSession()
       if (!session) {
-        setError("Kunne ikke verifisere brukeren. Prøv å klikke lenken i e-posten igjen.")
+        setError("DEBUG: Ingen session funnet etter SIGNED_IN")
         return
       }
 
@@ -46,7 +46,7 @@ function InviteConfirm() {
       const data = await res.json()
 
       if (!res.ok) {
-        setError(data.error ?? "Noe gikk galt under aktivering av kontoen.")
+        setError(`DEBUG ${res.status}: ${data.error ?? "Ukjent feil"} — epost: ${session.user?.email}`)
         return
       }
 
@@ -57,6 +57,10 @@ function InviteConfirm() {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       if (session && (event === "SIGNED_IN" || event === "INITIAL_SESSION")) {
         processUser()
+      } else if (!session && event === "INITIAL_SESSION") {
+        // Ingen eksisterende session — vent på SIGNED_IN fra lenken
+      } else if (!session) {
+        setError(`DEBUG: event=${event}, ingen session`)
       }
     })
 
@@ -66,7 +70,7 @@ function InviteConfirm() {
       supabase.auth.exchangeCodeForSession(code).then(({ error }) => {
         if (error) {
           done = true
-          setError("Ugyldig eller utløpt invitasjonslenke.")
+          setError(`DEBUG: exchangeCodeForSession feilet: ${error.message}`)
         }
       })
     }
