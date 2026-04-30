@@ -434,7 +434,7 @@ function Divider() {
   return <hr className="border-gray-200" />
 }
 
-function StatusBadge({ status }: { status: string | undefined }) {
+function StatusBadge({ status }: { status: string | null | undefined }) {
   const map: Record<string, { label: string; cls: string }> = {
     active:     { label: "Aktivt",          cls: "bg-green-50 text-green-700 ring-green-200" },
     trialing:   { label: "Prøveperiode",    cls: "bg-blue-50 text-blue-700 ring-blue-200" },
