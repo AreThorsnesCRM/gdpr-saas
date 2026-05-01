@@ -139,13 +139,19 @@ export async function PATCH(req: Request) {
 
   if (!target) return NextResponse.json({ error: "Bruker ikke funnet" }, { status: 404 })
 
-  // Oppdater tilgang (restrict_to_own)
+  // Oppdater tilgang (restrict_to_own) — skriv til begge tabeller
   if (typeof body.restrict_to_own === "boolean") {
-    await supabaseAdmin
-      .from("account_users")
-      .update({ restrict_to_own: body.restrict_to_own })
-      .eq("user_id", user_id)
-      .eq("account_id", caller.account_id)
+    await Promise.all([
+      supabaseAdmin
+        .from("account_users")
+        .update({ restrict_to_own: body.restrict_to_own })
+        .eq("user_id", user_id)
+        .eq("account_id", caller.account_id),
+      supabaseAdmin
+        .from("profiles")
+        .update({ restrict_to_own: body.restrict_to_own })
+        .eq("user_id", user_id),
+    ])
     return NextResponse.json({ success: true })
   }
 

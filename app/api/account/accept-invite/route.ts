@@ -57,6 +57,7 @@ export async function POST(req: Request) {
     user_id: user.id,
     account_id: pendingInvite.account_id,
     full_name,
+    restrict_to_own: pendingInvite.restrict_to_own ?? false,
   }, { onConflict: "user_id" })
 
   // Slett brukt invitasjon

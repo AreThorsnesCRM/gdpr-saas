@@ -38,6 +38,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           }
         } else {
           setProfile(profileData)
+          // restrict_to_own leses direkte fra profilen — pålitelig uten RLS-begrensninger
+          setRestrictToOwn(profileData?.restrict_to_own ?? false)
 
           if (profileData?.account_id) {
             const { data: { session } } = await supabase.auth.getSession()
@@ -51,11 +53,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             const meData = meRes.ok ? await meRes.json() : null
             setAccount(accountData ?? null)
             setRole(meData?.role ?? null)
-            setRestrictToOwn(meData?.restrict_to_own ?? false)
           } else {
             setAccount(null)
             setRole(null)
-            setRestrictToOwn(false)
           }
           return
         }
