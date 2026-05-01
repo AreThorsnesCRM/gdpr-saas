@@ -52,7 +52,8 @@ export default function SettingsPage() {
     name: "", org_number: "", address: "", postal_code: "", city: "", phone: "", contact_email: "",
   })
   const [savingCompany, setSavingCompany] = useState(false)
-  const [companyMessage, setCompanyMessage] = useState<{ type: "success" | "error"; text: string } | null>(null)
+  const [companySaved, setCompanySaved] = useState(false)
+  const [companyMessage, setCompanyMessage] = useState<{ type: "error"; text: string } | null>(null)
 
   useEffect(() => {
     fetchUsers()
@@ -130,7 +131,9 @@ export default function SettingsPage() {
       body: JSON.stringify(company),
     })
     if (res.ok) {
-      setCompanyMessage({ type: "success", text: "Lagret!" })
+      setCompanyMessage(null)
+      setCompanySaved(true)
+      setTimeout(() => setCompanySaved(false), 2000)
     } else {
       const data = await res.json()
       setCompanyMessage({ type: "error", text: data.error ?? "Noe gikk galt" })
@@ -240,13 +243,19 @@ export default function SettingsPage() {
                   </Field>
                 </div>
                 <div className="flex items-center gap-4 pt-1">
-                  <button type="submit" disabled={savingCompany} className={btnPrimary}>
-                    {savingCompany ? "Lagrer..." : "Lagre"}
+                  <button
+                    type="submit"
+                    disabled={savingCompany}
+                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors disabled:opacity-50 ${
+                      companySaved
+                        ? "bg-green-600 text-white"
+                        : "bg-slate-800 text-white hover:bg-slate-700"
+                    }`}
+                  >
+                    {savingCompany ? "Lagrer..." : companySaved ? "Lagret ✓" : "Lagre"}
                   </button>
                   {companyMessage && (
-                    <p className={`text-sm ${companyMessage.type === "success" ? "text-green-600" : "text-red-600"}`}>
-                      {companyMessage.text}
-                    </p>
+                    <p className="text-sm text-red-600">{companyMessage.text}</p>
                   )}
                 </div>
               </form>
