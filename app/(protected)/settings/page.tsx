@@ -18,6 +18,11 @@ type NotificationPrefs = {
   notify_payment_failed: boolean
 }
 
+type UserNotifPrefs = {
+  notify_expiring_agreements: boolean
+  notify_no_active_agreement: boolean
+}
+
 type CompanyProfile = {
   name: string
   org_number: string
@@ -64,6 +69,12 @@ export default function SettingsPage() {
   const [profileSaved, setProfileSaved] = useState(false)
   const [savingProfile, setSavingProfile] = useState(false)
 
+  const [userNotifPrefs, setUserNotifPrefs] = useState<UserNotifPrefs>({
+    notify_expiring_agreements: true,
+    notify_no_active_agreement: true,
+  })
+  const [savingUserNotif, setSavingUserNotif] = useState(false)
+
   useEffect(() => {
     fetchUsers()
     fetchCompanyProfile()
@@ -73,10 +84,17 @@ export default function SettingsPage() {
     if (!user || !supabase) return
     supabase
       .from("profiles")
-      .select("full_name")
+      .select("full_name, notify_expiring_agreements, notify_no_active_agreement")
       .eq("user_id", user.id)
       .maybeSingle()
-      .then(({ data }) => { if (data?.full_name) setFullName(data.full_name) })
+      .then(({ data }) => {
+        if (!data) return
+        if (data.full_name) setFullName(data.full_name)
+        setUserNotifPrefs({
+          notify_expiring_agreements: data.notify_expiring_agreements ?? true,
+          notify_no_active_agreement: data.notify_no_active_agreement ?? true,
+        })
+      })
   }, [user])
 
   async function fetchUsers() {
@@ -142,6 +160,14 @@ export default function SettingsPage() {
       setInviteMessage({ type: "error", text: data.error ?? "Noe gikk galt" })
     }
     setInviting(false)
+  }
+
+  async function handleUserNotifToggle(key: keyof UserNotifPrefs, value: boolean) {
+    if (!supabase || !user) return
+    setUserNotifPrefs((p) => ({ ...p, [key]: value }))
+    setSavingUserNotif(true)
+    await supabase.from("profiles").update({ [key]: value }).eq("user_id", user.id)
+    setSavingUserNotif(false)
   }
 
   async function handleToggle(key: keyof NotificationPrefs, value: boolean) {
@@ -402,26 +428,48 @@ export default function SettingsPage() {
             <SectionHeader
               title="Varsler"
               description="Velg hvilke e-postvarsler du ønsker å motta."
-              adminOnly
-              isAdmin={currentUserRole === "admin"}
             />
+
+            {/* Per-bruker varsler — alle brukere */}
+            <div className="mt-4 border border-gray-200 rounded-xl divide-y divide-gray-100">
+              <ToggleRow
+                label="Utløpende avtaler"
+                description="Få beskjed 2 uker og 1 uke før en avtale du er ansvarlig for utløper"
+                checked={userNotifPrefs.notify_expiring_agreements}
+                onChange={(v) => handleUserNotifToggle("notify_expiring_agreements", v)}
+              />
+              <ToggleRow
+                label="Kunder uten aktiv avtale"
+                description="Få beskjed når en kunde du er ansvarlig for ikke lenger har aktive avtaler"
+                checked={userNotifPrefs.notify_no_active_agreement}
+                onChange={(v) => handleUserNotifToggle("notify_no_active_agreement", v)}
+              />
+            </div>
+            {savingUserNotif && <p className="text-xs text-gray-400 mt-2">Lagrer...</p>}
+
+            {/* Systemvarsler — kun admin */}
             {currentUserRole === "admin" && (
-              <div className="mt-4 border border-gray-200 rounded-xl divide-y divide-gray-100">
-                <ToggleRow
-                  label="Prøveperiode utløper snart"
-                  description="Få beskjed 2 uker og 1 uke før prøveperioden avsluttes"
-                  checked={prefs.notify_trial_ending}
-                  onChange={(v) => handleToggle("notify_trial_ending", v)}
-                />
-                <ToggleRow
-                  label="Betalingsproblemer"
-                  description="Få beskjed dersom en betaling mislykkes"
-                  checked={prefs.notify_payment_failed}
-                  onChange={(v) => handleToggle("notify_payment_failed", v)}
-                />
-              </div>
+              <>
+                <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mt-8 mb-3">
+                  Systemvarsler
+                </p>
+                <div className="border border-gray-200 rounded-xl divide-y divide-gray-100">
+                  <ToggleRow
+                    label="Prøveperiode utløper snart"
+                    description="Få beskjed 2 uker og 1 uke før prøveperioden avsluttes"
+                    checked={prefs.notify_trial_ending}
+                    onChange={(v) => handleToggle("notify_trial_ending", v)}
+                  />
+                  <ToggleRow
+                    label="Betalingsproblemer"
+                    description="Få beskjed dersom en betaling mislykkes"
+                    checked={prefs.notify_payment_failed}
+                    onChange={(v) => handleToggle("notify_payment_failed", v)}
+                  />
+                </div>
+                {savingPrefs && <p className="text-xs text-gray-400 mt-2">Lagrer...</p>}
+              </>
             )}
-            {savingPrefs && <p className="text-xs text-gray-400 mt-2">Lagrer...</p>}
           </section>
 
           <Divider />
