@@ -56,6 +56,7 @@ export default function SettingsPage() {
   const [currentUserRole, setCurrentUserRole] = useState<string | null>(null)
   const [inviteEmail, setInviteEmail] = useState("")
   const [inviteRestrictToOwn, setInviteRestrictToOwn] = useState(false)
+  const [actionLoading, setActionLoading] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
   const [inviting, setInviting] = useState(false)
   const [inviteMessage, setInviteMessage] = useState<{ type: "success" | "error"; text: string } | null>(null)
@@ -171,6 +172,53 @@ export default function SettingsPage() {
       setInviteMessage({ type: "error", text: data.error ?? "Noe gikk galt" })
     }
     setInviting(false)
+  }
+
+  async function handleRemoveUser(userId: string) {
+    if (!window.confirm("Er du sikker på at du vil fjerne denne brukeren fra kontoen?")) return
+    setActionLoading(userId)
+    await fetch("/api/account/users", {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ user_id: userId }),
+    })
+    setActionLoading(null)
+    fetchUsers()
+  }
+
+  async function handleCancelInvite(email: string) {
+    if (!window.confirm(`Avbryte invitasjonen til ${email}?`)) return
+    setActionLoading(email)
+    await fetch("/api/account/invite", {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email }),
+    })
+    setActionLoading(null)
+    fetchUsers()
+  }
+
+  async function handleTransferAdmin(userId: string, name: string) {
+    if (!window.confirm(`Overfør admin-rollen til ${name}? Du vil selv bli vanlig bruker.`)) return
+    setActionLoading(userId)
+    const res = await fetch("/api/account/users", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ user_id: userId, action: "make_admin" }),
+    })
+    setActionLoading(null)
+    if (res.ok) fetchUsers()
+  }
+
+  async function handleToggleRestrict(userId: string, current: boolean) {
+    setMembers((prev) =>
+      prev.map((m) => m.user_id === userId ? { ...m, restrict_to_own: !current } : m)
+    )
+    await fetch("/api/account/users", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ user_id: userId, restrict_to_own: !current }),
+    })
   }
 
   async function handleUserNotifToggle(key: keyof UserNotifPrefs, value: boolean) {
@@ -384,6 +432,7 @@ export default function SettingsPage() {
                       <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wide">Rolle</th>
                       <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wide">Tilgang</th>
                       <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wide">Status</th>
+                      {currentUserRole === "admin" && <th className="px-4 py-3" />}
                     </tr>
                   </thead>
                   <tbody>
@@ -402,14 +451,60 @@ export default function SettingsPage() {
                             {member.role === "admin" ? "Admin" : "Bruker"}
                           </span>
                         </td>
-                        <td className="px-4 py-3 text-xs text-gray-500">
-                          {member.role === "admin" ? "—" : member.restrict_to_own ? "Kun egne kunder" : "Alle kunder"}
+                        <td className="px-4 py-3">
+                          {member.role === "admin" ? (
+                            <span className="text-xs text-gray-400">—</span>
+                          ) : currentUserRole === "admin" ? (
+                            <button
+                              role="switch"
+                              aria-checked={member.restrict_to_own}
+                              onClick={() => handleToggleRestrict(member.user_id, member.restrict_to_own)}
+                              className="flex items-center gap-2 group"
+                              title={member.restrict_to_own ? "Kun egne kunder — klikk for å gi full tilgang" : "Alle kunder — klikk for å begrense"}
+                            >
+                              <span className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${member.restrict_to_own ? "bg-slate-700" : "bg-gray-200"}`}>
+                                <span className={`inline-block h-3.5 w-3.5 transform rounded-full bg-white shadow transition-transform ${member.restrict_to_own ? "translate-x-[18px]" : "translate-x-0.5"}`} />
+                              </span>
+                              <span className="text-xs text-gray-500 group-hover:text-gray-800 transition-colors">
+                                {member.restrict_to_own ? "Kun egne" : "Alle kunder"}
+                              </span>
+                            </button>
+                          ) : (
+                            <span className="text-xs text-gray-500">
+                              {member.restrict_to_own ? "Kun egne kunder" : "Alle kunder"}
+                            </span>
+                          )}
                         </td>
                         <td className="px-4 py-3">
                           <span className="text-xs font-medium px-2.5 py-0.5 rounded-full bg-green-50 text-green-700 ring-1 ring-green-200">
                             Aktiv
                           </span>
                         </td>
+                        {currentUserRole === "admin" && (
+                          <td className="px-4 py-3">
+                            {member.role !== "admin" && member.user_id !== user?.id && (
+                              <div className="flex items-center gap-2">
+                                <button
+                                  onClick={() => handleTransferAdmin(member.user_id, member.full_name)}
+                                  disabled={actionLoading === member.user_id}
+                                  className="text-xs text-slate-500 hover:text-slate-800 transition-colors disabled:opacity-40"
+                                  title="Gjør til admin"
+                                >
+                                  Gjør til admin
+                                </button>
+                                <span className="text-gray-200">|</span>
+                                <button
+                                  onClick={() => handleRemoveUser(member.user_id)}
+                                  disabled={actionLoading === member.user_id}
+                                  className="text-xs text-red-400 hover:text-red-600 transition-colors disabled:opacity-40"
+                                  title="Fjern bruker"
+                                >
+                                  Fjern
+                                </button>
+                              </div>
+                            )}
+                          </td>
+                        )}
                       </tr>
                     ))}
                     {pendingInvites.map((invite) => (
@@ -422,13 +517,24 @@ export default function SettingsPage() {
                           </span>
                         </td>
                         <td className="px-4 py-3 text-xs text-gray-500">
-                          {invite.restrict_to_own ? "Kun egne kunder" : "Alle kunder"}
+                          {invite.restrict_to_own ? "Kun egne" : "Alle kunder"}
                         </td>
                         <td className="px-4 py-3">
                           <span className="text-xs font-medium px-2.5 py-0.5 rounded-full bg-amber-50 text-amber-700 ring-1 ring-amber-200">
                             Invitert
                           </span>
                         </td>
+                        {currentUserRole === "admin" && (
+                          <td className="px-4 py-3">
+                            <button
+                              onClick={() => handleCancelInvite(invite.email)}
+                              disabled={actionLoading === invite.email}
+                              className="text-xs text-red-400 hover:text-red-600 transition-colors disabled:opacity-40"
+                            >
+                              Avbryt
+                            </button>
+                          </td>
+                        )}
                       </tr>
                     ))}
                   </tbody>

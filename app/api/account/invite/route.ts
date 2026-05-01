@@ -70,3 +70,39 @@ export async function POST(req: Request) {
 
   return NextResponse.json({ success: true })
 }
+
+// Avbryt ventende invitasjon
+export async function DELETE(req: Request) {
+  if (!supabaseAdmin) return NextResponse.json({ error: "Not configured" }, { status: 500 })
+
+  const cookieStore = await cookies()
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    { cookies: { get: (name) => cookieStore.get(name)?.value } }
+  )
+
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+
+  const { data: accountUser } = await supabaseAdmin
+    .from("account_users")
+    .select("account_id, role")
+    .eq("user_id", user.id)
+    .single()
+
+  if (!accountUser || accountUser.role !== "admin") {
+    return NextResponse.json({ error: "Kun admin kan avbryte invitasjoner" }, { status: 403 })
+  }
+
+  const { email } = await req.json()
+  if (!email) return NextResponse.json({ error: "E-post mangler" }, { status: 400 })
+
+  await supabaseAdmin
+    .from("pending_invites")
+    .delete()
+    .eq("email", email)
+    .eq("account_id", accountUser.account_id)
+
+  return NextResponse.json({ success: true })
+}
