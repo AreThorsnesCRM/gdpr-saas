@@ -1,20 +1,16 @@
 import { NextResponse } from "next/server"
-import { createServerClient } from "@supabase/ssr"
 import { supabaseAdmin } from "@/lib/supabaseAdmin"
-import { cookies } from "next/headers"
 
-export async function GET() {
+export async function GET(req: Request) {
   if (!supabaseAdmin) return NextResponse.json({ error: "Not configured" }, { status: 500 })
 
-  const cookieStore = await cookies()
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    { cookies: { get: (name) => cookieStore.get(name)?.value } }
-  )
+  // Les access token fra Authorization-header (satt av AuthProvider)
+  const authHeader = req.headers.get("authorization")
+  const token = authHeader?.startsWith("Bearer ") ? authHeader.slice(7) : null
+  if (!token) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
 
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+  const { data: { user }, error } = await supabaseAdmin.auth.getUser(token)
+  if (error || !user) return NextResponse.json({ error: "Ugyldig token" }, { status: 401 })
 
   const { data } = await supabaseAdmin
     .from("account_users")

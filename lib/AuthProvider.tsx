@@ -40,9 +40,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           setProfile(profileData)
 
           if (profileData?.account_id) {
+            const { data: { session } } = await supabase.auth.getSession()
+            const token = session?.access_token ?? ""
             const [{ data: accountData }, meRes] = await Promise.all([
               supabase.from("accounts").select("*").eq("id", profileData.account_id).single(),
-              fetch("/api/account/me"),
+              fetch("/api/account/me", {
+                headers: { Authorization: `Bearer ${token}` },
+              }),
             ])
             const meData = meRes.ok ? await meRes.json() : null
             setAccount(accountData ?? null)
