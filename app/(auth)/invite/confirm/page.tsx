@@ -15,27 +15,75 @@ function Spinner() {
   )
 }
 
+function ErrorScreen({ title, message }: { title: string; message: string }) {
+  return (
+    <div className="flex min-h-screen items-center justify-center bg-gray-50">
+      <div className="text-center max-w-sm px-6">
+        <div className="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center mx-auto mb-4">
+          <span className="text-red-600 text-xl font-bold">!</span>
+        </div>
+        <h2 className="text-gray-900 font-semibold mb-2">{title}</h2>
+        <p className="text-gray-500 text-sm mb-6">{message}</p>
+        <a
+          href="/login"
+          className="inline-block bg-slate-800 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-slate-700 transition-colors"
+        >
+          Gå til innlogging
+        </a>
+      </div>
+    </div>
+  )
+}
+
 function InviteConfirm() {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const [error, setError] = useState("")
+  const [error, setError] = useState<{ title: string; message: string } | null>(null)
 
   useEffect(() => {
     if (!supabase) {
-      setError("Tjeneste ikke tilgjengelig")
+      setError({ title: "Tjeneste ikke tilgjengelig", message: "Prøv igjen senere." })
+      return
+    }
+
+    const hash = typeof window !== "undefined" ? window.location.hash : ""
+
+    // Supabase sendte en feil i hash-fragmentet (f.eks. utløpt lenke)
+    if (hash.includes("error=")) {
+      const params = new URLSearchParams(hash.slice(1))
+      const errorCode = params.get("error_code")
+      const errorDesc = params.get("error_description")?.replace(/\+/g, " ")
+      if (errorCode === "otp_expired" || errorDesc?.includes("expired")) {
+        setError({
+          title: "Invitasjonslenken er utløpt",
+          message: "Lenken er kun gyldig i 24 timer. Be administratoren sende en ny invitasjon fra innstillingssiden.",
+        })
+      } else {
+        setError({ title: "Noe gikk galt", message: errorDesc ?? "Ugyldig lenke." })
+      }
       return
     }
 
     let done = false
 
+    // Timeout — vis feil hvis ingenting skjer innen 15 sek
+    const timeoutId = setTimeout(() => {
+      if (!done) {
+        setError({
+          title: "Aktivering tok for lang tid",
+          message: "Noe gikk galt. Prøv lenken i e-posten på nytt, eller kontakt support.",
+        })
+      }
+    }, 15000)
+
     async function processUser() {
       if (done) return
       done = true
+      clearTimeout(timeoutId)
 
-      // Hent session — access_token sendes i header så server slipper å lese cookies
       const { data: { session } } = await supabase!.auth.getSession()
       if (!session) {
-        setError("DEBUG: Ingen session funnet etter SIGNED_IN")
+        setError({ title: "Ingen sesjon funnet", message: "Prøv å klikke på lenken i e-posten på nytt." })
         return
       }
 
@@ -46,49 +94,72 @@ function InviteConfirm() {
       const data = await res.json()
 
       if (!res.ok) {
-        setError(`DEBUG ${res.status}: ${data.error ?? "Ukjent feil"} — epost: ${session.user?.email}`)
+        setError({
+          title: "Kunne ikke aktivere konto",
+          message: data.error ?? "Ukjent feil. Kontakt support.",
+        })
         return
       }
 
       router.replace(data.redirect)
     }
 
-    // Sett opp lytter FØR alt annet — fanger opp både hash-fragment og PKCE
+    // Flyt 1: access_token i hash-fragmentet (implicit flow)
+    if (hash.includes("access_token=")) {
+      const params = new URLSearchParams(hash.slice(1))
+      const accessToken = params.get("access_token")
+      const refreshToken = params.get("refresh_token") ?? ""
+      if (accessToken) {
+        supabase.auth.setSession({ access_token: accessToken, refresh_token: refreshToken })
+          .then(({ error: sessionError }) => {
+            if (sessionError) {
+              done = true
+              clearTimeout(timeoutId)
+              setError({ title: "Feil ved aktivering", message: sessionError.message })
+            } else {
+              processUser()
+            }
+          })
+        return () => clearTimeout(timeoutId)
+      }
+    }
+
+    // Flyt 2: code i query-params (PKCE flow)
+    const code = searchParams.get("code")
+    if (code) {
+      supabase.auth.exchangeCodeForSession(code).then(({ error: exchError }) => {
+        if (exchError) {
+          done = true
+          clearTimeout(timeoutId)
+          if (exchError.message.includes("expired")) {
+            setError({
+              title: "Invitasjonslenken er utløpt",
+              message: "Lenken er kun gyldig i 24 timer. Be administratoren sende en ny invitasjon.",
+            })
+          } else {
+            setError({ title: "Feil ved aktivering", message: exchError.message })
+          }
+        } else {
+          processUser()
+        }
+      })
+      return () => clearTimeout(timeoutId)
+    }
+
+    // Fallback: lytt på auth-hendelser
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       if (session && (event === "SIGNED_IN" || event === "INITIAL_SESSION")) {
         processUser()
-      } else if (!session && event === "INITIAL_SESSION") {
-        // Ingen eksisterende session — vent på SIGNED_IN fra lenken
-      } else if (!session) {
-        setError(`DEBUG: event=${event}, ingen session`)
       }
     })
 
-    // PKCE-flyt: bytt code mot session (triggerer SIGNED_IN over)
-    const code = searchParams.get("code")
-    if (code) {
-      supabase.auth.exchangeCodeForSession(code).then(({ error }) => {
-        if (error) {
-          done = true
-          setError(`DEBUG: exchangeCodeForSession feilet: ${error.message}`)
-        }
-      })
+    return () => {
+      clearTimeout(timeoutId)
+      subscription.unsubscribe()
     }
-
-    return () => subscription.unsubscribe()
   }, [router, searchParams])
 
-  if (error) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-gray-50">
-        <div className="text-center max-w-sm">
-          <p className="text-red-600 mb-4">{error}</p>
-          <a href="/login" className="text-sm text-blue-600 underline">Gå til innlogging</a>
-        </div>
-      </div>
-    )
-  }
-
+  if (error) return <ErrorScreen title={error.title} message={error.message} />
   return <Spinner />
 }
 
