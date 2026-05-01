@@ -30,13 +30,10 @@ export default function NewCustomerPage() {
   const [loading, setLoading] = useState(false)
 
   useEffect(() => {
-    if (!account || !supabase) return
-    supabase
-      .from("profiles")
-      .select("user_id, full_name")
-      .eq("account_id", account.id)
-      .then(({ data }) => { if (data) setTeamMembers(data) })
-  }, [account])
+    fetch("/api/account/members")
+      .then((r) => r.json())
+      .then(({ members }) => { if (members) setTeamMembers(members) })
+  }, [])
 
   async function createCustomer() {
     if (!name.trim() || !supabase) return

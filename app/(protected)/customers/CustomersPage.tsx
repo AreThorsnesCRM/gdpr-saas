@@ -35,7 +35,7 @@ const statusFilters = [
 ]
 
 export default function CustomersPage() {
-  const { user, account } = useAuth()
+  const { user } = useAuth()
   const router = useRouter()
 
   const [customers, setCustomers] = useState<Customer[]>([])
@@ -52,13 +52,10 @@ export default function CustomersPage() {
   }, [user])
 
   useEffect(() => {
-    if (!account || !supabase) return
-    supabase
-      .from("profiles")
-      .select("user_id, full_name")
-      .eq("account_id", account.id)
-      .then(({ data }) => { if (data) setTeamMembers(data) })
-  }, [account])
+    fetch("/api/account/members")
+      .then((r) => r.json())
+      .then(({ members }) => { if (members) setTeamMembers(members) })
+  }, [])
 
   async function loadCustomers() {
     if (!supabase) return

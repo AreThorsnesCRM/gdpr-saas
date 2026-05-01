@@ -103,13 +103,10 @@ export default function CustomerPage(props: CustomerPageProps) {
   }, [user, id])
 
   useEffect(() => {
-    if (!account || !supabase) return
-    supabase
-      .from("profiles")
-      .select("user_id, full_name")
-      .eq("account_id", account.id)
-      .then(({ data }) => { if (data) setTeamMembers(data) })
-  }, [account])
+    fetch("/api/account/members")
+      .then((r) => r.json())
+      .then(({ members }) => { if (members) setTeamMembers(members) })
+  }, [])
 
   useEffect(() => {
     if (!agreementId || agreements.length === 0) return
