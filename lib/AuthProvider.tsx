@@ -10,6 +10,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<{ id: string; email?: string } | null>(null)
   const [profile, setProfile] = useState<Profile | null>(null)
   const [account, setAccount] = useState<Account | null>(null)
+  const [role, setRole] = useState<"admin" | "member" | null>(null)
+  const [restrictToOwn, setRestrictToOwn] = useState(false)
   const [loading, setLoading] = useState(true)
 
   const fetchProfile = useCallback(async (retries = 3) => {
@@ -38,14 +40,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           setProfile(profileData)
 
           if (profileData?.account_id) {
-            const { data: accountData } = await supabase
-              .from("accounts")
-              .select("*")
-              .eq("id", profileData.account_id)
-              .single()
+            const [{ data: accountData }, { data: accountUserData }] = await Promise.all([
+              supabase.from("accounts").select("*").eq("id", profileData.account_id).single(),
+              supabase
+                .from("account_users")
+                .select("role, restrict_to_own")
+                .eq("user_id", user!.id)
+                .single(),
+            ])
             setAccount(accountData ?? null)
+            setRole((accountUserData?.role as "admin" | "member") ?? null)
+            setRestrictToOwn(accountUserData?.restrict_to_own ?? false)
           } else {
             setAccount(null)
+            setRole(null)
+            setRestrictToOwn(false)
           }
           return
         }
@@ -103,6 +112,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           setUser(null)
           setProfile(null)
           setAccount(null)
+          setRole(null)
+          setRestrictToOwn(false)
         }
         setLoading(false)
       })
@@ -150,15 +161,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       await fetch("/api/logout", { method: "POST" })
       await supabase.auth.signOut()
-      setUser(null)
-      setProfile(null)
-      setAccount(null)
+      setUser(null); setProfile(null); setAccount(null)
+      setRole(null); setRestrictToOwn(false)
       router.replace("/login")
     } catch (error) {
       console.error("[AuthProvider] Logout error:", error)
-      setUser(null)
-      setProfile(null)
-      setAccount(null)
+      setUser(null); setProfile(null); setAccount(null)
+      setRole(null); setRestrictToOwn(false)
       router.replace("/login")
     }
   }
@@ -167,6 +176,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     user,
     profile,
     account,
+    role,
+    restrictToOwn,
     loading,
     logout,
   }

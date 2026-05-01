@@ -37,7 +37,7 @@ export async function GET() {
   // Hent alle brukere i samme account
   const { data: members } = await supabaseAdmin
     .from("account_users")
-    .select("user_id, role")
+    .select("user_id, role, restrict_to_own")
     .eq("account_id", accountUser.account_id)
 
   if (!members) return NextResponse.json({ users: [] })
@@ -60,11 +60,19 @@ export async function GET() {
       full_name: profile?.full_name ?? "—",
       email: authUser?.email ?? "—",
       role: member.role,
+      restrict_to_own: member.restrict_to_own ?? false,
     }
   })
 
+  // Hent ventende invitasjoner
+  const { data: pending } = await supabaseAdmin
+    .from("pending_invites")
+    .select("email, restrict_to_own")
+    .eq("account_id", accountUser.account_id)
+
   return NextResponse.json({
     users,
+    pendingInvites: pending ?? [],
     currentUserRole: accountUser.role,
     notify_trial_ending: accountData?.notify_trial_ending ?? true,
     notify_payment_failed: accountData?.notify_payment_failed ?? true,

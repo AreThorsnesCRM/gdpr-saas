@@ -35,7 +35,7 @@ const statusFilters = [
 ]
 
 export default function CustomersPage() {
-  const { user } = useAuth()
+  const { user, restrictToOwn } = useAuth()
   const router = useRouter()
 
   const [customers, setCustomers] = useState<Customer[]>([])
@@ -49,7 +49,7 @@ export default function CustomersPage() {
 
   useEffect(() => {
     if (user) loadCustomers()
-  }, [user])
+  }, [user, restrictToOwn])
 
   useEffect(() => {
     fetch("/api/account/members")
@@ -63,9 +63,11 @@ export default function CustomersPage() {
 
     const today = new Date().toISOString().split("T")[0]
 
-    const { data: customerData } = await supabase
+    let customerQuery = supabase
       .from("customers")
       .select("id, name, email, phone, org_nummer, city, account_manager_id")
+    if (restrictToOwn && user) customerQuery = customerQuery.eq("account_manager_id", user.id)
+    const { data: customerData } = await customerQuery
 
     const { data: agreements } = await supabase
       .from("agreements")

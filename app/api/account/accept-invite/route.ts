@@ -34,7 +34,7 @@ export async function POST(req: Request) {
   // Finn invitasjonen
   const { data: pendingInvite } = await supabaseAdmin
     .from("pending_invites")
-    .select("account_id")
+    .select("account_id, restrict_to_own")
     .eq("email", user.email)
     .maybeSingle()
 
@@ -48,6 +48,7 @@ export async function POST(req: Request) {
     account_id: pendingInvite.account_id,
     user_id: user.id,
     role: "member",
+    restrict_to_own: pendingInvite.restrict_to_own ?? false,
   })
 
   // Opprett profil

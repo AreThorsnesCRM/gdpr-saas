@@ -11,6 +11,12 @@ type Member = {
   full_name: string
   email: string
   role: string
+  restrict_to_own: boolean
+}
+
+type PendingInvite = {
+  email: string
+  restrict_to_own: boolean
 }
 
 type NotificationPrefs = {
@@ -46,8 +52,10 @@ export default function SettingsPage() {
 
   const [activeSection, setActiveSection] = useState("profil")
   const [members, setMembers] = useState<Member[]>([])
+  const [pendingInvites, setPendingInvites] = useState<PendingInvite[]>([])
   const [currentUserRole, setCurrentUserRole] = useState<string | null>(null)
   const [inviteEmail, setInviteEmail] = useState("")
+  const [inviteRestrictToOwn, setInviteRestrictToOwn] = useState(false)
   const [loading, setLoading] = useState(true)
   const [inviting, setInviting] = useState(false)
   const [inviteMessage, setInviteMessage] = useState<{ type: "success" | "error"; text: string } | null>(null)
@@ -103,6 +111,7 @@ export default function SettingsPage() {
     if (res.ok) {
       const data = await res.json()
       setMembers(data.users)
+      setPendingInvites(data.pendingInvites ?? [])
       setCurrentUserRole(data.currentUserRole)
       setPrefs({
         notify_trial_ending: data.notify_trial_ending ?? true,
@@ -150,12 +159,14 @@ export default function SettingsPage() {
     const res = await fetch("/api/account/invite", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email: inviteEmail }),
+      body: JSON.stringify({ email: inviteEmail, restrict_to_own: inviteRestrictToOwn }),
     })
     const data = await res.json()
     if (res.ok) {
       setInviteMessage({ type: "success", text: `Invitasjon sendt til ${inviteEmail}!` })
       setInviteEmail("")
+      setInviteRestrictToOwn(false)
+      fetchUsers()
     } else {
       setInviteMessage({ type: "error", text: data.error ?? "Noe gikk galt" })
     }
@@ -371,6 +382,8 @@ export default function SettingsPage() {
                       <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wide">Navn</th>
                       <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wide">E-post</th>
                       <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wide">Rolle</th>
+                      <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wide">Tilgang</th>
+                      <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wide">Status</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -389,6 +402,33 @@ export default function SettingsPage() {
                             {member.role === "admin" ? "Admin" : "Bruker"}
                           </span>
                         </td>
+                        <td className="px-4 py-3 text-xs text-gray-500">
+                          {member.role === "admin" ? "—" : member.restrict_to_own ? "Kun egne kunder" : "Alle kunder"}
+                        </td>
+                        <td className="px-4 py-3">
+                          <span className="text-xs font-medium px-2.5 py-0.5 rounded-full bg-green-50 text-green-700 ring-1 ring-green-200">
+                            Aktiv
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                    {pendingInvites.map((invite) => (
+                      <tr key={invite.email} className="border-t border-gray-100 bg-gray-50/50">
+                        <td className="px-4 py-3 text-gray-400 italic text-sm">—</td>
+                        <td className="px-4 py-3 text-gray-500">{invite.email}</td>
+                        <td className="px-4 py-3">
+                          <span className="text-xs font-medium px-2.5 py-0.5 rounded-full bg-gray-100 text-gray-600">
+                            Bruker
+                          </span>
+                        </td>
+                        <td className="px-4 py-3 text-xs text-gray-500">
+                          {invite.restrict_to_own ? "Kun egne kunder" : "Alle kunder"}
+                        </td>
+                        <td className="px-4 py-3">
+                          <span className="text-xs font-medium px-2.5 py-0.5 rounded-full bg-amber-50 text-amber-700 ring-1 ring-amber-200">
+                            Invitert
+                          </span>
+                        </td>
                       </tr>
                     ))}
                   </tbody>
@@ -399,18 +439,29 @@ export default function SettingsPage() {
             {currentUserRole === "admin" && (
               <div className="mt-6">
                 <p className="text-sm font-medium text-gray-700 mb-2">Inviter ny bruker</p>
-                <form onSubmit={handleInvite} className="flex gap-3">
-                  <input
-                    type="email"
-                    value={inviteEmail}
-                    onChange={(e) => setInviteEmail(e.target.value)}
-                    placeholder="E-postadresse"
-                    required
-                    className={`flex-1 ${inputCls}`}
-                  />
-                  <button type="submit" disabled={inviting} className={btnPrimary}>
-                    {inviting ? "Sender..." : "Send invitasjon"}
-                  </button>
+                <form onSubmit={handleInvite} className="space-y-3">
+                  <div className="flex gap-3">
+                    <input
+                      type="email"
+                      value={inviteEmail}
+                      onChange={(e) => setInviteEmail(e.target.value)}
+                      placeholder="E-postadresse"
+                      required
+                      className={`flex-1 ${inputCls}`}
+                    />
+                    <button type="submit" disabled={inviting} className={btnPrimary}>
+                      {inviting ? "Sender..." : "Send invitasjon"}
+                    </button>
+                  </div>
+                  <label className="flex items-center gap-2.5 cursor-pointer w-fit">
+                    <input
+                      type="checkbox"
+                      checked={inviteRestrictToOwn}
+                      onChange={(e) => setInviteRestrictToOwn(e.target.checked)}
+                      className="h-4 w-4 rounded border-gray-300 text-slate-800 focus:ring-slate-400"
+                    />
+                    <span className="text-sm text-gray-600">Begrens til egne kunder (ser bare kunder de er ansvarlig for)</span>
+                  </label>
                 </form>
                 {inviteMessage && (
                   <p className={`mt-2 text-sm ${inviteMessage.type === "success" ? "text-green-600" : "text-red-600"}`}>

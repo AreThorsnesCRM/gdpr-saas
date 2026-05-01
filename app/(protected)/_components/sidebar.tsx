@@ -40,11 +40,12 @@ const badgeLabel: Record<string, string> = {
 
 export default function Sidebar() {
   const pathname = usePathname()
-  const { profile, account, loading, logout } = useAuth()
+  const { profile, account, role, loading, logout } = useAuth()
 
   const status = loading ? "loading" : account?.subscription_status ?? "unknown"
   const fullName = profile?.full_name ?? ""
   const companyName = account?.name ?? "AreCRM"
+  const isAdmin = role === "admin"
 
   return (
     <aside className="w-64 h-screen bg-slate-900 flex flex-col fixed left-0 top-0">
@@ -59,9 +60,11 @@ export default function Sidebar() {
         {fullName && (
           <div className="text-xs text-slate-400 mt-0.5 truncate">{fullName}</div>
         )}
-        <span className={`inline-block mt-2.5 rounded-full px-2.5 py-0.5 text-xs font-medium ${badgeStyles[status]}`}>
-          {badgeLabel[status]}
-        </span>
+        {isAdmin && (
+          <span className={`inline-block mt-2.5 rounded-full px-2.5 py-0.5 text-xs font-medium ${badgeStyles[status]}`}>
+            {badgeLabel[status]}
+          </span>
+        )}
       </div>
 
       {/* Navigasjon */}

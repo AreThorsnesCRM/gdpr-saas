@@ -4,10 +4,12 @@ import { useEffect, useState } from "react"
 import Link from "next/link"
 import { useRouter, useSearchParams } from "next/navigation"
 import { supabase } from "@/lib/supabaseClient"
+import { useAuth } from "@/lib/AuthContext"
 
 export default function AgreementsPage() {
   const router = useRouter()
   const searchParams = useSearchParams()
+  const { user, restrictToOwn } = useAuth()
 
   const [filter, setFilter] = useState<
     "all" | "active" | "expired" | "upcoming" | "archived" | "expiresSoon"
@@ -46,10 +48,14 @@ export default function AgreementsPage() {
 
       await waitForSession()
 
-      const { data, error } = await supabase
+      let query = supabase
         .from("agreements")
-        .select("*, customers(name)")
+        .select("*, customers!inner(name, account_manager_id)")
         .order("start_date", { ascending: true })
+      if (restrictToOwn && user) {
+        query = query.eq("customers.account_manager_id", user.id)
+      }
+      const { data, error } = await query
 
       if (error) {
         console.error("Error fetching agreements:", error)
@@ -62,7 +68,7 @@ export default function AgreementsPage() {
     }
 
     fetchAgreements()
-  }, [])
+  }, [user, restrictToOwn])
 
   // Filter fra URL
   useEffect(() => {

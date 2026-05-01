@@ -8,7 +8,8 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Not configured" }, { status: 500 })
   }
 
-  const { email } = await req.json()
+  const body = await req.json()
+  const { email, restrict_to_own = false } = body
   if (!email) return NextResponse.json({ error: "E-post mangler" }, { status: 400 })
 
   const cookieStore = await cookies()
@@ -53,7 +54,7 @@ export async function POST(req: Request) {
   // (Supabase-invitasjonslenker bevarer ikke egne query params pålitelig)
   await supabaseAdmin
     .from("pending_invites")
-    .upsert({ email, account_id: accountUser.account_id }, { onConflict: "email" })
+    .upsert({ email, account_id: accountUser.account_id, restrict_to_own }, { onConflict: "email" })
 
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL!
   const redirectTo = `${baseUrl}/invite/confirm`

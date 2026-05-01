@@ -23,6 +23,8 @@ export type AuthContextType = {
   user: { id: string; email?: string } | null
   profile: Profile | null
   account: Account | null
+  role: "admin" | "member" | null
+  restrictToOwn: boolean
   loading: boolean
   logout: () => Promise<void>
 }

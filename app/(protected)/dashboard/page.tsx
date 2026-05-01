@@ -22,7 +22,7 @@ type StatsState = {
 }
 
 export default function DashboardPage() {
-  const { user, account, loading: authLoading } = useAuth()
+  const { user, account, restrictToOwn, loading: authLoading } = useAuth()
 
   const [stats, setStats] = useState<StatsState>({
     customers: 0,
@@ -38,12 +38,14 @@ export default function DashboardPage() {
     fetchStats()
     fetchUpcoming()
     fetchCriticalCustomers()
-  }, [user])
+  }, [user, restrictToOwn])
 
   async function fetchStats() {
     if (!supabase) return
 
-    const { data: customers } = await supabase.from("customers").select("id")
+    let customersQuery = supabase.from("customers").select("id")
+    if (restrictToOwn && user) customersQuery = customersQuery.eq("account_manager_id", user.id)
+    const { data: customers } = await customersQuery
     const { data: agreements } = await supabase.from("agreements").select("id, archived, end_date, customer_id")
 
     const today = new Date().toISOString().split("T")[0]
@@ -88,7 +90,9 @@ export default function DashboardPage() {
     if (!supabase) return
     const today = new Date().toISOString().split("T")[0]
 
-    const { data: customers } = await supabase.from("customers").select("id, name, email")
+    let critQuery = supabase.from("customers").select("id, name, email")
+    if (restrictToOwn && user) critQuery = critQuery.eq("account_manager_id", user.id)
+    const { data: customers } = await critQuery
     const { data: agreements } = await supabase.from("agreements").select("customer_id, archived, end_date")
 
     if (!customers || !agreements) return
