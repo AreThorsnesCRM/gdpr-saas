@@ -47,6 +47,7 @@ export default function NewCustomerPage() {
 
     const { error } = await supabase.from("customers").insert([{
       user_id: u.id,
+      account_id: account?.id ?? null,
       name,
       email: email || null,
       phone: phone || null,

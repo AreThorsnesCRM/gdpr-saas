@@ -2,8 +2,9 @@
 
 export const dynamic = "force-dynamic"
 
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useState } from "react"
 import { useAuth } from "@/lib/AuthContext"
+import { supabase } from "@/lib/supabaseClient"
 
 type Member = {
   user_id: string
@@ -28,6 +29,7 @@ type CompanyProfile = {
 }
 
 const sections = [
+  { id: "profil",      label: "Min profil" },
   { id: "firma",       label: "Firmainformasjon" },
   { id: "brukere",     label: "Brukere" },
   { id: "varsler",     label: "Varsler" },
@@ -35,19 +37,22 @@ const sections = [
 ]
 
 export default function SettingsPage() {
-  const { account } = useAuth()
-  const [activeSection, setActiveSection] = useState("firma")
+  const { account, user } = useAuth()
+
+  const [activeSection, setActiveSection] = useState("profil")
   const [members, setMembers] = useState<Member[]>([])
   const [currentUserRole, setCurrentUserRole] = useState<string | null>(null)
   const [inviteEmail, setInviteEmail] = useState("")
   const [loading, setLoading] = useState(true)
   const [inviting, setInviting] = useState(false)
   const [inviteMessage, setInviteMessage] = useState<{ type: "success" | "error"; text: string } | null>(null)
+
   const [prefs, setPrefs] = useState<NotificationPrefs>({
     notify_trial_ending: true,
     notify_payment_failed: true,
   })
   const [savingPrefs, setSavingPrefs] = useState(false)
+
   const [company, setCompany] = useState<CompanyProfile>({
     name: "", org_number: "", address: "", postal_code: "", city: "", phone: "", contact_email: "",
   })
@@ -55,10 +60,24 @@ export default function SettingsPage() {
   const [companySaved, setCompanySaved] = useState(false)
   const [companyMessage, setCompanyMessage] = useState<{ type: "error"; text: string } | null>(null)
 
+  const [fullName, setFullName] = useState("")
+  const [profileSaved, setProfileSaved] = useState(false)
+  const [savingProfile, setSavingProfile] = useState(false)
+
   useEffect(() => {
     fetchUsers()
     fetchCompanyProfile()
   }, [])
+
+  useEffect(() => {
+    if (!user || !supabase) return
+    supabase
+      .from("profiles")
+      .select("full_name")
+      .eq("user_id", user.id)
+      .maybeSingle()
+      .then(({ data }) => { if (data?.full_name) setFullName(data.full_name) })
+  }, [user])
 
   async function fetchUsers() {
     setLoading(true)
@@ -88,6 +107,21 @@ export default function SettingsPage() {
         phone: data.phone ?? "",
         contact_email: data.contact_email ?? "",
       })
+    }
+  }
+
+  async function handleSaveProfile(e: React.FormEvent) {
+    e.preventDefault()
+    if (!supabase || !user) return
+    setSavingProfile(true)
+    const { error } = await supabase
+      .from("profiles")
+      .update({ full_name: fullName })
+      .eq("user_id", user.id)
+    setSavingProfile(false)
+    if (!error) {
+      setProfileSaved(true)
+      setTimeout(() => setProfileSaved(false), 2000)
     }
   }
 
@@ -165,7 +199,6 @@ export default function SettingsPage() {
 
   return (
     <div className="p-8 max-w-5xl">
-      {/* Sidehode */}
       <div className="mb-8">
         <h1 className="text-2xl font-bold text-gray-900">Innstillinger</h1>
         {account && <p className="text-gray-500 mt-1">{account.name}</p>}
@@ -194,6 +227,43 @@ export default function SettingsPage() {
 
         {/* Innholdsseksjoner */}
         <div className="flex-1 space-y-12">
+
+          {/* Min profil */}
+          <section id="profil" className="scroll-mt-8">
+            <SectionHeader title="Min profil" description="Navn som vises til andre brukere på kontoen." />
+            <form onSubmit={handleSaveProfile} className="mt-4 space-y-4 max-w-sm">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Fullt navn</label>
+                <input
+                  type="text"
+                  value={fullName}
+                  onChange={(e) => setFullName(e.target.value)}
+                  placeholder="Ditt navn"
+                  className={inputCls}
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">E-post</label>
+                <input
+                  type="text"
+                  value={user?.email ?? ""}
+                  disabled
+                  className={`${inputCls} bg-gray-50 text-gray-400 cursor-not-allowed`}
+                />
+              </div>
+              <button
+                type="submit"
+                disabled={savingProfile}
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors disabled:opacity-50 ${
+                  profileSaved ? "bg-green-600 text-white" : "bg-slate-800 text-white hover:bg-slate-700"
+                }`}
+              >
+                {savingProfile ? "Lagrer..." : profileSaved ? "Lagret ✓" : "Lagre"}
+              </button>
+            </form>
+          </section>
+
+          <Divider />
 
           {/* Firmainformasjon */}
           <section id="firma" className="scroll-mt-8">
@@ -247,9 +317,7 @@ export default function SettingsPage() {
                     type="submit"
                     disabled={savingCompany}
                     className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors disabled:opacity-50 ${
-                      companySaved
-                        ? "bg-green-600 text-white"
-                        : "bg-slate-800 text-white hover:bg-slate-700"
+                      companySaved ? "bg-green-600 text-white" : "bg-slate-800 text-white hover:bg-slate-700"
                     }`}
                   >
                     {savingCompany ? "Lagrer..." : companySaved ? "Lagret ✓" : "Lagre"}
@@ -272,17 +340,19 @@ export default function SettingsPage() {
             ) : (
               <div className="mt-4 border border-gray-200 rounded-xl overflow-hidden">
                 <table className="w-full text-sm">
-                  <thead className="bg-gray-50 text-gray-500">
-                    <tr>
-                      <th className="text-left px-4 py-3 font-medium">Navn</th>
-                      <th className="text-left px-4 py-3 font-medium">E-post</th>
-                      <th className="text-left px-4 py-3 font-medium">Rolle</th>
+                  <thead>
+                    <tr className="border-b border-gray-200 bg-gray-50">
+                      <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wide">Navn</th>
+                      <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wide">E-post</th>
+                      <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wide">Rolle</th>
                     </tr>
                   </thead>
                   <tbody>
                     {members.map((member) => (
                       <tr key={member.user_id} className="border-t border-gray-100">
-                        <td className="px-4 py-3 text-gray-800 font-medium">{member.full_name}</td>
+                        <td className="px-4 py-3 text-gray-800 font-medium">
+                          {member.full_name || <span className="text-gray-400 italic">Ikke satt</span>}
+                        </td>
                         <td className="px-4 py-3 text-gray-500">{member.email}</td>
                         <td className="px-4 py-3">
                           <span className={`text-xs font-medium px-2.5 py-0.5 rounded-full ${
@@ -300,7 +370,6 @@ export default function SettingsPage() {
               </div>
             )}
 
-            {/* Inviter */}
             {currentUserRole === "admin" && (
               <div className="mt-6">
                 <p className="text-sm font-medium text-gray-700 mb-2">Inviter ny bruker</p>
@@ -379,24 +448,18 @@ export default function SettingsPage() {
                 </div>
                 <div className="flex gap-3">
                   {(account.subscription_status === "active" || account.subscription_status === "past_due") && (
-                    <button onClick={openPortal} className={btnPrimary}>
-                      Administrer abonnement
-                    </button>
+                    <button onClick={openPortal} className={btnPrimary}>Administrer abonnement</button>
                   )}
                   {account.subscription_status === "trialing" && (
                     <>
-                      <button onClick={openCheckout} className={btnPrimary}>
-                        Start abonnement nå
-                      </button>
-                      <button onClick={openPortal} className="border border-gray-200 text-gray-700 px-4 py-2 rounded-lg text-sm font-medium hover:border-gray-300 hover:text-gray-900 transition-colors">
+                      <button onClick={openCheckout} className={btnPrimary}>Start abonnement nå</button>
+                      <button onClick={openPortal} className="border border-gray-200 text-gray-700 px-4 py-2 rounded-lg text-sm font-medium hover:border-gray-300 transition-colors">
                         Administrer abonnement
                       </button>
                     </>
                   )}
                   {(account.subscription_status === "canceled" || account.subscription_status === "incomplete") && (
-                    <button onClick={openCheckout} className={btnPrimary}>
-                      Start abonnement
-                    </button>
+                    <button onClick={openCheckout} className={btnPrimary}>Start abonnement</button>
                   )}
                 </div>
               </div>
@@ -424,10 +487,7 @@ function Field({ label, children, colSpan }: { label: string; children: React.Re
 }
 
 function SectionHeader({ title, description, adminOnly, isAdmin }: {
-  title: string
-  description: string
-  adminOnly?: boolean
-  isAdmin?: boolean
+  title: string; description: string; adminOnly?: boolean; isAdmin?: boolean
 }) {
   return (
     <div>
@@ -453,18 +513,11 @@ function StatusBadge({ status }: { status: string | null | undefined }) {
   }
   const s = status ? map[status] : null
   if (!s) return null
-  return (
-    <span className={`text-xs font-medium px-2.5 py-0.5 rounded-full ring-1 ${s.cls}`}>
-      {s.label}
-    </span>
-  )
+  return <span className={`text-xs font-medium px-2.5 py-0.5 rounded-full ring-1 ${s.cls}`}>{s.label}</span>
 }
 
 function ToggleRow({ label, description, checked, onChange }: {
-  label: string
-  description: string
-  checked: boolean
-  onChange: (v: boolean) => void
+  label: string; description: string; checked: boolean; onChange: (v: boolean) => void
 }) {
   return (
     <div className="flex items-center justify-between px-4 py-4">
@@ -476,13 +529,9 @@ function ToggleRow({ label, description, checked, onChange }: {
         role="switch"
         aria-checked={checked}
         onClick={() => onChange(!checked)}
-        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-          checked ? "bg-slate-800" : "bg-gray-200"
-        }`}
+        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${checked ? "bg-slate-800" : "bg-gray-200"}`}
       >
-        <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform shadow ${
-          checked ? "translate-x-6" : "translate-x-1"
-        }`} />
+        <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform shadow ${checked ? "translate-x-6" : "translate-x-1"}`} />
       </button>
     </div>
   )
