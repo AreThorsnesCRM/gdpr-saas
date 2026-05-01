@@ -559,15 +559,18 @@ export default function SettingsPage() {
                       {inviting ? "Sender..." : "Send invitasjon"}
                     </button>
                   </div>
-                  <label className="flex items-center gap-2.5 cursor-pointer w-fit">
-                    <input
-                      type="checkbox"
-                      checked={inviteRestrictToOwn}
-                      onChange={(e) => setInviteRestrictToOwn(e.target.checked)}
-                      className="h-4 w-4 rounded border-gray-300 text-slate-800 focus:ring-slate-400"
-                    />
-                    <span className="text-sm text-gray-600">Begrens til egne kunder (ser bare kunder de er ansvarlig for)</span>
-                  </label>
+                  <div className="flex items-center justify-between py-1">
+                    <span className="text-sm text-gray-600">Begrens til egne kunder</span>
+                    <button
+                      type="button"
+                      role="switch"
+                      aria-checked={inviteRestrictToOwn}
+                      onClick={() => setInviteRestrictToOwn((v) => !v)}
+                      className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${inviteRestrictToOwn ? "bg-slate-800" : "bg-gray-200"}`}
+                    >
+                      <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform shadow ${inviteRestrictToOwn ? "translate-x-6" : "translate-x-1"}`} />
+                    </button>
+                  </div>
                 </form>
                 {inviteMessage && (
                   <p className={`mt-2 text-sm ${inviteMessage.type === "success" ? "text-green-600" : "text-red-600"}`}>

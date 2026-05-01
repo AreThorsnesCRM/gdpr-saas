@@ -40,17 +40,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           setProfile(profileData)
 
           if (profileData?.account_id) {
-            const [{ data: accountData }, { data: accountUserData }] = await Promise.all([
+            const [{ data: accountData }, meRes] = await Promise.all([
               supabase.from("accounts").select("*").eq("id", profileData.account_id).single(),
-              supabase
-                .from("account_users")
-                .select("role, restrict_to_own")
-                .eq("user_id", user!.id)
-                .single(),
+              fetch("/api/account/me"),
             ])
+            const meData = meRes.ok ? await meRes.json() : null
             setAccount(accountData ?? null)
-            setRole((accountUserData?.role as "admin" | "member") ?? null)
-            setRestrictToOwn(accountUserData?.restrict_to_own ?? false)
+            setRole(meData?.role ?? null)
+            setRestrictToOwn(meData?.restrict_to_own ?? false)
           } else {
             setAccount(null)
             setRole(null)
