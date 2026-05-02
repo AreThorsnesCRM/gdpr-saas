@@ -38,8 +38,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           }
         } else {
           setProfile(profileData)
-          // restrict_to_own leses direkte fra profilen — pålitelig uten RLS-begrensninger
-          setRestrictToOwn(profileData?.restrict_to_own ?? false)
 
           if (profileData?.account_id) {
             const { data: { session } } = await supabase.auth.getSession()
@@ -52,8 +50,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             ])
             const meData = meRes.ok ? await meRes.json() : null
             setAccount(accountData ?? null)
-            setRole(meData?.role ?? null)
+            const fetchedRole = meData?.role ?? null
+            setRole(fetchedRole)
+            // Admin har alltid full tilgang uavhengig av DB-verdi
+            setRestrictToOwn(fetchedRole === "admin" ? false : (profileData?.restrict_to_own ?? false))
           } else {
+            setRestrictToOwn(profileData?.restrict_to_own ?? false)
             setAccount(null)
             setRole(null)
           }
