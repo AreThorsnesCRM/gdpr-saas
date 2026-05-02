@@ -129,12 +129,16 @@ export default function AgreementsPage() {
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold text-gray-900">Avtaler</h1>
         <Link
-          href="/agreements/new"
+          href="/customers"
           className="bg-slate-800 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-slate-700 transition-colors"
         >
           Ny avtale
         </Link>
       </div>
+
+      <p className="text-sm text-gray-400 -mt-4">
+        Gå til en kunde for å legge til eller redigere avtaler.
+      </p>
 
       <div className="flex flex-wrap gap-2">
         {filterOptions.map((f) => (
