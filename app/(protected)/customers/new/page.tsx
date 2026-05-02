@@ -16,7 +16,7 @@ interface TeamMember {
 
 export default function NewCustomerPage() {
   const router = useRouter()
-  const { user, account } = useAuth()
+  const { user } = useAuth()
 
   const [name, setName] = useState("")
   const [email, setEmail] = useState("")
@@ -39,24 +39,29 @@ export default function NewCustomerPage() {
     if (!name.trim() || !supabase) return
     setLoading(true)
 
-    const { data: { user: u } } = await supabase.auth.getUser()
-    if (!u) { setLoading(false); return }
+    const { data: { session } } = await supabase.auth.getSession()
+    if (!session) { setLoading(false); return }
 
-    const { error } = await supabase.from("customers").insert([{
-      user_id: u.id,
-      account_id: account?.id ?? null,
-      name,
-      email: email || null,
-      phone: phone || null,
-      org_nummer: orgNummer || null,
-      address: address || null,
-      postal_code: postalCode || null,
-      city: city || null,
-      account_manager_id: accountManagerId || null,
-    }])
+    const res = await fetch("/api/customers", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${session.access_token}`,
+      },
+      body: JSON.stringify({
+        name,
+        email: email || null,
+        phone: phone || null,
+        org_nummer: orgNummer || null,
+        address: address || null,
+        postal_code: postalCode || null,
+        city: city || null,
+        account_manager_id: accountManagerId || null,
+      }),
+    })
 
     setLoading(false)
-    if (!error) router.push("/customers")
+    if (res.ok) router.push("/customers")
   }
 
   const inputClass = "w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-400 bg-white"
