@@ -218,15 +218,8 @@ export default function AgreementSlideOver({
 
           <div className="flex-1 overflow-y-auto px-8 py-6">
             <div
-              className="text-sm text-gray-800 leading-relaxed
-                [&_h2]:text-lg [&_h2]:font-semibold [&_h2]:mt-6 [&_h2]:mb-2 [&_h2]:text-gray-900
-                [&_h3]:text-base [&_h3]:font-semibold [&_h3]:mt-4 [&_h3]:mb-1 [&_h3]:text-gray-900
-                [&_p]:mb-3 [&_p]:text-gray-700
-                [&_ul]:list-disc [&_ul]:pl-5 [&_ul]:mb-3
-                [&_ol]:list-decimal [&_ol]:pl-5 [&_ol]:mb-3
-                [&_li]:mb-0.5 [&_li]:text-gray-700
-                [&_strong]:font-semibold [&_em]:italic"
-              dangerouslySetInnerHTML={{ __html: previewHtml || "<p class='text-gray-400'>Ingen innhold i malen.</p>" }}
+              className="agreement-preview text-sm"
+              dangerouslySetInnerHTML={{ __html: previewHtml || "<p style='color:#9ca3af'>Ingen innhold i malen.</p>" }}
             />
           </div>
 

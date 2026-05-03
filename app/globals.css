@@ -24,3 +24,15 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+/* Avtalemaler — forhåndsvisning */
+.agreement-preview h1 { font-size: 1.5rem; font-weight: 700; margin: 0 0 1rem; color: #111827; }
+.agreement-preview h2 { font-size: 1.2rem; font-weight: 600; margin: 1.5rem 0 0.5rem; color: #111827; }
+.agreement-preview h3 { font-size: 1rem;   font-weight: 600; margin: 1rem 0 0.25rem; color: #111827; }
+.agreement-preview p  { margin-bottom: 0.8rem; color: #374151; line-height: 1.7; }
+.agreement-preview ul { list-style-type: disc;    padding-left: 1.4rem; margin-bottom: 0.8rem; }
+.agreement-preview ol { list-style-type: decimal; padding-left: 1.4rem; margin-bottom: 0.8rem; }
+.agreement-preview li { margin-bottom: 0.2rem; color: #374151; }
+.agreement-preview strong { font-weight: 700; }
+.agreement-preview em    { font-style: italic; }
+.agreement-preview blockquote { border-left: 3px solid #e5e7eb; padding-left: 1rem; color: #6b7280; margin: 1rem 0; }
