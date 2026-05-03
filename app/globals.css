@@ -35,4 +35,10 @@ body {
 .agreement-preview li { margin-bottom: 0.2rem; color: #374151; }
 .agreement-preview strong { font-weight: 700; }
 .agreement-preview em    { font-style: italic; }
+.agreement-preview u     { text-decoration: underline; }
+.agreement-preview s     { text-decoration: line-through; }
 .agreement-preview blockquote { border-left: 3px solid #e5e7eb; padding-left: 1rem; color: #6b7280; margin: 1rem 0; }
+.agreement-preview hr    { border: none; border-top: 1px solid #e5e7eb; margin: 1.5rem 0; }
+.agreement-preview [style*="text-align: center"] { text-align: center; }
+.agreement-preview [style*="text-align: right"]  { text-align: right; }
+.agreement-preview [style*="text-align: justify"] { text-align: justify; }

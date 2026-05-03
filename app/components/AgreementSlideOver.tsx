@@ -60,7 +60,7 @@ function formatDateNO(dateStr: string): string {
 async function generatePDFFile(html: string, title: string): Promise<File> {
   const container = document.createElement("div")
   container.style.cssText = "position:fixed;left:-9999px;top:0;width:794px;padding:60px 80px;font-family:Arial,sans-serif;font-size:13px;line-height:1.7;background:white;color:#111;"
-  container.innerHTML = `<style>h2{font-size:18px;font-weight:600;margin:1.2em 0 0.4em}h3{font-size:15px;font-weight:600;margin:1em 0 0.3em}p{margin:0 0 0.8em}ul,ol{margin:0 0 0.8em;padding-left:1.8em}li{margin:0.2em 0}strong{font-weight:700}em{font-style:italic}</style>${html}`
+  container.innerHTML = `<style>h1{font-size:22px;font-weight:700;margin:0 0 1em}h2{font-size:18px;font-weight:600;margin:1.2em 0 0.4em}h3{font-size:15px;font-weight:600;margin:1em 0 0.3em}p{margin:0 0 0.8em}ul,ol{margin:0 0 0.8em;padding-left:1.8em}li{margin:0.2em 0}strong{font-weight:700}em{font-style:italic}u{text-decoration:underline}s{text-decoration:line-through}hr{border:none;border-top:1px solid #ccc;margin:1.5em 0}blockquote{border-left:3px solid #ccc;padding-left:1em;color:#555;margin:1em 0}</style>${html}`
   document.body.appendChild(container)
 
   const html2canvasLib = (await import("html2canvas")).default
