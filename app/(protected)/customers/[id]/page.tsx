@@ -28,6 +28,8 @@ interface Note {
   id: string
   content: string
   created_at: string
+  user_id: string
+  type: string
 }
 
 interface Agreement {
@@ -77,6 +79,7 @@ export default function CustomerPage(props: CustomerPageProps) {
 
   const [notes, setNotes] = useState<Note[]>([])
   const [newNote, setNewNote] = useState("")
+  const [newNoteType, setNewNoteType] = useState("note")
 
   const [agreements, setAgreements] = useState<Agreement[]>([])
   const activeAgreements = agreements.filter((a) => !a.archived)
@@ -172,7 +175,12 @@ export default function CustomerPage(props: CustomerPageProps) {
     if (!newNote.trim() || !supabase) return
     const { data: { user: u } } = await supabase.auth.getUser()
     if (!u) return
-    await supabase.from("notes").insert({ customer_id: id, content: newNote, user_id: u.id })
+    await supabase.from("notes").insert({
+      customer_id: id,
+      content: newNote,
+      user_id: u.id,
+      type: newNoteType,
+    })
     setNewNote("")
     fetchNotes()
   }
@@ -368,37 +376,92 @@ export default function CustomerPage(props: CustomerPageProps) {
             </button>
           </div>
 
-          {/* Notater */}
+          {/* Aktivitetslogg */}
           <div className="bg-white rounded-xl border border-gray-200 p-6 space-y-4">
-            <h2 className="text-base font-semibold text-gray-900">Notater</h2>
-            <textarea
-              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-400 bg-white resize-none"
-              rows={3}
-              placeholder="Nytt notat..."
-              value={newNote}
-              onChange={(e) => setNewNote(e.target.value)}
-            />
-            <button
-              onClick={addNote}
-              className="bg-slate-800 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-slate-700 transition-colors"
-            >
-              Legg til notat
-            </button>
+            <h2 className="text-base font-semibold text-gray-900">Aktivitet</h2>
+
+            {/* Type-velger */}
+            <div className="flex gap-2 flex-wrap">
+              {activityTypes.map((t) => (
+                <button
+                  key={t.value}
+                  onClick={() => setNewNoteType(t.value)}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${
+                    newNoteType === t.value
+                      ? "bg-slate-800 text-white"
+                      : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                  }`}
+                >
+                  <span>{t.icon}</span>
+                  {t.label}
+                </button>
+              ))}
+            </div>
+
+            {/* Input */}
+            <div className="space-y-2">
+              <textarea
+                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-400 bg-white resize-none"
+                rows={2}
+                placeholder={`Legg til ${activityTypes.find(t => t.value === newNoteType)?.label.toLowerCase() ?? "notat"}...`}
+                value={newNote}
+                onChange={(e) => setNewNote(e.target.value)}
+                onKeyDown={(e) => { if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) addNote() }}
+              />
+              <button
+                onClick={addNote}
+                disabled={!newNote.trim()}
+                className="bg-slate-800 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-slate-700 disabled:opacity-40 transition-colors"
+              >
+                Legg til
+              </button>
+            </div>
+
+            {/* Tidslinje */}
             {notes.length > 0 && (
-              <ul className="pt-1">
-                {notes.map((n) => (
-                  <li key={n.id} className="group flex items-start justify-between gap-3 py-2.5 border-t border-gray-100 first:border-0">
-                    <p className="text-sm text-gray-700 flex-1">{n.content}</p>
-                    <button
-                      onClick={() => deleteNote(n.id)}
-                      className="text-gray-300 hover:text-red-500 transition-colors shrink-0 opacity-0 group-hover:opacity-100 mt-0.5"
-                      title="Slett notat"
-                    >
-                      <TrashIcon className="h-4 w-4" />
-                    </button>
-                  </li>
-                ))}
+              <ul className="space-y-0 pt-2">
+                {notes.map((n, i) => {
+                  const typeInfo = activityTypes.find(t => t.value === n.type) ?? activityTypes[0]
+                  const authorName = teamMembers.find(m => m.user_id === n.user_id)?.full_name ?? "Ukjent"
+                  const isLast = i === notes.length - 1
+                  return (
+                    <li key={n.id} className="group relative flex gap-3">
+                      {/* Vertikal linje */}
+                      {!isLast && (
+                        <div className="absolute left-[15px] top-8 bottom-0 w-px bg-gray-100" />
+                      )}
+                      {/* Ikon-sirkel */}
+                      <div className={`relative z-10 flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-sm ${typeInfo.bg}`}>
+                        {typeInfo.icon}
+                      </div>
+                      {/* Innhold */}
+                      <div className="flex-1 pb-4 min-w-0">
+                        <div className="flex items-center justify-between gap-2">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${typeInfo.badge}`}>
+                              {typeInfo.label}
+                            </span>
+                            <span className="text-xs text-gray-400">{authorName}</span>
+                            <span className="text-xs text-gray-300">·</span>
+                            <span className="text-xs text-gray-400">{timeAgo(n.created_at)}</span>
+                          </div>
+                          <button
+                            onClick={() => deleteNote(n.id)}
+                            className="opacity-0 group-hover:opacity-100 text-gray-300 hover:text-red-500 transition-colors shrink-0"
+                            title="Slett"
+                          >
+                            <TrashIcon className="h-3.5 w-3.5" />
+                          </button>
+                        </div>
+                        <p className="text-sm text-gray-700 mt-1 leading-relaxed">{n.content}</p>
+                      </div>
+                    </li>
+                  )
+                })}
               </ul>
+            )}
+            {notes.length === 0 && (
+              <p className="text-sm text-gray-400">Ingen aktivitet registrert ennå.</p>
             )}
           </div>
         </div>
@@ -509,4 +572,23 @@ export default function CustomerPage(props: CustomerPageProps) {
       />
     </div>
   )
+}
+
+const activityTypes = [
+  { value: "note",    label: "Notat",    icon: "📝", bg: "bg-gray-100",   badge: "bg-gray-100 text-gray-600" },
+  { value: "call",    label: "Samtale",  icon: "📞", bg: "bg-green-50",   badge: "bg-green-50 text-green-700" },
+  { value: "email",   label: "E-post",   icon: "✉️",  bg: "bg-blue-50",    badge: "bg-blue-50 text-blue-700" },
+  { value: "meeting", label: "Møte",     icon: "👥", bg: "bg-purple-50",  badge: "bg-purple-50 text-purple-700" },
+]
+
+function timeAgo(dateStr: string) {
+  const diff = Date.now() - new Date(dateStr).getTime()
+  const mins  = Math.floor(diff / 60000)
+  const hours = Math.floor(diff / 3600000)
+  const days  = Math.floor(diff / 86400000)
+  if (mins < 1)   return "nå nettopp"
+  if (mins < 60)  return `${mins}m siden`
+  if (hours < 24) return `${hours}t siden`
+  if (days < 7)   return `${days}d siden`
+  return new Date(dateStr).toLocaleDateString("no-NO", { day: "numeric", month: "short" })
 }
