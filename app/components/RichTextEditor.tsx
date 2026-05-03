@@ -41,7 +41,7 @@ export default function RichTextEditor({ content, onChange, placeholder }: Props
   // Sync ekstern content-endring (f.eks. ved lasting)
   useEffect(() => {
     if (editor && content !== editor.getHTML()) {
-      editor.commands.setContent(content, false)
+      editor.commands.setContent(content)
     }
   }, [content])
 
