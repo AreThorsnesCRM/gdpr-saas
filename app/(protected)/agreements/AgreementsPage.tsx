@@ -1,10 +1,10 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import Link from "next/link"
 import { useRouter, useSearchParams } from "next/navigation"
 import { supabase } from "@/lib/supabaseClient"
 import { useAuth } from "@/lib/AuthContext"
+import AgreementSlideOver from "@/app/components/AgreementSlideOver"
 
 type Agreement = {
   id: string
@@ -16,6 +16,8 @@ type Agreement = {
   customer_id: string
   customers: { name: string; account_manager_id: string | null }
 }
+
+type Customer = { id: string; name: string }
 
 type Filter = "all" | "active" | "expired" | "upcoming" | "expiresSoon" | "archived"
 
@@ -35,7 +37,21 @@ export default function AgreementsPage() {
 
   const [filter, setFilter] = useState<Filter>("all")
   const [agreements, setAgreements] = useState<Agreement[]>([])
+  const [customers, setCustomers] = useState<Customer[]>([])
   const [loading, setLoading] = useState(true)
+
+  // Slide-over state
+  const [slideOverOpen, setSlideOverOpen] = useState(false)
+  const [customerId, setCustomerId] = useState("")
+  const [newTitle, setNewTitle] = useState("")
+  const [newStart, setNewStart] = useState("")
+  const [newEnd, setNewEnd] = useState("")
+  const [newContactName, setNewContactName] = useState("")
+  const [newContactEmail, setNewContactEmail] = useState("")
+  const [newContactPhone, setNewContactPhone] = useState("")
+  const [newSigned, setNewSigned] = useState(false)
+  const [newFile, setNewFile] = useState<File | null>(null)
+  const [removeExistingFile, setRemoveExistingFile] = useState(false)
 
   useEffect(() => {
     const urlFilter = searchParams.get("filter")
@@ -58,6 +74,15 @@ export default function AgreementsPage() {
     fetchAgreements()
   }, [user, restrictToOwn])
 
+  useEffect(() => {
+    if (!supabase || !user) return
+    supabase
+      .from("customers")
+      .select("id, name")
+      .order("name")
+      .then(({ data }) => setCustomers(data ?? []))
+  }, [user])
+
   async function fetchAgreements() {
     if (!supabase) return
     setLoading(true)
@@ -74,6 +99,48 @@ export default function AgreementsPage() {
     const { data } = await query
     setAgreements(data ?? [])
     setLoading(false)
+  }
+
+  function resetForm() {
+    setCustomerId("")
+    setNewTitle(""); setNewStart(""); setNewEnd("")
+    setNewContactName(""); setNewContactEmail(""); setNewContactPhone("")
+    setNewSigned(false); setNewFile(null); setRemoveExistingFile(false)
+  }
+
+  function openSlideOver() { resetForm(); setSlideOverOpen(true) }
+  function closeSlideOver() { resetForm(); setSlideOverOpen(false) }
+
+  async function handleSave() {
+    if (!supabase || !user || !customerId || !newTitle || !newStart || !newEnd) return
+
+    let file_url: string | null = null
+    if (newFile) {
+      const fileExt = newFile.name.split(".").pop()
+      const fileName = `${customerId}/${Date.now()}.${fileExt}`
+      const { data: upload, error } = await supabase.storage.from("agreements").upload(fileName, newFile)
+      if (!error && upload) {
+        const { data: urlData } = supabase.storage.from("agreements").getPublicUrl(upload.path)
+        file_url = urlData.publicUrl
+      }
+    }
+
+    await supabase.from("agreements").insert({
+      customer_id: customerId,
+      user_id: user.id,
+      title: newTitle,
+      start_date: newStart,
+      end_date: newEnd,
+      contact_name: newContactName || null,
+      contact_email: newContactEmail || null,
+      contact_phone: newContactPhone || null,
+      signed: newSigned,
+      file_url,
+      archived: false,
+    })
+
+    closeSlideOver()
+    fetchAgreements()
   }
 
   function daysUntil(dateStr: string) {
@@ -128,17 +195,13 @@ export default function AgreementsPage() {
 
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold text-gray-900">Avtaler</h1>
-        <Link
-          href="/customers"
+        <button
+          onClick={openSlideOver}
           className="bg-slate-800 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-slate-700 transition-colors"
         >
           Ny avtale
-        </Link>
+        </button>
       </div>
-
-      <p className="text-sm text-gray-400 -mt-4">
-        Gå til en kunde for å legge til eller redigere avtaler.
-      </p>
 
       <div className="flex flex-wrap gap-2">
         {filterOptions.map((f) => (
@@ -197,6 +260,33 @@ export default function AgreementsPage() {
         <p className="text-xs text-gray-400">{filtered.length} avtale{filtered.length !== 1 ? "r" : ""}</p>
       )}
 
+      <AgreementSlideOver
+        open={slideOverOpen}
+        onClose={closeSlideOver}
+        editingAgreement={null}
+        customers={customers}
+        customerId={customerId}
+        setCustomerId={setCustomerId}
+        newTitle={newTitle}
+        setNewTitle={setNewTitle}
+        newStart={newStart}
+        setNewStart={setNewStart}
+        newEnd={newEnd}
+        setNewEnd={setNewEnd}
+        newContactName={newContactName}
+        setNewContactName={setNewContactName}
+        newContactEmail={newContactEmail}
+        setNewContactEmail={setNewContactEmail}
+        newContactPhone={newContactPhone}
+        setNewContactPhone={setNewContactPhone}
+        newSigned={newSigned}
+        setNewSigned={setNewSigned}
+        newFile={newFile}
+        setNewFile={setNewFile}
+        removeExistingFile={removeExistingFile}
+        setRemoveExistingFile={setRemoveExistingFile}
+        onSave={handleSave}
+      />
     </div>
   )
 }
