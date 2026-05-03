@@ -7,6 +7,7 @@ import {
   UserGroupIcon,
   DocumentTextIcon,
   ArchiveBoxIcon,
+  ClipboardDocumentListIcon,
   Cog6ToothIcon,
   ArrowLeftOnRectangleIcon,
 } from "@heroicons/react/24/outline"
@@ -17,6 +18,7 @@ const navItems = [
   { href: "/customers", label: "Kunder", icon: UserGroupIcon },
   { href: "/agreements", label: "Avtaler", icon: DocumentTextIcon },
   { href: "/agreements?filter=archived", label: "Arkiv", icon: ArchiveBoxIcon },
+  { href: "/templates", label: "Maler", icon: ClipboardDocumentListIcon },
   { href: "/settings", label: "Innstillinger", icon: Cog6ToothIcon },
 ]
 
