@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react"
 import { substituteMergeFields } from "@/lib/mergeFields"
+import RichTextEditor from "@/app/components/RichTextEditor"
 
 type Customer = { id: string; name: string }
 type Template = { id: string; name: string; duration_months: number; content: string }
@@ -114,6 +115,7 @@ export default function AgreementSlideOver({
   const [templates, setTemplates] = useState<Template[]>([])
   const [selectedTemplateId, setSelectedTemplateId] = useState("")
   const [previewMode, setPreviewMode] = useState(false)
+  const [previewContent, setPreviewContent] = useState("")
   const [generating, setGenerating] = useState(false)
 
   // Hent maler én gang når slide-overen åpnes
@@ -171,13 +173,10 @@ export default function AgreementSlideOver({
   }
 
   async function handleSaveFromPreview() {
-    const template = templates.find((t) => t.id === selectedTemplateId)
-    if (!template) return
     setGenerating(true)
     try {
-      const previewHtml = getPreviewHtml()
-      const generatedFile = await generatePDFFile(previewHtml, newTitle)
-      onSave({ generatedFile, content: template.content, templateId: selectedTemplateId })
+      const generatedFile = await generatePDFFile(previewContent, newTitle)
+      onSave({ generatedFile, content: previewContent, templateId: selectedTemplateId })
       setPreviewMode(false)
     } finally {
       setGenerating(false)
@@ -186,6 +185,7 @@ export default function AgreementSlideOver({
 
   function handleSaveClick() {
     if (selectedTemplateId) {
+      setPreviewContent(getPreviewHtml())
       setPreviewMode(true)
     } else {
       onSave()
@@ -194,53 +194,54 @@ export default function AgreementSlideOver({
 
   if (!open) return null
 
-  // --- Forhåndsvisnings-modus ---
+  // --- Forhåndsvisnings- og redigeringsmodus (full skjerm) ---
   if (previewMode) {
-    const previewHtml = getPreviewHtml()
     return (
-      <div
-        className="fixed inset-0 z-50 flex justify-end bg-black/40 backdrop-blur-sm"
-        onMouseDown={handleBackdropClick}
-      >
-        <div
-          ref={panelRef}
-          className="h-full w-full max-w-2xl bg-white shadow-xl border-l border-gray-200 flex flex-col animate-slideIn"
-        >
-          <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100 shrink-0">
-            <div>
-              <h2 className="text-base font-semibold text-gray-900">Forhåndsvisning</h2>
-              <p className="text-xs text-gray-400 mt-0.5">{newTitle}</p>
-            </div>
-            <button onClick={onClose} className="text-sm text-gray-400 hover:text-gray-700 transition-colors">
-              Lukk
+      <div className="fixed inset-0 z-50 bg-gray-50 overflow-y-auto">
+        <div className="max-w-4xl mx-auto px-8 py-8 space-y-6">
+
+          {/* Topplinje */}
+          <div className="flex items-center justify-between">
+            <button
+              onClick={() => setPreviewMode(false)}
+              className="inline-flex items-center gap-1 text-sm text-gray-500 hover:text-gray-900 transition-colors"
+            >
+              ← Tilbake til skjema
+            </button>
+            <button
+              onClick={handleSaveFromPreview}
+              disabled={generating}
+              className="rounded-lg bg-slate-800 px-4 py-2 text-sm font-medium text-white hover:bg-slate-700 disabled:opacity-50 transition-colors"
+            >
+              {generating ? "Genererer PDF..." : "Lagre som PDF"}
             </button>
           </div>
 
-          <div className="flex-1 overflow-y-auto px-8 py-6 space-y-5">
-            {/* Flettefelt-verdier som brukes */}
-            <div className="rounded-lg bg-amber-50 border border-amber-100 px-4 py-3 text-xs space-y-1">
-              <p className="font-medium text-amber-800 mb-1.5">Flettefelt som brukes i denne forhåndsvisningen:</p>
-              <div className="grid grid-cols-2 gap-x-4 gap-y-0.5 text-amber-700 font-mono">
-                <span>{"{{kunde_navn}}"}</span><span className="font-sans font-medium">{mergeData?.kunde_navn ?? <em className="text-amber-400 font-normal">ikke satt</em>}</span>
-                <span>{"{{firma_navn}}"}</span><span className="font-sans font-medium">{mergeData?.firma_navn ?? <em className="text-amber-400 font-normal">ikke satt</em>}</span>
-                <span>{"{{org_nummer}}"}</span><span className="font-sans font-medium">{mergeData?.org_nummer ?? <em className="text-amber-400 font-normal">ikke satt</em>}</span>
-                <span>{"{{startdato}}"}</span><span className="font-sans font-medium">{formatDateNO(newStart) || <em className="text-amber-400 font-normal">ikke satt</em>}</span>
-                <span>{"{{sluttdato}}"}</span><span className="font-sans font-medium">{formatDateNO(newEnd) || <em className="text-amber-400 font-normal">ikke satt</em>}</span>
-              </div>
-            </div>
+          {/* Tittel */}
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900">{newTitle}</h1>
+            <p className="text-sm text-gray-400 mt-1">
+              {formatDateNO(newStart)} – {formatDateNO(newEnd)}
+              {mergeData?.kunde_navn && <> · {mergeData.kunde_navn}</>}
+            </p>
+          </div>
 
-            <div
-              className="agreement-preview text-sm"
-              dangerouslySetInnerHTML={{ __html: previewHtml || "<p style='color:#9ca3af'>Ingen innhold i malen.</p>" }}
+          {/* Editor */}
+          <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+            <RichTextEditor
+              content={previewContent}
+              onChange={setPreviewContent}
+              placeholder="Innhold..."
             />
           </div>
 
-          <div className="flex justify-between items-center gap-3 px-5 py-4 border-t border-gray-100 shrink-0">
+          {/* Bunn */}
+          <div className="flex justify-between items-center">
             <button
               onClick={() => setPreviewMode(false)}
-              className="text-sm text-gray-500 hover:text-gray-800 transition-colors"
+              className="text-sm text-gray-400 hover:text-gray-700 transition-colors"
             >
-              ← Tilbake til skjema
+              Avbryt
             </button>
             <button
               onClick={handleSaveFromPreview}
