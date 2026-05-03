@@ -38,6 +38,7 @@ export default function DashboardPage() {
   const [slideOverOpen, setSlideOverOpen] = useState(false)
   const [customersList, setCustomersList] = useState<{ id: string; name: string }[]>([])
   const [customerId, setCustomerId] = useState("")
+  const [selectedCustomerOrg, setSelectedCustomerOrg] = useState<string | null>(null)
   const [newTitle, setNewTitle] = useState("")
   const [newStart, setNewStart] = useState("")
   const [newEnd, setNewEnd] = useState("")
@@ -64,20 +65,28 @@ export default function DashboardPage() {
       .then(({ data }) => setCustomersList(data ?? []))
   }, [user])
 
+  useEffect(() => {
+    if (!customerId || !supabase) { setSelectedCustomerOrg(null); return }
+    supabase.from("customers").select("org_nummer").eq("id", customerId).single()
+      .then(({ data }) => setSelectedCustomerOrg(data?.org_nummer ?? null))
+  }, [customerId])
+
   function resetForm() {
-    setCustomerId(""); setNewTitle(""); setNewStart(""); setNewEnd("")
+    setCustomerId(""); setSelectedCustomerOrg(null)
+    setNewTitle(""); setNewStart(""); setNewEnd("")
     setNewContactName(""); setNewContactEmail(""); setNewContactPhone("")
     setNewSigned(false); setNewFile(null); setRemoveExistingFile(false)
   }
 
-  async function handleSaveAgreement() {
+  async function handleSaveAgreement(opts?: { generatedFile?: File; content?: string; templateId?: string }) {
     if (!supabase || !user || !customerId || !newTitle || !newStart || !newEnd) return
 
+    const fileToUpload = opts?.generatedFile ?? newFile
     let file_url: string | null = null
-    if (newFile) {
-      const fileExt = newFile.name.split(".").pop()
+    if (fileToUpload) {
+      const fileExt = fileToUpload.name.split(".").pop()
       const fileName = `${customerId}/${Date.now()}.${fileExt}`
-      const { data: upload, error } = await supabase.storage.from("agreements").upload(fileName, newFile)
+      const { data: upload, error } = await supabase.storage.from("agreements").upload(fileName, fileToUpload)
       if (!error && upload) {
         const { data: urlData } = supabase.storage.from("agreements").getPublicUrl(upload.path)
         file_url = urlData.publicUrl
@@ -96,6 +105,8 @@ export default function DashboardPage() {
       signed: newSigned,
       file_url,
       archived: false,
+      ...(opts?.content ? { content: opts.content } : {}),
+      ...(opts?.templateId ? { template_id: opts.templateId } : {}),
     })
 
     resetForm()
@@ -344,6 +355,11 @@ export default function DashboardPage() {
         setNewFile={setNewFile}
         removeExistingFile={removeExistingFile}
         setRemoveExistingFile={setRemoveExistingFile}
+        mergeData={{
+          kunde_navn: customersList.find((c) => c.id === customerId)?.name,
+          org_nummer: selectedCustomerOrg ?? undefined,
+          firma_navn: account?.name,
+        }}
         onSave={handleSaveAgreement}
       />
     </div>

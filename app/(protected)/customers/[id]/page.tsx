@@ -216,13 +216,14 @@ export default function CustomerPage(props: CustomerPageProps) {
     generateAgreementPDF(agreement, customer, profile)
   }
 
-  async function uploadAgreementFile(existingUrl: string | null) {
+  async function uploadAgreementFile(existingUrl: string | null, fileOverride?: File | null) {
     if (!supabase) return existingUrl
     let file_url = removeExistingFile ? null : existingUrl
-    if (newFile) {
-      const fileExt = newFile.name.split(".").pop()
+    const file = fileOverride ?? newFile
+    if (file) {
+      const fileExt = file.name.split(".").pop()
       const fileName = `${id}/${Date.now()}.${fileExt}`
-      const { data: upload, error } = await supabase.storage.from("agreements").upload(fileName, newFile)
+      const { data: upload, error } = await supabase.storage.from("agreements").upload(fileName, file)
       if (!error && upload) {
         const { data: urlData } = supabase.storage.from("agreements").getPublicUrl(upload.path)
         file_url = urlData.publicUrl
@@ -231,10 +232,11 @@ export default function CustomerPage(props: CustomerPageProps) {
     return file_url
   }
 
-  async function handleSaveAgreement() {
+  async function handleSaveAgreement(opts?: { generatedFile?: File; content?: string; templateId?: string }) {
     if (!supabase) return
+    const fileToUpload = opts?.generatedFile ?? newFile
     if (editingAgreement) {
-      const file_url = await uploadAgreementFile(editingAgreement.file_url)
+      const file_url = await uploadAgreementFile(editingAgreement.file_url, fileToUpload)
       await supabase.from("agreements").update({
         title: newTitle, start_date: newStart, end_date: newEnd, signed: newSigned,
         file_url, contact_name: newContactName, contact_email: newContactEmail, contact_phone: newContactPhone,
@@ -242,12 +244,14 @@ export default function CustomerPage(props: CustomerPageProps) {
     } else {
       const { data: { user: u } } = await supabase.auth.getUser()
       if (!u) return
-      const file_url = await uploadAgreementFile(null)
+      const file_url = await uploadAgreementFile(null, fileToUpload)
       await supabase.from("agreements").insert({
         customer_id: id, title: newTitle, start_date: newStart, end_date: newEnd,
         signed: newSigned, file_url, contact_name: newContactName,
         contact_email: newContactEmail, contact_phone: newContactPhone,
         archived: false, user_id: u.id,
+        ...(opts?.content ? { content: opts.content } : {}),
+        ...(opts?.templateId ? { template_id: opts.templateId } : {}),
       })
     }
     fetchAgreements()
@@ -568,6 +572,11 @@ export default function CustomerPage(props: CustomerPageProps) {
         setNewFile={setNewFile}
         removeExistingFile={removeExistingFile}
         setRemoveExistingFile={setRemoveExistingFile}
+        mergeData={{
+          kunde_navn: customer?.name,
+          org_nummer: orgNummer || undefined,
+          firma_navn: account?.name,
+        }}
         onSave={handleSaveAgreement}
       />
     </div>

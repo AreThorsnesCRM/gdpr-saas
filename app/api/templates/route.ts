@@ -27,7 +27,7 @@ export async function GET() {
 
   const { data } = await supabaseAdmin
     .from("agreement_templates")
-    .select("id, name, duration_months, created_at")
+    .select("id, name, duration_months, content, created_at")
     .eq("account_id", accountUser.account_id)
     .order("created_at", { ascending: false })
 

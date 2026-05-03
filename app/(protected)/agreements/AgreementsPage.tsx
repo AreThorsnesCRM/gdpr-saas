@@ -33,7 +33,7 @@ const filterOptions: { id: Filter; label: string }[] = [
 export default function AgreementsPage() {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const { user, restrictToOwn } = useAuth()
+  const { user, account, restrictToOwn } = useAuth()
 
   const [filter, setFilter] = useState<Filter>("all")
   const [agreements, setAgreements] = useState<Agreement[]>([])
@@ -43,6 +43,7 @@ export default function AgreementsPage() {
   // Slide-over state
   const [slideOverOpen, setSlideOverOpen] = useState(false)
   const [customerId, setCustomerId] = useState("")
+  const [selectedCustomerOrg, setSelectedCustomerOrg] = useState<string | null>(null)
   const [newTitle, setNewTitle] = useState("")
   const [newStart, setNewStart] = useState("")
   const [newEnd, setNewEnd] = useState("")
@@ -83,6 +84,12 @@ export default function AgreementsPage() {
       .then(({ data }) => setCustomers(data ?? []))
   }, [user])
 
+  useEffect(() => {
+    if (!customerId || !supabase) { setSelectedCustomerOrg(null); return }
+    supabase.from("customers").select("org_nummer").eq("id", customerId).single()
+      .then(({ data }) => setSelectedCustomerOrg(data?.org_nummer ?? null))
+  }, [customerId])
+
   async function fetchAgreements() {
     if (!supabase) return
     setLoading(true)
@@ -103,6 +110,7 @@ export default function AgreementsPage() {
 
   function resetForm() {
     setCustomerId("")
+    setSelectedCustomerOrg(null)
     setNewTitle(""); setNewStart(""); setNewEnd("")
     setNewContactName(""); setNewContactEmail(""); setNewContactPhone("")
     setNewSigned(false); setNewFile(null); setRemoveExistingFile(false)
@@ -111,14 +119,15 @@ export default function AgreementsPage() {
   function openSlideOver() { resetForm(); setSlideOverOpen(true) }
   function closeSlideOver() { resetForm(); setSlideOverOpen(false) }
 
-  async function handleSave() {
+  async function handleSave(opts?: { generatedFile?: File; content?: string; templateId?: string }) {
     if (!supabase || !user || !customerId || !newTitle || !newStart || !newEnd) return
 
+    const fileToUpload = opts?.generatedFile ?? newFile
     let file_url: string | null = null
-    if (newFile) {
-      const fileExt = newFile.name.split(".").pop()
+    if (fileToUpload) {
+      const fileExt = fileToUpload.name.split(".").pop()
       const fileName = `${customerId}/${Date.now()}.${fileExt}`
-      const { data: upload, error } = await supabase.storage.from("agreements").upload(fileName, newFile)
+      const { data: upload, error } = await supabase.storage.from("agreements").upload(fileName, fileToUpload)
       if (!error && upload) {
         const { data: urlData } = supabase.storage.from("agreements").getPublicUrl(upload.path)
         file_url = urlData.publicUrl
@@ -137,6 +146,8 @@ export default function AgreementsPage() {
       signed: newSigned,
       file_url,
       archived: false,
+      ...(opts?.content ? { content: opts.content } : {}),
+      ...(opts?.templateId ? { template_id: opts.templateId } : {}),
     })
 
     closeSlideOver()
@@ -285,6 +296,11 @@ export default function AgreementsPage() {
         setNewFile={setNewFile}
         removeExistingFile={removeExistingFile}
         setRemoveExistingFile={setRemoveExistingFile}
+        mergeData={{
+          kunde_navn: customers.find((c) => c.id === customerId)?.name,
+          org_nummer: selectedCustomerOrg ?? undefined,
+          firma_navn: account?.name,
+        }}
         onSave={handleSave}
       />
     </div>
