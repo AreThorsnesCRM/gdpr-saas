@@ -213,7 +213,11 @@ export default function CustomerPage(props: CustomerPageProps) {
   }
 
   function handleGeneratePDF(agreement: Agreement) {
-    generateAgreementPDF(agreement, customer, profile)
+    if (agreement.file_url) {
+      window.open(agreement.file_url, "_blank")
+    } else {
+      generateAgreementPDF(agreement, customer, profile)
+    }
   }
 
   async function uploadAgreementFile(existingUrl: string | null, fileOverride?: File | null) {
@@ -504,12 +508,6 @@ export default function CustomerPage(props: CustomerPageProps) {
                           <p className="text-xs text-gray-400 mt-0.5">
                             {formatDate(a.start_date)} – {formatDate(a.end_date)}
                           </p>
-                          {a.file_url && (
-                            <a href={a.file_url} target="_blank" rel="noopener noreferrer"
-                              className="text-xs text-slate-500 hover:text-slate-800 underline mt-0.5 inline-block">
-                              Se fil
-                            </a>
-                          )}
                         </div>
                         <div className="flex items-center gap-3 shrink-0 text-xs text-gray-400">
                           <button onClick={() => handleGeneratePDF(a)} className="hover:text-gray-700 transition-colors">PDF</button>

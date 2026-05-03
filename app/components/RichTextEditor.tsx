@@ -114,6 +114,16 @@ export default function RichTextEditor({ content, onChange, placeholder }: Props
 
         <div className="w-px h-4 bg-gray-200 mx-1" />
 
+        {/* Angre / Gjør om */}
+        <button type="button" onClick={() => editor.chain().focus().undo().run()}
+          disabled={!editor.can().undo()}
+          className={btn(false) + " disabled:opacity-30"} title="Angre">↩</button>
+        <button type="button" onClick={() => editor.chain().focus().redo().run()}
+          disabled={!editor.can().redo()}
+          className={btn(false) + " disabled:opacity-30"} title="Gjør om">↪</button>
+
+        <div className="w-px h-4 bg-gray-200 mx-1" />
+
         {/* Flettefelt */}
         <span className="text-xs text-gray-400 mr-1">Flettefelt:</span>
         {mergeFields.map((f) => (
