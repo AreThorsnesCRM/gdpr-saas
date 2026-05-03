@@ -197,7 +197,7 @@ export default function AgreementSlideOver({
   // --- Forhåndsvisnings- og redigeringsmodus (full skjerm) ---
   if (previewMode) {
     return (
-      <div className="fixed inset-0 z-50 bg-gray-50 overflow-y-auto">
+      <div className="fixed top-0 right-0 bottom-0 left-64 z-50 bg-gray-50 overflow-y-auto">
         <div className="max-w-4xl mx-auto px-8 py-8 space-y-6">
 
           {/* Topplinje */}
