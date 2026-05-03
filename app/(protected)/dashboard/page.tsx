@@ -13,6 +13,7 @@ import {
   ClockIcon,
 } from "@heroicons/react/24/outline"
 import SubscribeButton from "../../components/SubscribeButton"
+import AgreementSlideOver from "../../components/AgreementSlideOver"
 
 type StatsState = {
   customers: number
@@ -33,12 +34,75 @@ export default function DashboardPage() {
   const [upcoming, setUpcoming] = useState<any[]>([])
   const [criticalCustomers, setCriticalCustomers] = useState<any[]>([])
 
+  // Slide-over state
+  const [slideOverOpen, setSlideOverOpen] = useState(false)
+  const [customersList, setCustomersList] = useState<{ id: string; name: string }[]>([])
+  const [customerId, setCustomerId] = useState("")
+  const [newTitle, setNewTitle] = useState("")
+  const [newStart, setNewStart] = useState("")
+  const [newEnd, setNewEnd] = useState("")
+  const [newContactName, setNewContactName] = useState("")
+  const [newContactEmail, setNewContactEmail] = useState("")
+  const [newContactPhone, setNewContactPhone] = useState("")
+  const [newSigned, setNewSigned] = useState(false)
+  const [newFile, setNewFile] = useState<File | null>(null)
+  const [removeExistingFile, setRemoveExistingFile] = useState(false)
+
   useEffect(() => {
     if (!user) return
     fetchStats()
     fetchUpcoming()
     fetchCriticalCustomers()
   }, [user, restrictToOwn])
+
+  useEffect(() => {
+    if (!supabase || !user) return
+    supabase
+      .from("customers")
+      .select("id, name")
+      .order("name")
+      .then(({ data }) => setCustomersList(data ?? []))
+  }, [user])
+
+  function resetForm() {
+    setCustomerId(""); setNewTitle(""); setNewStart(""); setNewEnd("")
+    setNewContactName(""); setNewContactEmail(""); setNewContactPhone("")
+    setNewSigned(false); setNewFile(null); setRemoveExistingFile(false)
+  }
+
+  async function handleSaveAgreement() {
+    if (!supabase || !user || !customerId || !newTitle || !newStart || !newEnd) return
+
+    let file_url: string | null = null
+    if (newFile) {
+      const fileExt = newFile.name.split(".").pop()
+      const fileName = `${customerId}/${Date.now()}.${fileExt}`
+      const { data: upload, error } = await supabase.storage.from("agreements").upload(fileName, newFile)
+      if (!error && upload) {
+        const { data: urlData } = supabase.storage.from("agreements").getPublicUrl(upload.path)
+        file_url = urlData.publicUrl
+      }
+    }
+
+    await supabase.from("agreements").insert({
+      customer_id: customerId,
+      user_id: user.id,
+      title: newTitle,
+      start_date: newStart,
+      end_date: newEnd,
+      contact_name: newContactName || null,
+      contact_email: newContactEmail || null,
+      contact_phone: newContactPhone || null,
+      signed: newSigned,
+      file_url,
+      archived: false,
+    })
+
+    resetForm()
+    setSlideOverOpen(false)
+    fetchStats()
+    fetchUpcoming()
+  }
 
   async function fetchStats() {
     if (!supabase) return
@@ -172,10 +236,11 @@ export default function DashboardPage() {
             className="bg-slate-800 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-slate-700 transition-colors">
             Ny kunde
           </Link>
-          <Link href="/agreements/new"
-            className="bg-slate-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-slate-500 transition-colors">
+          <button
+            onClick={() => { resetForm(); setSlideOverOpen(true) }}
+            className="bg-slate-800 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-slate-700 transition-colors">
             Ny avtale
-          </Link>
+          </button>
         </div>
       </div>
 
@@ -253,6 +318,34 @@ export default function DashboardPage() {
         </div>
 
       </div>
+
+      <AgreementSlideOver
+        open={slideOverOpen}
+        onClose={() => { resetForm(); setSlideOverOpen(false) }}
+        editingAgreement={null}
+        customers={customersList}
+        customerId={customerId}
+        setCustomerId={setCustomerId}
+        newTitle={newTitle}
+        setNewTitle={setNewTitle}
+        newStart={newStart}
+        setNewStart={setNewStart}
+        newEnd={newEnd}
+        setNewEnd={setNewEnd}
+        newContactName={newContactName}
+        setNewContactName={setNewContactName}
+        newContactEmail={newContactEmail}
+        setNewContactEmail={setNewContactEmail}
+        newContactPhone={newContactPhone}
+        setNewContactPhone={setNewContactPhone}
+        newSigned={newSigned}
+        setNewSigned={setNewSigned}
+        newFile={newFile}
+        setNewFile={setNewFile}
+        removeExistingFile={removeExistingFile}
+        setRemoveExistingFile={setRemoveExistingFile}
+        onSave={handleSaveAgreement}
+      />
     </div>
   )
 }
