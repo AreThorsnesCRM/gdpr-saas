@@ -216,7 +216,19 @@ export default function AgreementSlideOver({
             </button>
           </div>
 
-          <div className="flex-1 overflow-y-auto px-8 py-6">
+          <div className="flex-1 overflow-y-auto px-8 py-6 space-y-5">
+            {/* Flettefelt-verdier som brukes */}
+            <div className="rounded-lg bg-amber-50 border border-amber-100 px-4 py-3 text-xs space-y-1">
+              <p className="font-medium text-amber-800 mb-1.5">Flettefelt som brukes i denne forhåndsvisningen:</p>
+              <div className="grid grid-cols-2 gap-x-4 gap-y-0.5 text-amber-700 font-mono">
+                <span>{"{{kunde_navn}}"}</span><span className="font-sans font-medium">{mergeData?.kunde_navn ?? <em className="text-amber-400 font-normal">ikke satt</em>}</span>
+                <span>{"{{firma_navn}}"}</span><span className="font-sans font-medium">{mergeData?.firma_navn ?? <em className="text-amber-400 font-normal">ikke satt</em>}</span>
+                <span>{"{{org_nummer}}"}</span><span className="font-sans font-medium">{mergeData?.org_nummer ?? <em className="text-amber-400 font-normal">ikke satt</em>}</span>
+                <span>{"{{startdato}}"}</span><span className="font-sans font-medium">{formatDateNO(newStart) || <em className="text-amber-400 font-normal">ikke satt</em>}</span>
+                <span>{"{{sluttdato}}"}</span><span className="font-sans font-medium">{formatDateNO(newEnd) || <em className="text-amber-400 font-normal">ikke satt</em>}</span>
+              </div>
+            </div>
+
             <div
               className="agreement-preview text-sm"
               dangerouslySetInnerHTML={{ __html: previewHtml || "<p style='color:#9ca3af'>Ingen innhold i malen.</p>" }}
