@@ -7,7 +7,8 @@ import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { supabase } from "../../../lib/supabaseClient"
 import { useAuth } from "@/lib/AuthContext"
-import { TrashIcon, ChevronUpDownIcon } from "@heroicons/react/24/outline"
+import { TrashIcon, ChevronUpDownIcon, ArrowUpTrayIcon } from "@heroicons/react/24/outline"
+import ExcelImportModal from "@/app/components/ExcelImportModal"
 
 type Customer = {
   id: string
@@ -42,6 +43,7 @@ export default function CustomersPage() {
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>([])
   const [loading, setLoading] = useState(true)
 
+  const [importOpen, setImportOpen] = useState(false)
   const [search, setSearch] = useState("")
   const [statusFilter, setStatusFilter] = useState("all")
   const [managerFilter, setManagerFilter] = useState("")
@@ -145,11 +147,26 @@ export default function CustomersPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold text-gray-900">Kunder</h1>
-        <Link href="/customers/new"
-          className="bg-slate-800 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-slate-700 transition-colors">
-          Ny kunde
-        </Link>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setImportOpen(true)}
+            className="inline-flex items-center gap-2 border border-gray-200 text-gray-600 px-3 py-2 rounded-lg text-sm font-medium hover:bg-gray-50 hover:border-gray-300 transition-colors"
+          >
+            <ArrowUpTrayIcon className="h-4 w-4" />
+            Importer fra Excel
+          </button>
+          <Link href="/customers/new"
+            className="bg-slate-800 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-slate-700 transition-colors">
+            Ny kunde
+          </Link>
+        </div>
       </div>
+
+      <ExcelImportModal
+        open={importOpen}
+        onClose={() => setImportOpen(false)}
+        onImported={() => { loadCustomers(); setImportOpen(false) }}
+      />
 
       {/* Filtre */}
       <div className="space-y-3">
