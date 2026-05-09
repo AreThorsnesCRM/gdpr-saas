@@ -3,7 +3,7 @@
 export const dynamic = "force-dynamic"
 
 import { useEffect, useState } from "react"
-import { useRouter } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 import Link from "next/link"
 import { supabase } from "../../../lib/supabaseClient"
 import { useAuth } from "@/lib/AuthContext"
@@ -38,6 +38,7 @@ const statusFilters = [
 export default function CustomersPage() {
   const { user, restrictToOwn } = useAuth()
   const router = useRouter()
+  const searchParams = useSearchParams()
 
   const [customers, setCustomers] = useState<Customer[]>([])
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>([])
@@ -48,6 +49,12 @@ export default function CustomersPage() {
   const [statusFilter, setStatusFilter] = useState("all")
   const [managerFilter, setManagerFilter] = useState("")
   const [sortDir, setSortDir] = useState<"asc" | "desc">("asc")
+
+  useEffect(() => {
+    if (searchParams.get("noActive") === "true") setStatusFilter("noActive")
+    else if (searchParams.get("status") === "active") setStatusFilter("active")
+    else if (searchParams.get("status") === "never") setStatusFilter("never")
+  }, [searchParams])
 
   useEffect(() => {
     if (user) loadCustomers()
