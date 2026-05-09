@@ -70,7 +70,7 @@ export default function ExcelImportModal({ open, onClose, onImported }: Props) {
     setImported(null)
     setFileName(file.name)
 
-    const XLSX = (await import("xlsx")).default
+    const XLSX = await import("xlsx")
     const buffer = await file.arrayBuffer()
     const wb = XLSX.read(buffer, { type: "array" })
     const ws = wb.Sheets[wb.SheetNames[0]]
