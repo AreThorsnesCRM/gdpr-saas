@@ -21,6 +21,7 @@ interface Customer {
   address: string | null
   postal_code: string | null
   city: string | null
+  website: string | null
   account_manager_id: string | null
 }
 
@@ -73,6 +74,7 @@ export default function CustomerPage(props: CustomerPageProps) {
   const [address, setAddress] = useState("")
   const [postalCode, setPostalCode] = useState("")
   const [city, setCity] = useState("")
+  const [website, setWebsite] = useState("")
   const [accountManagerId, setAccountManagerId] = useState("")
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>([])
   const [saved, setSaved] = useState(false)
@@ -132,6 +134,7 @@ export default function CustomerPage(props: CustomerPageProps) {
       setAddress(data.address ?? "")
       setPostalCode(data.postal_code ?? "")
       setCity(data.city ?? "")
+      setWebsite(data.website ?? "")
       setAccountManagerId(data.account_manager_id ?? "")
     }
   }
@@ -158,6 +161,7 @@ export default function CustomerPage(props: CustomerPageProps) {
       address: address || null,
       postal_code: postalCode || null,
       city: city || null,
+      website: website || null,
       account_manager_id: accountManagerId || null,
     }).eq("id", id)
     fetchCustomer()
@@ -334,9 +338,15 @@ export default function CustomerPage(props: CustomerPageProps) {
                 </div>
               </div>
 
-              <div>
-                <label className="block text-xs font-medium text-gray-500 mb-1">Org.nummer</label>
-                <input className={inputClass} placeholder="F.eks. 123456789 eller GB123456" value={orgNummer} onChange={(e) => setOrgNummer(e.target.value)} />
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-medium text-gray-500 mb-1">Org.nummer</label>
+                  <input className={inputClass} placeholder="F.eks. 123456789" value={orgNummer} onChange={(e) => setOrgNummer(e.target.value)} />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-gray-500 mb-1">Nettside</label>
+                  <input className={inputClass} placeholder="www.eksempel.no" value={website} onChange={(e) => setWebsite(e.target.value)} />
+                </div>
               </div>
 
               <div>

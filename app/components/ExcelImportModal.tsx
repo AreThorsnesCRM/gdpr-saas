@@ -11,6 +11,7 @@ type CustomerRow = {
   address: string
   postal_code: string
   city: string
+  website: string
 }
 
 type Props = {
@@ -29,6 +30,7 @@ const COL_MAP: Record<string, keyof CustomerRow> = {
   adresse: "address", address: "address", gateadresse: "address",
   postnummer: "postal_code", "postal code": "postal_code", postal_code: "postal_code", zip: "postal_code",
   sted: "city", by: "city", city: "city", poststed: "city",
+  nettside: "website", website: "website", url: "website", hjemmeside: "website", web: "website",
 }
 
 function normalizeKey(raw: string): keyof CustomerRow | null {
@@ -45,7 +47,7 @@ function parseSheet(data: any[][]): CustomerRow[] {
   })
 
   return data.slice(1).map((row) => {
-    const customer: CustomerRow = { name: "", email: "", phone: "", org_nummer: "", address: "", postal_code: "", city: "" }
+    const customer: CustomerRow = { name: "", email: "", phone: "", org_nummer: "", address: "", postal_code: "", city: "", website: "" }
     fieldMap.forEach(({ colIdx, field }) => {
       customer[field] = String(row[colIdx] ?? "").trim()
     })
@@ -128,6 +130,7 @@ export default function ExcelImportModal({ open, onClose, onImported }: Props) {
     { key: "address", label: "Adresse" },
     { key: "postal_code", label: "Postnr" },
     { key: "city", label: "Sted" },
+    { key: "website", label: "Nettside" },
   ]
 
   return (

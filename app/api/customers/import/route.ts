@@ -40,6 +40,7 @@ export async function POST(req: Request) {
     address: c.address?.trim() || null,
     postal_code: c.postal_code?.trim() || null,
     city: c.city?.trim() || null,
+    website: c.website?.trim() || null,
   })).filter((c) => c.name)
 
   const { data, error } = await supabaseAdmin
