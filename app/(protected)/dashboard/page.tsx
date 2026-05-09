@@ -121,13 +121,13 @@ export default function DashboardPage() {
     let customersQuery = supabase.from("customers").select("id")
     if (restrictToOwn && user) customersQuery = customersQuery.eq("account_manager_id", user.id)
     const { data: customers } = await customersQuery
-    const { data: agreements } = await supabase.from("agreements").select("id, archived, end_date, customer_id")
+    const { data: agreements } = await supabase.from("agreements").select("id, archived, start_date, end_date, customer_id")
 
     const today = new Date().toISOString().split("T")[0]
     const in30Days = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split("T")[0]
 
     const active = agreements?.filter(
-      (a: any) => !a.archived && (!a.end_date || a.end_date >= today)
+      (a: any) => !a.archived && a.start_date <= today && a.end_date >= today
     ).length ?? 0
 
     const soon = agreements?.filter(
@@ -135,7 +135,7 @@ export default function DashboardPage() {
     ).length ?? 0
 
     const customersWithActive = new Set(
-      agreements?.filter((a: any) => !a.archived && (!a.end_date || a.end_date >= today))
+      agreements?.filter((a: any) => !a.archived && a.start_date <= today && a.end_date >= today)
         .map((a: any) => a.customer_id)
     )
     const withoutActive = customers?.filter((c: any) => !customersWithActive.has(c.id)).length ?? 0
