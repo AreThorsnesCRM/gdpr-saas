@@ -14,6 +14,7 @@ import {
 } from "@heroicons/react/24/outline"
 import SubscribeButton from "../../components/SubscribeButton"
 import AgreementSlideOver from "../../components/AgreementSlideOver"
+import { useTranslations, useLocale } from "next-intl"
 
 type StatsState = {
   customers: number
@@ -24,6 +25,8 @@ type StatsState = {
 
 export default function DashboardPage() {
   const { user, account, restrictToOwn, loading: authLoading } = useAuth()
+  const t = useTranslations("dashboard")
+  const locale = useLocale()
 
   const [stats, setStats] = useState<StatsState>({
     customers: 0,
@@ -34,7 +37,6 @@ export default function DashboardPage() {
   const [upcoming, setUpcoming] = useState<any[]>([])
   const [criticalCustomers, setCriticalCustomers] = useState<any[]>([])
 
-  // Slide-over state
   const [slideOverOpen, setSlideOverOpen] = useState(false)
   const [customersList, setCustomersList] = useState<{ id: string; name: string }[]>([])
   const [customerId, setCustomerId] = useState("")
@@ -197,16 +199,20 @@ export default function DashboardPage() {
 
   const status = account?.subscription_status
   const showBanner = !authLoading && status && status !== "active"
+  const dateLocale = locale === "en" ? "en-GB" : "no-NO"
 
   function daysLeft(dateString: string | null) {
     if (!dateString) return null
     return Math.ceil((new Date(dateString).getTime() - Date.now()) / 86400000)
   }
 
+  function formatDate(dateStr: string) {
+    return new Date(dateStr).toLocaleDateString(dateLocale, { day: "numeric", month: "short" })
+  }
+
   return (
     <div className="p-8 space-y-8 max-w-6xl">
 
-      {/* Abonnement-banner — kun når handling kreves */}
       {showBanner && (
         <div className={`rounded-xl border px-6 py-4 flex items-center justify-between ${
           status === "trialing" ? "bg-blue-50 border-blue-200" :
@@ -215,82 +221,78 @@ export default function DashboardPage() {
         }`}>
           <div>
             <p className="font-semibold text-gray-900">
-              {status === "trialing" && `${daysLeft(account?.trial_end ?? null)} dager igjen av prøveperioden`}
-              {status === "past_due" && "Betaling feilet"}
-              {status === "canceled" && "Abonnement avsluttet"}
-              {status === "incomplete" && "Betaling ikke fullført"}
+              {status === "trialing" && t("trialDaysLeft", { days: daysLeft(account?.trial_end ?? null) ?? 0 })}
+              {status === "past_due" && t("paymentFailed")}
+              {status === "canceled" && t("canceled")}
+              {status === "incomplete" && t("incomplete")}
             </p>
             <p className="text-sm text-gray-500 mt-0.5">
-              {status === "trialing" && "Start abonnement for å fortsette uten avbrudd"}
-              {status === "past_due" && "Oppdater betalingsmetode for å unngå avbrudd"}
-              {status === "canceled" && "Aktiver abonnementet på nytt"}
-              {status === "incomplete" && "Fullfør kjøpet for å aktivere kontoen"}
+              {status === "trialing" && t("trialBannerDesc")}
+              {status === "past_due" && t("paymentFailedDesc")}
+              {status === "canceled" && t("canceledDesc")}
+              {status === "incomplete" && t("incompleteDesc")}
             </p>
           </div>
           <div className="shrink-0 ml-6">
-            {status === "trialing" && <SubscribeButton label="Start abonnement" mode="checkout" />}
-            {status === "past_due" && <SubscribeButton label="Oppdater betaling" mode="portal" />}
-            {status === "canceled" && <SubscribeButton label="Start på nytt" mode="checkout" />}
-            {status === "incomplete" && <SubscribeButton label="Fullfør betaling" mode="checkout" />}
+            {status === "trialing" && <SubscribeButton label={t("startSubscription")} mode="checkout" />}
+            {status === "past_due" && <SubscribeButton label={t("updatePayment")} mode="portal" />}
+            {status === "canceled" && <SubscribeButton label={t("restart")} mode="checkout" />}
+            {status === "incomplete" && <SubscribeButton label={t("completePurchase")} mode="checkout" />}
           </div>
         </div>
       )}
 
-      {/* Sidehode */}
       <div className="flex items-start justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Oversikt</h1>
-          <p className="text-gray-500 mt-1">Kunder, avtaler og aktivitet samlet på ett sted</p>
+          <h1 className="text-2xl font-bold text-gray-900">{t("title")}</h1>
+          <p className="text-gray-500 mt-1">{t("subtitle")}</p>
         </div>
         <div className="flex gap-3">
           <Link href="/customers/new"
             className="bg-slate-800 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-slate-700 transition-colors">
-            Ny kunde
+            {t("newCustomer")}
           </Link>
           <button
             onClick={() => { resetForm(); setSlideOverOpen(true) }}
             className="bg-slate-800 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-slate-700 transition-colors">
-            Ny avtale
+            {t("newAgreement")}
           </button>
         </div>
       </div>
 
-      {/* Stat-kort */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <Link href="/customers">
-          <StatCard title="Kunder" value={stats.customers}
+          <StatCard title={t("statCustomers")} value={stats.customers}
             icon={<UserGroupIcon className="h-5 w-5 text-blue-600" />}
             bg="bg-blue-50" />
         </Link>
         <Link href="/customers?noActive=true">
-          <StatCard title="Uten aktive avtaler" value={stats.customersWithoutActive}
+          <StatCard title={t("statWithoutActive")} value={stats.customersWithoutActive}
             icon={<ExclamationTriangleIcon className="h-5 w-5 text-red-500" />}
             bg="bg-red-50" />
         </Link>
         <Link href="/agreements?status=active">
-          <StatCard title="Aktive avtaler" value={stats.activeAgreements}
+          <StatCard title={t("statActiveAgreements")} value={stats.activeAgreements}
             icon={<CheckCircleIcon className="h-5 w-5 text-green-600" />}
             bg="bg-green-50" />
         </Link>
         <Link href="/agreements?expiresSoon=true">
-          <StatCard title="Utløper snart" value={stats.expiringSoon}
-            subtitle="Avtaler de neste 30 dagene"
+          <StatCard title={t("statExpiringSoon")} value={stats.expiringSoon}
+            subtitle={t("statExpiringSoonSubtitle")}
             icon={<ClockIcon className="h-5 w-5 text-amber-500" />}
             bg="bg-amber-50" />
         </Link>
       </div>
 
-      {/* To-kolonne: Kommende avtaler + Kritiske kunder */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
 
-        {/* Kommende avtaler */}
         <div className="bg-white rounded-xl border border-gray-200 p-6">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-base font-semibold text-gray-900">Kommende avtaler</h2>
-            <Link href="/agreements" className="text-xs text-slate-500 hover:text-slate-800">Se alle →</Link>
+            <h2 className="text-base font-semibold text-gray-900">{t("upcomingTitle")}</h2>
+            <Link href="/agreements" className="text-xs text-slate-500 hover:text-slate-800">{t("seeAll")}</Link>
           </div>
           {upcoming.length === 0 ? (
-            <p className="text-sm text-gray-400">Ingen kommende avtaler</p>
+            <p className="text-sm text-gray-400">{t("upcomingEmpty")}</p>
           ) : (
             <ul className="space-y-2">
               {upcoming.map((a: any) => (
@@ -303,14 +305,13 @@ export default function DashboardPage() {
           )}
         </div>
 
-        {/* Mest kritiske kunder */}
         <div className="bg-white rounded-xl border border-gray-200 p-6">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-base font-semibold text-gray-900">Kunder uten aktiv avtale</h2>
-            <Link href="/customers?noActive=true" className="text-xs text-slate-500 hover:text-slate-800">Se alle →</Link>
+            <h2 className="text-base font-semibold text-gray-900">{t("criticalTitle")}</h2>
+            <Link href="/customers?noActive=true" className="text-xs text-slate-500 hover:text-slate-800">{t("seeAll")}</Link>
           </div>
           {criticalCustomers.length === 0 ? (
-            <p className="text-sm text-gray-400">Alle kunder har aktive avtaler</p>
+            <p className="text-sm text-gray-400">{t("criticalEmpty")}</p>
           ) : (
             <ul className="space-y-2">
               {criticalCustomers.map((c: any) => (
@@ -318,10 +319,10 @@ export default function DashboardPage() {
                   <div>
                     <p className="text-sm font-medium text-gray-800">{c.name}</p>
                     <p className="text-xs text-gray-400">
-                      {c.neverHadAgreement ? "Aldri hatt avtale" : `Utløpt for ${c.daysSinceEnd} dager siden`}
+                      {c.neverHadAgreement ? t("neverHad") : t("expiredDaysAgo", { days: c.daysSinceEnd })}
                     </p>
                   </div>
-                  <Link href={`/customers/${c.id}`} className="text-xs text-slate-500 hover:text-slate-800">Åpne →</Link>
+                  <Link href={`/customers/${c.id}`} className="text-xs text-slate-500 hover:text-slate-800">{t("open")}</Link>
                 </li>
               ))}
             </ul>
@@ -381,8 +382,4 @@ function StatCard({ title, value, icon, bg, subtitle }: {
       {subtitle && <div className="text-xs text-gray-400 mt-0.5">{subtitle}</div>}
     </div>
   )
-}
-
-function formatDate(dateStr: string) {
-  return new Date(dateStr).toLocaleDateString("no-NO", { day: "numeric", month: "short" })
 }

@@ -11,6 +11,7 @@ import AgreementSlideOver from "@/app/components/AgreementSlideOver"
 import { generateAgreementPDF } from "@/lib/pdfGenerator"
 import { useAuth } from "@/lib/AuthContext"
 import { ChevronLeftIcon, TrashIcon } from "@heroicons/react/24/outline"
+import { useTranslations, useLocale } from "next-intl"
 
 interface Customer {
   id: string
@@ -60,6 +61,9 @@ export default function CustomerPage(props: CustomerPageProps) {
   const params = use(props.params)
   const id = params.id
   const { user, profile, account } = useAuth()
+  const t = useTranslations("customerDetail")
+  const tc = useTranslations("common")
+  const locale = useLocale()
 
   const agreementId =
     typeof window !== "undefined"
@@ -99,6 +103,13 @@ export default function CustomerPage(props: CustomerPageProps) {
   const [newContactPhone, setNewContactPhone] = useState("")
   const [newFile, setNewFile] = useState<File | null>(null)
   const [removeExistingFile, setRemoveExistingFile] = useState(false)
+
+  const activityTypes = [
+    { value: "note",    label: t("activityTypeNote"),    icon: "📝", bg: "bg-gray-100",   badge: "bg-gray-100 text-gray-600" },
+    { value: "call",    label: t("activityTypeCall"),    icon: "📞", bg: "bg-green-50",   badge: "bg-green-50 text-green-700" },
+    { value: "email",   label: t("activityTypeEmail"),   icon: "✉️",  bg: "bg-blue-50",    badge: "bg-blue-50 text-blue-700" },
+    { value: "meeting", label: t("activityTypeMeeting"), icon: "👥", bg: "bg-purple-50",  badge: "bg-purple-50 text-purple-700" },
+  ]
 
   useEffect(() => {
     if (!user || !id) return
@@ -170,7 +181,7 @@ export default function CustomerPage(props: CustomerPageProps) {
   }
 
   async function deleteCustomer() {
-    if (!supabase || !window.confirm("Er du sikker på at du vil slette denne kunden?")) return
+    if (!supabase || !window.confirm(t("deleteConfirm"))) return
     await supabase.from("customers").delete().eq("id", id)
     router.push("/customers")
   }
@@ -281,14 +292,28 @@ export default function CustomerPage(props: CustomerPageProps) {
   function getExpiryBadge(a: Agreement) {
     if (!a.end_date) return null
     const days = Math.ceil((new Date(a.end_date).getTime() - Date.now()) / 86400000)
-    if (days < 0)   return { text: "Utløpt",                   color: "bg-red-50 text-red-600 ring-red-200" }
-    if (days <= 7)  return { text: `Utløper om ${days} dager`, color: "bg-red-50 text-red-600 ring-red-200" }
-    if (days <= 30) return { text: `Utløper om ${days} dager`, color: "bg-amber-50 text-amber-700 ring-amber-200" }
+    if (days < 0)   return { text: t("badgeExpired"),                           color: "bg-red-50 text-red-600 ring-red-200" }
+    if (days <= 7)  return { text: t("badgeExpiresDays", { days }),             color: "bg-red-50 text-red-600 ring-red-200" }
+    if (days <= 30) return { text: t("badgeExpiresDays", { days }),             color: "bg-amber-50 text-amber-700 ring-amber-200" }
     return null
   }
 
+  const dateLocale = locale === "en" ? "en-GB" : "no-NO"
+
   function formatDate(dateStr: string) {
-    return new Date(dateStr).toLocaleDateString("no-NO", { day: "numeric", month: "short", year: "numeric" })
+    return new Date(dateStr).toLocaleDateString(dateLocale, { day: "numeric", month: "short", year: "numeric" })
+  }
+
+  function timeAgo(dateStr: string) {
+    const diff = Date.now() - new Date(dateStr).getTime()
+    const mins  = Math.floor(diff / 60000)
+    const hours = Math.floor(diff / 3600000)
+    const days  = Math.floor(diff / 86400000)
+    if (mins < 1)   return t("timeJustNow")
+    if (mins < 60)  return t("timeMinutes", { mins })
+    if (hours < 24) return t("timeHours", { hours })
+    if (days < 7)   return t("timeDays", { days })
+    return new Date(dateStr).toLocaleDateString(dateLocale, { day: "numeric", month: "short" })
   }
 
   const inputClass = "w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-400 bg-white"
@@ -298,17 +323,17 @@ export default function CustomerPage(props: CustomerPageProps) {
 
       <Link href="/customers" className="inline-flex items-center gap-1 text-sm text-gray-500 hover:text-gray-900 transition-colors">
         <ChevronLeftIcon className="h-4 w-4" />
-        Kunder
+        {t("backToCustomers")}
       </Link>
 
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-gray-900">{customer?.name ?? "Kunde"}</h1>
+        <h1 className="text-2xl font-bold text-gray-900">{customer?.name ?? ""}</h1>
         <button
           onClick={deleteCustomer}
           className="flex items-center gap-1.5 text-sm text-red-600 hover:text-red-700 border border-red-200 hover:border-red-300 px-3 py-1.5 rounded-lg transition-colors"
         >
           <TrashIcon className="h-4 w-4" />
-          Slett kunde
+          {t("deleteCustomer")}
         </button>
       </div>
 
@@ -319,61 +344,61 @@ export default function CustomerPage(props: CustomerPageProps) {
 
           {/* Kundeinformasjon */}
           <div className="bg-white rounded-xl border border-gray-200 p-6 space-y-4">
-            <h2 className="text-base font-semibold text-gray-900">Kundeinformasjon</h2>
+            <h2 className="text-base font-semibold text-gray-900">{t("infoTitle")}</h2>
 
             <div className="space-y-3">
               <div>
-                <label className="block text-xs font-medium text-gray-500 mb-1">Navn</label>
-                <input className={inputClass} placeholder="Navn" value={name} onChange={(e) => setName(e.target.value)} />
+                <label className="block text-xs font-medium text-gray-500 mb-1">{t("labelName")}</label>
+                <input className={inputClass} placeholder={t("labelName")} value={name} onChange={(e) => setName(e.target.value)} />
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-medium text-gray-500 mb-1">E-post</label>
-                  <input className={inputClass} placeholder="E-post" value={email} onChange={(e) => setEmail(e.target.value)} />
+                  <label className="block text-xs font-medium text-gray-500 mb-1">{t("labelEmail")}</label>
+                  <input className={inputClass} placeholder={t("labelEmail")} value={email} onChange={(e) => setEmail(e.target.value)} />
                 </div>
                 <div>
-                  <label className="block text-xs font-medium text-gray-500 mb-1">Telefon</label>
-                  <input className={inputClass} placeholder="Telefon" value={phone} onChange={(e) => setPhone(e.target.value)} />
+                  <label className="block text-xs font-medium text-gray-500 mb-1">{t("labelPhone")}</label>
+                  <input className={inputClass} placeholder={t("labelPhone")} value={phone} onChange={(e) => setPhone(e.target.value)} />
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-medium text-gray-500 mb-1">Org.nummer</label>
-                  <input className={inputClass} placeholder="F.eks. 123456789" value={orgNummer} onChange={(e) => setOrgNummer(e.target.value)} />
+                  <label className="block text-xs font-medium text-gray-500 mb-1">{t("labelOrgNr")}</label>
+                  <input className={inputClass} placeholder={t("placeholderOrgNr")} value={orgNummer} onChange={(e) => setOrgNummer(e.target.value)} />
                 </div>
                 <div>
-                  <label className="block text-xs font-medium text-gray-500 mb-1">Nettside</label>
-                  <input className={inputClass} placeholder="www.eksempel.no" value={website} onChange={(e) => setWebsite(e.target.value)} />
+                  <label className="block text-xs font-medium text-gray-500 mb-1">{t("labelWebsite")}</label>
+                  <input className={inputClass} placeholder={t("placeholderWebsite")} value={website} onChange={(e) => setWebsite(e.target.value)} />
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-gray-500 mb-1">Adresse</label>
-                <input className={inputClass} placeholder="Gateadresse" value={address} onChange={(e) => setAddress(e.target.value)} />
+                <label className="block text-xs font-medium text-gray-500 mb-1">{t("labelAddress")}</label>
+                <input className={inputClass} placeholder={t("placeholderAddress")} value={address} onChange={(e) => setAddress(e.target.value)} />
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-medium text-gray-500 mb-1">Postnummer</label>
-                  <input className={inputClass} placeholder="0000" value={postalCode} onChange={(e) => setPostalCode(e.target.value)} />
+                  <label className="block text-xs font-medium text-gray-500 mb-1">{t("labelPostalCode")}</label>
+                  <input className={inputClass} placeholder={t("placeholderPostalCode")} value={postalCode} onChange={(e) => setPostalCode(e.target.value)} />
                 </div>
                 <div>
-                  <label className="block text-xs font-medium text-gray-500 mb-1">Sted</label>
-                  <input className={inputClass} placeholder="By" value={city} onChange={(e) => setCity(e.target.value)} />
+                  <label className="block text-xs font-medium text-gray-500 mb-1">{t("labelCity")}</label>
+                  <input className={inputClass} placeholder={t("placeholderCity")} value={city} onChange={(e) => setCity(e.target.value)} />
                 </div>
               </div>
 
               {teamMembers.length > 0 && (
                 <div>
-                  <label className="block text-xs font-medium text-gray-500 mb-1">Kundeansvarlig</label>
+                  <label className="block text-xs font-medium text-gray-500 mb-1">{t("labelManager")}</label>
                   <select
                     className={inputClass}
                     value={accountManagerId}
                     onChange={(e) => setAccountManagerId(e.target.value)}
                   >
-                    <option value="">Ingen ansvarlig valgt</option>
+                    <option value="">{t("noManager")}</option>
                     {teamMembers.map((m) => (
                       <option key={m.user_id} value={m.user_id}>{m.full_name}</option>
                     ))}
@@ -390,38 +415,36 @@ export default function CustomerPage(props: CustomerPageProps) {
                   : "bg-slate-800 text-white hover:bg-slate-700"
               }`}
             >
-              {saved ? "Lagret ✓" : "Lagre endringer"}
+              {saved ? tc("saved") : tc("saveChanges")}
             </button>
           </div>
 
           {/* Aktivitetslogg */}
           <div className="bg-white rounded-xl border border-gray-200 p-6 space-y-4">
-            <h2 className="text-base font-semibold text-gray-900">Aktivitet</h2>
+            <h2 className="text-base font-semibold text-gray-900">{t("activityTitle")}</h2>
 
-            {/* Type-velger */}
             <div className="flex gap-2 flex-wrap">
-              {activityTypes.map((t) => (
+              {activityTypes.map((at) => (
                 <button
-                  key={t.value}
-                  onClick={() => setNewNoteType(t.value)}
+                  key={at.value}
+                  onClick={() => setNewNoteType(at.value)}
                   className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${
-                    newNoteType === t.value
+                    newNoteType === at.value
                       ? "bg-slate-800 text-white"
                       : "bg-gray-100 text-gray-600 hover:bg-gray-200"
                   }`}
                 >
-                  <span>{t.icon}</span>
-                  {t.label}
+                  <span>{at.icon}</span>
+                  {at.label}
                 </button>
               ))}
             </div>
 
-            {/* Input */}
             <div className="space-y-2">
               <textarea
                 className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-400 bg-white resize-none"
                 rows={2}
-                placeholder={`Legg til ${activityTypes.find(t => t.value === newNoteType)?.label.toLowerCase() ?? "notat"}...`}
+                placeholder={t("activityPlaceholder", { type: activityTypes.find(at => at.value === newNoteType)?.label.toLowerCase() ?? "" })}
                 value={newNote}
                 onChange={(e) => setNewNote(e.target.value)}
                 onKeyDown={(e) => { if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) addNote() }}
@@ -431,28 +454,24 @@ export default function CustomerPage(props: CustomerPageProps) {
                 disabled={!newNote.trim()}
                 className="bg-slate-800 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-slate-700 disabled:opacity-40 transition-colors"
               >
-                Legg til
+                {t("activityAdd")}
               </button>
             </div>
 
-            {/* Tidslinje */}
             {notes.length > 0 && (
               <ul className="space-y-0 pt-2">
                 {notes.map((n, i) => {
-                  const typeInfo = activityTypes.find(t => t.value === n.type) ?? activityTypes[0]
-                  const authorName = teamMembers.find(m => m.user_id === n.user_id)?.full_name ?? "Ukjent"
+                  const typeInfo = activityTypes.find(at => at.value === n.type) ?? activityTypes[0]
+                  const authorName = teamMembers.find(m => m.user_id === n.user_id)?.full_name ?? t("activityUnknownAuthor")
                   const isLast = i === notes.length - 1
                   return (
                     <li key={n.id} className="group relative flex gap-3">
-                      {/* Vertikal linje */}
                       {!isLast && (
                         <div className="absolute left-[15px] top-8 bottom-0 w-px bg-gray-100" />
                       )}
-                      {/* Ikon-sirkel */}
                       <div className={`relative z-10 flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-sm ${typeInfo.bg}`}>
                         {typeInfo.icon}
                       </div>
-                      {/* Innhold */}
                       <div className="flex-1 pb-4 min-w-0">
                         <div className="flex items-center justify-between gap-2">
                           <div className="flex items-center gap-2 flex-wrap">
@@ -466,7 +485,7 @@ export default function CustomerPage(props: CustomerPageProps) {
                           <button
                             onClick={() => deleteNote(n.id)}
                             className="opacity-0 group-hover:opacity-100 text-gray-300 hover:text-red-500 transition-colors shrink-0"
-                            title="Slett"
+                            title={t("deleteActivityTitle")}
                           >
                             <TrashIcon className="h-3.5 w-3.5" />
                           </button>
@@ -479,7 +498,7 @@ export default function CustomerPage(props: CustomerPageProps) {
               </ul>
             )}
             {notes.length === 0 && (
-              <p className="text-sm text-gray-400">Ingen aktivitet registrert ennå.</p>
+              <p className="text-sm text-gray-400">{t("activityEmpty")}</p>
             )}
           </div>
         </div>
@@ -488,17 +507,17 @@ export default function CustomerPage(props: CustomerPageProps) {
         <div>
           <div className="bg-white rounded-xl border border-gray-200 p-6 space-y-4">
             <div className="flex items-center justify-between">
-              <h2 id="agreements-section" className="text-base font-semibold text-gray-900">Avtaler</h2>
+              <h2 id="agreements-section" className="text-base font-semibold text-gray-900">{t("agreementsTitle")}</h2>
               <button
                 onClick={handleNewAgreement}
                 className="bg-slate-800 text-white px-3 py-1.5 rounded-lg text-sm font-medium hover:bg-slate-700 transition-colors"
               >
-                Ny avtale
+                {t("newAgreement")}
               </button>
             </div>
 
             {activeAgreements.length === 0 ? (
-              <p className="text-sm text-gray-400">Ingen aktive avtaler</p>
+              <p className="text-sm text-gray-400">{t("noActiveAgreements")}</p>
             ) : (
               <ul>
                 {activeAgreements.map((a) => {
@@ -520,9 +539,9 @@ export default function CustomerPage(props: CustomerPageProps) {
                           </p>
                         </div>
                         <div className="flex items-center gap-3 shrink-0 text-xs text-gray-400">
-                          <button onClick={() => handleGeneratePDF(a)} className="hover:text-gray-700 transition-colors">PDF</button>
-                          <button onClick={() => handleEditAgreement(a)} className="hover:text-gray-700 transition-colors">Rediger</button>
-                          <button onClick={() => archiveAgreement(a.id)} className="hover:text-red-500 transition-colors">Arkiver</button>
+                          <button onClick={() => handleGeneratePDF(a)} className="hover:text-gray-700 transition-colors">{t("pdf")}</button>
+                          <button onClick={() => handleEditAgreement(a)} className="hover:text-gray-700 transition-colors">{t("edit")}</button>
+                          <button onClick={() => archiveAgreement(a.id)} className="hover:text-red-500 transition-colors">{t("archive")}</button>
                         </div>
                       </div>
                     </li>
@@ -533,7 +552,7 @@ export default function CustomerPage(props: CustomerPageProps) {
 
             {archivedAgreements.length > 0 && (
               <div className="border-t border-gray-100 pt-4 mt-2">
-                <p className="text-xs font-medium text-gray-400 uppercase tracking-wide mb-2">Arkivert</p>
+                <p className="text-xs font-medium text-gray-400 uppercase tracking-wide mb-2">{t("archivedLabel")}</p>
                 <ul>
                   {archivedAgreements.map((a) => (
                     <li key={a.id} className="group border-t border-gray-100 first:border-0 py-3 opacity-50 hover:opacity-100 transition-opacity">
@@ -545,8 +564,8 @@ export default function CustomerPage(props: CustomerPageProps) {
                           </p>
                         </div>
                         <div className="flex items-center gap-3 shrink-0 text-xs text-gray-400">
-                          <button onClick={() => handleGeneratePDF(a)} className="hover:text-gray-700 transition-colors">PDF</button>
-                          <button onClick={() => unarchiveAgreement(a.id)} className="hover:text-gray-700 transition-colors">Gjenopprett</button>
+                          <button onClick={() => handleGeneratePDF(a)} className="hover:text-gray-700 transition-colors">{t("pdf")}</button>
+                          <button onClick={() => unarchiveAgreement(a.id)} className="hover:text-gray-700 transition-colors">{t("restore")}</button>
                         </div>
                       </div>
                     </li>
@@ -589,23 +608,4 @@ export default function CustomerPage(props: CustomerPageProps) {
       />
     </div>
   )
-}
-
-const activityTypes = [
-  { value: "note",    label: "Notat",    icon: "📝", bg: "bg-gray-100",   badge: "bg-gray-100 text-gray-600" },
-  { value: "call",    label: "Samtale",  icon: "📞", bg: "bg-green-50",   badge: "bg-green-50 text-green-700" },
-  { value: "email",   label: "E-post",   icon: "✉️",  bg: "bg-blue-50",    badge: "bg-blue-50 text-blue-700" },
-  { value: "meeting", label: "Møte",     icon: "👥", bg: "bg-purple-50",  badge: "bg-purple-50 text-purple-700" },
-]
-
-function timeAgo(dateStr: string) {
-  const diff = Date.now() - new Date(dateStr).getTime()
-  const mins  = Math.floor(diff / 60000)
-  const hours = Math.floor(diff / 3600000)
-  const days  = Math.floor(diff / 86400000)
-  if (mins < 1)   return "nå nettopp"
-  if (mins < 60)  return `${mins}m siden`
-  if (hours < 24) return `${hours}t siden`
-  if (days < 7)   return `${days}d siden`
-  return new Date(dateStr).toLocaleDateString("no-NO", { day: "numeric", month: "short" })
 }

@@ -5,6 +5,7 @@ export const dynamic = "force-dynamic"
 import { useEffect, useState } from "react"
 import { useAuth } from "@/lib/AuthContext"
 import { supabase } from "@/lib/supabaseClient"
+import { useTranslations } from "next-intl"
 
 type Member = {
   user_id: string
@@ -39,16 +40,18 @@ type CompanyProfile = {
   contact_email: string
 }
 
-const sections = [
-  { id: "profil",      label: "Min profil" },
-  { id: "firma",       label: "Firmainformasjon" },
-  { id: "brukere",     label: "Brukere" },
-  { id: "varsler",     label: "Varsler" },
-  { id: "abonnement",  label: "Abonnement" },
-]
-
 export default function SettingsPage() {
   const { account, user } = useAuth()
+  const t = useTranslations("settings")
+  const tc = useTranslations("common")
+
+  const sections = [
+    { id: "profil",      label: t("tabProfile") },
+    { id: "firma",       label: t("tabCompany") },
+    { id: "brukere",     label: t("tabUsers") },
+    { id: "varsler",     label: t("tabNotifications") },
+    { id: "abonnement",  label: t("tabSubscription") },
+  ]
 
   const [activeSection, setActiveSection] = useState("profil")
   const [members, setMembers] = useState<Member[]>([])
@@ -164,18 +167,18 @@ export default function SettingsPage() {
     })
     const data = await res.json()
     if (res.ok) {
-      setInviteMessage({ type: "success", text: `Invitasjon sendt til ${inviteEmail}!` })
+      setInviteMessage({ type: "success", text: t("inviteSent", { email: inviteEmail }) })
       setInviteEmail("")
       setInviteRestrictToOwn(false)
       fetchUsers()
     } else {
-      setInviteMessage({ type: "error", text: data.error ?? "Noe gikk galt" })
+      setInviteMessage({ type: "error", text: data.error ?? tc("error") })
     }
     setInviting(false)
   }
 
   async function handleRemoveUser(userId: string) {
-    if (!window.confirm("Er du sikker på at du vil fjerne denne brukeren fra kontoen?")) return
+    if (!window.confirm(t("removeConfirm"))) return
     setActionLoading(userId)
     await fetch("/api/account/users", {
       method: "DELETE",
@@ -187,7 +190,7 @@ export default function SettingsPage() {
   }
 
   async function handleCancelInvite(email: string) {
-    if (!window.confirm(`Avbryte invitasjonen til ${email}?`)) return
+    if (!window.confirm(t("cancelInviteConfirm", { email }))) return
     setActionLoading(email)
     await fetch("/api/account/invite", {
       method: "DELETE",
@@ -199,7 +202,7 @@ export default function SettingsPage() {
   }
 
   async function handleTransferAdmin(userId: string, name: string) {
-    if (!window.confirm(`Overfør admin-rollen til ${name}? Du vil selv bli vanlig bruker.`)) return
+    if (!window.confirm(t("makeAdminConfirm", { name }))) return
     setActionLoading(userId)
     const res = await fetch("/api/account/users", {
       method: "PATCH",
@@ -255,7 +258,7 @@ export default function SettingsPage() {
       setTimeout(() => setCompanySaved(false), 2000)
     } else {
       const data = await res.json()
-      setCompanyMessage({ type: "error", text: data.error ?? "Noe gikk galt" })
+      setCompanyMessage({ type: "error", text: data.error ?? tc("error") })
     }
     setSavingCompany(false)
   }
@@ -282,10 +285,18 @@ export default function SettingsPage() {
     document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" })
   }
 
+  const subStatusMap: Record<string, { label: string; cls: string }> = {
+    active:     { label: t("subStatusActive"),     cls: "bg-green-50 text-green-700 ring-green-200" },
+    trialing:   { label: t("subStatusTrialing"),   cls: "bg-blue-50 text-blue-700 ring-blue-200" },
+    past_due:   { label: t("subStatusPastDue"),    cls: "bg-red-50 text-red-600 ring-red-200" },
+    canceled:   { label: t("subStatusCanceled"),   cls: "bg-gray-100 text-gray-600 ring-gray-200" },
+    incomplete: { label: t("subStatusIncomplete"), cls: "bg-amber-50 text-amber-700 ring-amber-200" },
+  }
+
   return (
     <div className="p-8 max-w-5xl">
       <div className="mb-8">
-        <h1 className="text-2xl font-bold text-gray-900">Innstillinger</h1>
+        <h1 className="text-2xl font-bold text-gray-900">{t("title")}</h1>
         {account && <p className="text-gray-500 mt-1">{account.name}</p>}
       </div>
 
@@ -310,25 +321,27 @@ export default function SettingsPage() {
           </ul>
         </nav>
 
-        {/* Innholdsseksjoner */}
         <div className="flex-1 space-y-12">
 
           {/* Min profil */}
           <section id="profil" className="scroll-mt-8">
-            <SectionHeader title="Min profil" description="Navn som vises til andre brukere på kontoen." />
+            <div>
+              <h2 className="text-base font-semibold text-gray-900">{t("profileTitle")}</h2>
+              <p className="text-sm text-gray-500 mt-0.5">{t("profileDesc")}</p>
+            </div>
             <form onSubmit={handleSaveProfile} className="mt-4 space-y-4 max-w-sm">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Fullt navn</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t("profileNameLabel")}</label>
                 <input
                   type="text"
                   value={fullName}
                   onChange={(e) => setFullName(e.target.value)}
-                  placeholder="Ditt navn"
+                  placeholder={t("profileNamePlaceholder")}
                   className={inputCls}
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">E-post</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t("profileEmailLabel")}</label>
                 <input
                   type="text"
                   value={user?.email ?? ""}
@@ -343,7 +356,7 @@ export default function SettingsPage() {
                   profileSaved ? "bg-green-600 text-white" : "bg-slate-800 text-white hover:bg-slate-700"
                 }`}
               >
-                {savingProfile ? "Lagrer..." : profileSaved ? "Lagret ✓" : "Lagre"}
+                {savingProfile ? tc("saving") : profileSaved ? tc("saved") : tc("save")}
               </button>
             </form>
           </section>
@@ -352,47 +365,47 @@ export default function SettingsPage() {
 
           {/* Firmainformasjon */}
           <section id="firma" className="scroll-mt-8">
-            <SectionHeader
-              title="Firmainformasjon"
-              description="Brukes i maler og PDF-er."
-              adminOnly
-              isAdmin={currentUserRole === "admin"}
-            />
+            <div>
+              <h2 className="text-base font-semibold text-gray-900">{t("companyTitle")}</h2>
+              <p className="text-sm text-gray-500 mt-0.5">
+                {currentUserRole !== "admin" ? t("adminOnly") : t("companyDesc")}
+              </p>
+            </div>
             {currentUserRole === "admin" && (
               <form onSubmit={handleCompanySave} className="mt-4 space-y-4">
                 <div className="grid grid-cols-2 gap-4">
-                  <Field label="Firmanavn" colSpan={2}>
+                  <Field label={t("companyNameLabel")} colSpan={2}>
                     <input type="text" value={company.name}
                       onChange={(e) => setCompany((c) => ({ ...c, name: e.target.value }))}
                       className={inputCls} />
                   </Field>
-                  <Field label="Organisasjonsnummer" colSpan={2}>
-                    <input type="text" value={company.org_number} placeholder="123 456 789"
+                  <Field label={t("companyOrgLabel")} colSpan={2}>
+                    <input type="text" value={company.org_number} placeholder={t("companyOrgPlaceholder")}
                       onChange={(e) => setCompany((c) => ({ ...c, org_number: e.target.value }))}
                       className={inputCls} />
                   </Field>
-                  <Field label="Adresse" colSpan={2}>
-                    <input type="text" value={company.address} placeholder="Gateveien 1"
+                  <Field label={t("companyAddressLabel")} colSpan={2}>
+                    <input type="text" value={company.address} placeholder={t("companyAddressPlaceholder")}
                       onChange={(e) => setCompany((c) => ({ ...c, address: e.target.value }))}
                       className={inputCls} />
                   </Field>
-                  <Field label="Postnummer">
-                    <input type="text" value={company.postal_code} placeholder="0001"
+                  <Field label={t("companyPostalLabel")}>
+                    <input type="text" value={company.postal_code} placeholder={t("companyPostalPlaceholder")}
                       onChange={(e) => setCompany((c) => ({ ...c, postal_code: e.target.value }))}
                       className={inputCls} />
                   </Field>
-                  <Field label="Sted">
-                    <input type="text" value={company.city} placeholder="Oslo"
+                  <Field label={t("companyCityLabel")}>
+                    <input type="text" value={company.city} placeholder={t("companyCityPlaceholder")}
                       onChange={(e) => setCompany((c) => ({ ...c, city: e.target.value }))}
                       className={inputCls} />
                   </Field>
-                  <Field label="Telefon">
-                    <input type="tel" value={company.phone} placeholder="+47 000 00 000"
+                  <Field label={t("companyPhoneLabel")}>
+                    <input type="tel" value={company.phone} placeholder={t("companyPhonePlaceholder")}
                       onChange={(e) => setCompany((c) => ({ ...c, phone: e.target.value }))}
                       className={inputCls} />
                   </Field>
-                  <Field label="Kontakt-e-post">
-                    <input type="email" value={company.contact_email} placeholder="post@firma.no"
+                  <Field label={t("companyEmailLabel")}>
+                    <input type="email" value={company.contact_email} placeholder={t("companyEmailPlaceholder")}
                       onChange={(e) => setCompany((c) => ({ ...c, contact_email: e.target.value }))}
                       className={inputCls} />
                   </Field>
@@ -405,7 +418,7 @@ export default function SettingsPage() {
                       companySaved ? "bg-green-600 text-white" : "bg-slate-800 text-white hover:bg-slate-700"
                     }`}
                   >
-                    {savingCompany ? "Lagrer..." : companySaved ? "Lagret ✓" : "Lagre"}
+                    {savingCompany ? tc("saving") : companySaved ? tc("saved") : tc("save")}
                   </button>
                   {companyMessage && (
                     <p className="text-sm text-red-600">{companyMessage.text}</p>
@@ -419,19 +432,22 @@ export default function SettingsPage() {
 
           {/* Brukere */}
           <section id="brukere" className="scroll-mt-8">
-            <SectionHeader title="Brukere" description="Alle brukere på denne kontoen." />
+            <div>
+              <h2 className="text-base font-semibold text-gray-900">{t("usersTitle")}</h2>
+              <p className="text-sm text-gray-500 mt-0.5">{t("usersDesc")}</p>
+            </div>
             {loading ? (
-              <p className="text-sm text-gray-400 mt-4">Laster...</p>
+              <p className="text-sm text-gray-400 mt-4">{tc("loading")}</p>
             ) : (
               <div className="mt-4 border border-gray-200 rounded-xl overflow-hidden">
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="border-b border-gray-200 bg-gray-50">
-                      <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wide">Navn</th>
-                      <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wide">E-post</th>
-                      <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wide">Rolle</th>
-                      <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wide">Tilgang</th>
-                      <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wide">Status</th>
+                      <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wide">{t("columnName")}</th>
+                      <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wide">{t("columnEmail")}</th>
+                      <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wide">{t("columnRole")}</th>
+                      <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wide">{t("columnAccess")}</th>
+                      <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wide">{t("columnStatus")}</th>
                       {currentUserRole === "admin" && <th className="px-4 py-3" />}
                     </tr>
                   </thead>
@@ -439,7 +455,7 @@ export default function SettingsPage() {
                     {members.map((member) => (
                       <tr key={member.user_id} className="border-t border-gray-100">
                         <td className="px-4 py-3 text-gray-800 font-medium">
-                          {member.full_name || <span className="text-gray-400 italic">Ikke satt</span>}
+                          {member.full_name || <span className="text-gray-400 italic">{t("roleNotSet")}</span>}
                         </td>
                         <td className="px-4 py-3 text-gray-500">{member.email}</td>
                         <td className="px-4 py-3">
@@ -448,7 +464,7 @@ export default function SettingsPage() {
                               ? "bg-blue-50 text-blue-700 ring-1 ring-blue-200"
                               : "bg-gray-100 text-gray-600"
                           }`}>
-                            {member.role === "admin" ? "Admin" : "Bruker"}
+                            {member.role === "admin" ? t("roleAdmin") : t("roleMember")}
                           </span>
                         </td>
                         <td className="px-4 py-3">
@@ -460,24 +476,24 @@ export default function SettingsPage() {
                               aria-checked={member.restrict_to_own}
                               onClick={() => handleToggleRestrict(member.user_id, member.restrict_to_own)}
                               className="flex items-center gap-2 group"
-                              title={member.restrict_to_own ? "Kun egne kunder — klikk for å gi full tilgang" : "Alle kunder — klikk for å begrense"}
+                              title={member.restrict_to_own ? t("accessOwnOnlyTitle") : t("accessAllTitle")}
                             >
                               <span className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${member.restrict_to_own ? "bg-slate-800" : "bg-gray-200"}`}>
                                 <span className={`inline-block h-3.5 w-3.5 transform rounded-full bg-white shadow transition-transform ${member.restrict_to_own ? "translate-x-5" : "translate-x-0.5"}`} />
                               </span>
                               <span className="text-xs text-gray-500 group-hover:text-gray-800 transition-colors">
-                                {member.restrict_to_own ? "Kun egne" : "Alle kunder"}
+                                {member.restrict_to_own ? t("accessOwnBadge") : t("accessAllBadge")}
                               </span>
                             </button>
                           ) : (
                             <span className="text-xs text-gray-500">
-                              {member.restrict_to_own ? "Kun egne kunder" : "Alle kunder"}
+                              {member.restrict_to_own ? t("accessOwnReadonly") : t("accessAllReadonly")}
                             </span>
                           )}
                         </td>
                         <td className="px-4 py-3">
                           <span className="text-xs font-medium px-2.5 py-0.5 rounded-full bg-green-50 text-green-700 ring-1 ring-green-200">
-                            Aktiv
+                            {t("statusActive")}
                           </span>
                         </td>
                         {currentUserRole === "admin" && (
@@ -488,18 +504,16 @@ export default function SettingsPage() {
                                   onClick={() => handleTransferAdmin(member.user_id, member.full_name)}
                                   disabled={actionLoading === member.user_id}
                                   className="text-xs text-slate-500 hover:text-slate-800 transition-colors disabled:opacity-40"
-                                  title="Gjør til admin"
                                 >
-                                  Gjør til admin
+                                  {t("makeAdmin")}
                                 </button>
                                 <span className="text-gray-200">|</span>
                                 <button
                                   onClick={() => handleRemoveUser(member.user_id)}
                                   disabled={actionLoading === member.user_id}
                                   className="text-xs text-red-400 hover:text-red-600 transition-colors disabled:opacity-40"
-                                  title="Fjern bruker"
                                 >
-                                  Fjern
+                                  {t("removeUser")}
                                 </button>
                               </div>
                             )}
@@ -513,15 +527,15 @@ export default function SettingsPage() {
                         <td className="px-4 py-3 text-gray-500">{invite.email}</td>
                         <td className="px-4 py-3">
                           <span className="text-xs font-medium px-2.5 py-0.5 rounded-full bg-gray-100 text-gray-600">
-                            Bruker
+                            {t("roleMember")}
                           </span>
                         </td>
                         <td className="px-4 py-3 text-xs text-gray-500">
-                          {invite.restrict_to_own ? "Kun egne" : "Alle kunder"}
+                          {invite.restrict_to_own ? t("accessOwnBadge") : t("accessAllBadge")}
                         </td>
                         <td className="px-4 py-3">
                           <span className="text-xs font-medium px-2.5 py-0.5 rounded-full bg-amber-50 text-amber-700 ring-1 ring-amber-200">
-                            Invitert
+                            {t("statusInvited")}
                           </span>
                         </td>
                         {currentUserRole === "admin" && (
@@ -531,7 +545,7 @@ export default function SettingsPage() {
                               disabled={actionLoading === invite.email}
                               className="text-xs text-red-400 hover:text-red-600 transition-colors disabled:opacity-40"
                             >
-                              Avbryt
+                              {t("cancelInvite")}
                             </button>
                           </td>
                         )}
@@ -544,23 +558,23 @@ export default function SettingsPage() {
 
             {currentUserRole === "admin" && (
               <div className="mt-6">
-                <p className="text-sm font-medium text-gray-700 mb-2">Inviter ny bruker</p>
+                <p className="text-sm font-medium text-gray-700 mb-2">{t("inviteTitle")}</p>
                 <form onSubmit={handleInvite} className="space-y-3">
                   <div className="flex gap-3">
                     <input
                       type="email"
                       value={inviteEmail}
                       onChange={(e) => setInviteEmail(e.target.value)}
-                      placeholder="E-postadresse"
+                      placeholder={t("inviteEmailPlaceholder")}
                       required
                       className={`flex-1 ${inputCls}`}
                     />
                     <button type="submit" disabled={inviting} className={btnPrimary}>
-                      {inviting ? "Sender..." : "Send invitasjon"}
+                      {inviting ? t("inviteSending") : t("inviteSendButton")}
                     </button>
                   </div>
                   <div className="flex items-center justify-between py-1">
-                    <span className="text-sm text-gray-600">Begrens til egne kunder</span>
+                    <span className="text-sm text-gray-600">{t("inviteRestrict")}</span>
                     <button
                       type="button"
                       role="switch"
@@ -585,49 +599,47 @@ export default function SettingsPage() {
 
           {/* Varsler */}
           <section id="varsler" className="scroll-mt-8">
-            <SectionHeader
-              title="Varsler"
-              description="Velg hvilke e-postvarsler du ønsker å motta."
-            />
+            <div>
+              <h2 className="text-base font-semibold text-gray-900">{t("notificationsTitle")}</h2>
+              <p className="text-sm text-gray-500 mt-0.5">{t("notificationsDesc")}</p>
+            </div>
 
-            {/* Per-bruker varsler — alle brukere */}
             <div className="mt-4 border border-gray-200 rounded-xl divide-y divide-gray-100">
               <ToggleRow
-                label="Utløpende avtaler"
-                description="Få beskjed 2 uker og 1 uke før en avtale du er ansvarlig for utløper"
+                label={t("notifExpiringTitle")}
+                description={t("notifExpiringDesc")}
                 checked={userNotifPrefs.notify_expiring_agreements}
                 onChange={(v) => handleUserNotifToggle("notify_expiring_agreements", v)}
               />
               <ToggleRow
-                label="Kunder uten aktiv avtale"
-                description="Få beskjed når en kunde du er ansvarlig for ikke lenger har aktive avtaler"
+                label={t("notifNoActiveTitle")}
+                description={t("notifNoActiveDesc")}
                 checked={userNotifPrefs.notify_no_active_agreement}
                 onChange={(v) => handleUserNotifToggle("notify_no_active_agreement", v)}
               />
             </div>
-            {savingUserNotif && <p className="text-xs text-gray-400 mt-2">Lagrer...</p>}
+            {savingUserNotif && <p className="text-xs text-gray-400 mt-2">{tc("saving")}</p>}
 
-            {/* Systemvarsler — kun admin */}
             {currentUserRole === "admin" && (
               <>
                 <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mt-8 mb-3">
-                  Systemvarsler
+                  {t("notifSystemTitle")}
                 </p>
                 <div className="border border-gray-200 rounded-xl divide-y divide-gray-100">
                   <ToggleRow
-                    label="Prøveperiode utløper snart"
-                    description="Få beskjed 2 uker og 1 uke før prøveperioden avsluttes"
+                    label={t("notifTrialTitle")}
+                    description={t("notifTrialDesc")}
                     checked={prefs.notify_trial_ending}
                     onChange={(v) => handleToggle("notify_trial_ending", v)}
                   />
                   <ToggleRow
-                    label="Betalingsproblemer"
-                    description="Få beskjed dersom en betaling mislykkes"
+                    label={t("notifPaymentTitle")}
+                    description={t("notifPaymentDesc")}
                     checked={prefs.notify_payment_failed}
                     onChange={(v) => handleToggle("notify_payment_failed", v)}
                   />
                 </div>
-                {savingPrefs && <p className="text-xs text-gray-400 mt-2">Lagrer...</p>}
+                {savingPrefs && <p className="text-xs text-gray-400 mt-2">{tc("saving")}</p>}
               </>
             )}
           </section>
@@ -636,38 +648,43 @@ export default function SettingsPage() {
 
           {/* Abonnement */}
           <section id="abonnement" className="scroll-mt-8">
-            <SectionHeader
-              title="Abonnement"
-              description="Administrer betaling, faktura og abonnement."
-              adminOnly
-              isAdmin={currentUserRole === "admin"}
-            />
+            <div>
+              <h2 className="text-base font-semibold text-gray-900">{t("subscriptionTitle")}</h2>
+              <p className="text-sm text-gray-500 mt-0.5">
+                {currentUserRole !== "admin" ? t("adminOnly") : t("subscriptionDesc")}
+              </p>
+            </div>
             {currentUserRole === "admin" && account && (
               <div className="mt-4 space-y-4">
                 <div className="flex items-center gap-3">
-                  <StatusBadge status={account.subscription_status} />
+                  {(() => {
+                    const s = account.subscription_status ? subStatusMap[account.subscription_status] : null
+                    return s ? (
+                      <span className={`text-xs font-medium px-2.5 py-0.5 rounded-full ring-1 ${s.cls}`}>{s.label}</span>
+                    ) : null
+                  })()}
                   <p className="text-sm text-gray-500">
-                    {account.subscription_status === "active"   && "Abonnementet er aktivt."}
-                    {account.subscription_status === "trialing" && `${daysLeft(account.trial_end)} dager igjen av prøveperioden.`}
-                    {account.subscription_status === "past_due" && "Betaling feilet — oppdater betalingsmetode."}
-                    {account.subscription_status === "canceled" && "Abonnementet er avsluttet."}
-                    {account.subscription_status === "incomplete" && "Betaling ikke fullført."}
+                    {account.subscription_status === "active"   && t("subscriptionActive")}
+                    {account.subscription_status === "trialing" && t("subscriptionTrial", { daysLeft: daysLeft(account.trial_end) ?? 0 })}
+                    {account.subscription_status === "past_due" && t("subscriptionPastDue")}
+                    {account.subscription_status === "canceled" && t("subscriptionCanceled")}
+                    {account.subscription_status === "incomplete" && t("subscriptionIncomplete")}
                   </p>
                 </div>
                 <div className="flex gap-3">
                   {(account.subscription_status === "active" || account.subscription_status === "past_due") && (
-                    <button onClick={openPortal} className={btnPrimary}>Administrer abonnement</button>
+                    <button onClick={openPortal} className={btnPrimary}>{t("manageSubscription")}</button>
                   )}
                   {account.subscription_status === "trialing" && (
                     <>
-                      <button onClick={openCheckout} className={btnPrimary}>Start abonnement nå</button>
+                      <button onClick={openCheckout} className={btnPrimary}>{t("startSubscriptionNow")}</button>
                       <button onClick={openPortal} className="border border-gray-200 text-gray-700 px-4 py-2 rounded-lg text-sm font-medium hover:border-gray-300 transition-colors">
-                        Administrer abonnement
+                        {t("manageSubscription")}
                       </button>
                     </>
                   )}
                   {(account.subscription_status === "canceled" || account.subscription_status === "incomplete") && (
-                    <button onClick={openCheckout} className={btnPrimary}>Start abonnement</button>
+                    <button onClick={openCheckout} className={btnPrimary}>{t("startSubscription")}</button>
                   )}
                 </div>
               </div>
@@ -679,8 +696,6 @@ export default function SettingsPage() {
     </div>
   )
 }
-
-// ── Hjelpere ──────────────────────────────────────────────────────────────────
 
 const inputCls = "w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-400 bg-white"
 const btnPrimary = "bg-slate-800 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-slate-700 disabled:opacity-50 transition-colors"
@@ -694,34 +709,8 @@ function Field({ label, children, colSpan }: { label: string; children: React.Re
   )
 }
 
-function SectionHeader({ title, description, adminOnly, isAdmin }: {
-  title: string; description: string; adminOnly?: boolean; isAdmin?: boolean
-}) {
-  return (
-    <div>
-      <h2 className="text-base font-semibold text-gray-900">{title}</h2>
-      <p className="text-sm text-gray-500 mt-0.5">
-        {adminOnly && !isAdmin ? "Kun synlig for admin." : description}
-      </p>
-    </div>
-  )
-}
-
 function Divider() {
   return <hr className="border-gray-200" />
-}
-
-function StatusBadge({ status }: { status: string | null | undefined }) {
-  const map: Record<string, { label: string; cls: string }> = {
-    active:     { label: "Aktivt",          cls: "bg-green-50 text-green-700 ring-green-200" },
-    trialing:   { label: "Prøveperiode",    cls: "bg-blue-50 text-blue-700 ring-blue-200" },
-    past_due:   { label: "Betaling feilet", cls: "bg-red-50 text-red-600 ring-red-200" },
-    canceled:   { label: "Avsluttet",       cls: "bg-gray-100 text-gray-600 ring-gray-200" },
-    incomplete: { label: "Ikke fullført",   cls: "bg-amber-50 text-amber-700 ring-amber-200" },
-  }
-  const s = status ? map[status] : null
-  if (!s) return null
-  return <span className={`text-xs font-medium px-2.5 py-0.5 rounded-full ring-1 ${s.cls}`}>{s.label}</span>
 }
 
 function ToggleRow({ label, description, checked, onChange }: {

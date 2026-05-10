@@ -12,37 +12,42 @@ import {
   ArrowLeftOnRectangleIcon,
 } from "@heroicons/react/24/outline"
 import { useAuth } from "@/lib/AuthContext"
-
-const navItems = [
-  { href: "/dashboard", label: "Dashboard", icon: HomeIcon },
-  { href: "/customers", label: "Kunder", icon: UserGroupIcon },
-  { href: "/agreements", label: "Avtaler", icon: DocumentTextIcon },
-  { href: "/agreements?filter=archived", label: "Arkiv", icon: ArchiveBoxIcon },
-  { href: "/templates", label: "Maler", icon: ClipboardDocumentListIcon },
-  { href: "/settings", label: "Innstillinger", icon: Cog6ToothIcon },
-]
-
-const badgeStyles: Record<string, string> = {
-  active:   "bg-green-500/20 text-green-400 ring-1 ring-green-500/30",
-  trialing: "bg-blue-500/20 text-blue-400 ring-1 ring-blue-500/30",
-  past_due: "bg-red-500/20 text-red-400 ring-1 ring-red-500/30",
-  canceled: "bg-slate-500/20 text-slate-400 ring-1 ring-slate-500/30",
-  unknown:  "bg-slate-500/20 text-slate-400 ring-1 ring-slate-500/30",
-  loading:  "bg-slate-500/20 text-slate-400 ring-1 ring-slate-500/30",
-}
-
-const badgeLabel: Record<string, string> = {
-  active:   "Aktivt",
-  trialing: "Prøveperiode",
-  past_due: "Forfalt",
-  canceled: "Avsluttet",
-  unknown:  "Ukjent",
-  loading:  "Laster...",
-}
+import { useTranslations, useLocale } from "next-intl"
+import LanguageSwitcher from "@/app/components/LanguageSwitcher"
 
 export default function Sidebar() {
   const pathname = usePathname()
   const { profile, account, role, loading, logout } = useAuth()
+  const t = useTranslations("nav")
+  const ts = useTranslations("sidebar")
+  const locale = useLocale()
+
+  const navItems = [
+    { href: "/dashboard", label: t("dashboard"), icon: HomeIcon },
+    { href: "/customers", label: t("customers"), icon: UserGroupIcon },
+    { href: "/agreements", label: t("agreements"), icon: DocumentTextIcon },
+    { href: "/agreements?filter=archived", label: t("archive"), icon: ArchiveBoxIcon },
+    { href: "/templates", label: t("templates"), icon: ClipboardDocumentListIcon },
+    { href: "/settings", label: t("settings"), icon: Cog6ToothIcon },
+  ]
+
+  const badgeStyles: Record<string, string> = {
+    active:   "bg-green-500/20 text-green-400 ring-1 ring-green-500/30",
+    trialing: "bg-blue-500/20 text-blue-400 ring-1 ring-blue-500/30",
+    past_due: "bg-red-500/20 text-red-400 ring-1 ring-red-500/30",
+    canceled: "bg-slate-500/20 text-slate-400 ring-1 ring-slate-500/30",
+    unknown:  "bg-slate-500/20 text-slate-400 ring-1 ring-slate-500/30",
+    loading:  "bg-slate-500/20 text-slate-400 ring-1 ring-slate-500/30",
+  }
+
+  const badgeLabel: Record<string, string> = {
+    active:   ts("statusActive"),
+    trialing: ts("statusTrialing"),
+    past_due: ts("statusPastDue"),
+    canceled: ts("statusCanceled"),
+    unknown:  ts("statusUnknown"),
+    loading:  ts("statusLoading"),
+  }
 
   const status = loading ? "loading" : account?.subscription_status ?? "unknown"
   const fullName = profile?.full_name ?? ""
@@ -95,16 +100,19 @@ export default function Sidebar() {
         })}
       </nav>
 
-      {/* Bunn: logg ut + copyright */}
+      {/* Bunn: logg ut + språkvalg + copyright */}
       <div className="px-3 pb-4 pt-3 border-t border-slate-700/50">
         <button
           onClick={logout}
           className="flex items-center gap-3 w-full px-3 py-2 rounded-lg text-sm font-medium text-slate-400 hover:bg-slate-800 hover:text-white transition-colors"
         >
           <ArrowLeftOnRectangleIcon className="h-4 w-4 shrink-0" />
-          Logg ut
+          {t("logout")}
         </button>
-        <div className="text-xs text-slate-600 mt-3 px-3">
+        <div className="mt-2">
+          <LanguageSwitcher />
+        </div>
+        <div className="text-xs text-slate-600 mt-2 px-3">
           © {new Date().getFullYear()} AreCRM
         </div>
       </div>

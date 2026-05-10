@@ -3,7 +3,9 @@
     "allow": [
       "Bash(npx tsc *)",
       "Bash(npm install *)",
-      "Bash(node -e \"console.log\\(require\\('crypto'\\).randomBytes\\(32\\).toString\\('hex'\\)\\)\")"
+      "Bash(node -e \"console.log\\(require\\('crypto'\\).randomBytes\\(32\\).toString\\('hex'\\)\\)\")",
+      "Bash(Get-ChildItem -Path \"c:\\\\MVP\\\\gdpr-saas\\\\app\" -Directory)",
+      "Bash(Select-Object -ExpandProperty Name)"
     ]
   }
 }

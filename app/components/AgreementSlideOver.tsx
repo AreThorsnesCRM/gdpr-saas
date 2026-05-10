@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react"
 import { substituteMergeFields } from "@/lib/mergeFields"
 import RichTextEditor from "@/app/components/RichTextEditor"
+import { useTranslations } from "next-intl"
 
 type Customer = { id: string; name: string }
 type Template = { id: string; name: string; duration_months: number; content: string }
@@ -17,11 +18,9 @@ type Props = {
   open: boolean
   onClose: () => void
   editingAgreement: any | null
-  // Kunde-velger — vises kun fra avtalelisten (ikke fra kundesiden)
   customers?: Customer[]
   customerId?: string
   setCustomerId?: (id: string) => void
-  // Avtalefelt
   newTitle: string
   setNewTitle: (v: string) => void
   newStart: string
@@ -40,7 +39,6 @@ type Props = {
   setNewFile: (f: File | null) => void
   removeExistingFile: boolean
   setRemoveExistingFile: (v: boolean) => void
-  // Flettefelt-data for forhåndsvisning
   mergeData?: { kunde_navn?: string; org_nummer?: string; firma_navn?: string }
   onSave: (opts?: SaveOpts) => void
 }
@@ -111,6 +109,7 @@ export default function AgreementSlideOver({
   mergeData,
   onSave,
 }: Props) {
+  const t = useTranslations("slideOver")
   const panelRef = useRef<HTMLDivElement | null>(null)
   const [templates, setTemplates] = useState<Template[]>([])
   const [selectedTemplateId, setSelectedTemplateId] = useState("")
@@ -118,7 +117,6 @@ export default function AgreementSlideOver({
   const [previewContent, setPreviewContent] = useState("")
   const [generating, setGenerating] = useState(false)
 
-  // Hent maler én gang når slide-overen åpnes
   useEffect(() => {
     if (!open || editingAgreement) return
     fetch("/api/templates")
@@ -126,7 +124,6 @@ export default function AgreementSlideOver({
       .then(({ templates }) => setTemplates(templates ?? []))
   }, [open, editingAgreement])
 
-  // Nullstill mal-valg og preview når slide-overen lukkes
   useEffect(() => {
     if (!open) {
       setSelectedTemplateId("")
@@ -134,7 +131,6 @@ export default function AgreementSlideOver({
     }
   }, [open])
 
-  // Beregn sluttdato automatisk når startdato endres og en mal er valgt
   useEffect(() => {
     if (!selectedTemplateId || !newStart) return
     const template = templates.find((t) => t.id === selectedTemplateId)
@@ -156,14 +152,14 @@ export default function AgreementSlideOver({
   function handleTemplateSelect(templateId: string) {
     setSelectedTemplateId(templateId)
     if (!templateId) return
-    const template = templates.find((t) => t.id === templateId)
+    const template = templates.find((tmpl) => tmpl.id === templateId)
     if (!template) return
     if (!newTitle) setNewTitle(template.name)
     if (newStart) setNewEnd(calcEndDate(newStart, template.duration_months))
   }
 
   function getPreviewHtml(): string {
-    const template = templates.find((t) => t.id === selectedTemplateId)
+    const template = templates.find((tmpl) => tmpl.id === selectedTemplateId)
     if (!template?.content) return ""
     return substituteMergeFields(template.content, {
       ...mergeData,
@@ -194,30 +190,27 @@ export default function AgreementSlideOver({
 
   if (!open) return null
 
-  // --- Forhåndsvisnings- og redigeringsmodus (full skjerm) ---
   if (previewMode) {
     return (
       <div className="fixed top-0 right-0 bottom-0 left-64 z-50 bg-gray-50 overflow-y-auto">
         <div className="max-w-4xl mx-auto px-8 py-8 space-y-6">
 
-          {/* Topplinje */}
           <div className="flex items-center justify-between">
             <button
               onClick={() => setPreviewMode(false)}
               className="inline-flex items-center gap-1 text-sm text-gray-500 hover:text-gray-900 transition-colors"
             >
-              ← Tilbake til skjema
+              {t("backToForm")}
             </button>
             <button
               onClick={handleSaveFromPreview}
               disabled={generating}
               className="rounded-lg bg-slate-800 px-4 py-2 text-sm font-medium text-white hover:bg-slate-700 disabled:opacity-50 transition-colors"
             >
-              {generating ? "Genererer PDF..." : "Lagre som PDF"}
+              {generating ? t("generating") : t("saveAsPDF")}
             </button>
           </div>
 
-          {/* Tittel */}
           <div>
             <h1 className="text-2xl font-bold text-gray-900">{newTitle}</h1>
             <p className="text-sm text-gray-400 mt-1">
@@ -226,29 +219,27 @@ export default function AgreementSlideOver({
             </p>
           </div>
 
-          {/* Editor */}
           <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
             <RichTextEditor
               content={previewContent}
               onChange={setPreviewContent}
-              placeholder="Innhold..."
+              placeholder={t("contentPlaceholder")}
             />
           </div>
 
-          {/* Bunn */}
           <div className="flex justify-between items-center">
             <button
               onClick={() => setPreviewMode(false)}
               className="text-sm text-gray-400 hover:text-gray-700 transition-colors"
             >
-              Avbryt
+              {t("cancel")}
             </button>
             <button
               onClick={handleSaveFromPreview}
               disabled={generating}
               className="rounded-lg bg-slate-800 px-4 py-2 text-sm font-medium text-white hover:bg-slate-700 disabled:opacity-50 transition-colors"
             >
-              {generating ? "Genererer PDF..." : "Lagre som PDF"}
+              {generating ? t("generating") : t("saveAsPDF")}
             </button>
           </div>
         </div>
@@ -256,7 +247,6 @@ export default function AgreementSlideOver({
     )
   }
 
-  // --- Skjema-modus ---
   const showCustomerPicker = customers && customers.length > 0 && !editingAgreement
   const showTemplatePicker = !editingAgreement && templates.length > 0
 
@@ -269,53 +259,48 @@ export default function AgreementSlideOver({
         ref={panelRef}
         className="h-full w-full max-w-md bg-white shadow-xl border-l border-gray-200 overflow-y-auto animate-slideIn"
       >
-        {/* Header */}
         <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
           <h2 className="text-base font-semibold text-gray-900">
-            {editingAgreement ? "Rediger avtale" : "Ny avtale"}
+            {editingAgreement ? t("editTitle") : t("newTitle")}
           </h2>
           <button onClick={onClose} className="text-sm text-gray-400 hover:text-gray-700 transition-colors">
-            Lukk
+            {t("cancel")}
           </button>
         </div>
 
         <div className="px-5 py-6 space-y-4">
 
-          {/* Mal-velger */}
           {showTemplatePicker && (
             <div className="space-y-1">
-              <label className="text-xs font-medium text-gray-500">Bruk mal</label>
+              <label className="text-xs font-medium text-gray-500">{t("useTemplate")}</label>
               <select
                 value={selectedTemplateId}
                 onChange={(e) => handleTemplateSelect(e.target.value)}
                 className={inputCls}
               >
-                <option value="">Velg mal (valgfritt)</option>
-                {templates.map((t) => (
-                  <option key={t.id} value={t.id}>
-                    {t.name} — {t.duration_months} mnd
+                <option value="">{t("selectTemplate")}</option>
+                {templates.map((tmpl) => (
+                  <option key={tmpl.id} value={tmpl.id}>
+                    {tmpl.name} — {tmpl.duration_months} {t("months")}
                   </option>
                 ))}
               </select>
               {selectedTemplateId && (
-                <p className="text-xs text-amber-600">
-                  Sluttdato beregnes automatisk · Forhåndsvis innhold før lagring
-                </p>
+                <p className="text-xs text-amber-600">{t("autoEndDateHint")}</p>
               )}
             </div>
           )}
 
-          {/* Kunde-velger (kun fra avtalelisten) */}
           {showCustomerPicker && (
             <div className="space-y-1">
-              <label className="text-xs font-medium text-gray-500">Kunde *</label>
+              <label className="text-xs font-medium text-gray-500">{t("customerLabel")}</label>
               <select
                 value={customerId ?? ""}
                 onChange={(e) => setCustomerId?.(e.target.value)}
                 className={inputCls}
                 required
               >
-                <option value="">Velg kunde</option>
+                <option value="">{t("selectCustomer")}</option>
                 {customers.map((c) => (
                   <option key={c.id} value={c.id}>{c.name}</option>
                 ))}
@@ -323,22 +308,20 @@ export default function AgreementSlideOver({
             </div>
           )}
 
-          {/* Tittel */}
           <div className="space-y-1">
-            <label className="text-xs font-medium text-gray-500">Tittel *</label>
+            <label className="text-xs font-medium text-gray-500">{t("titleLabel")}</label>
             <input
               type="text"
               value={newTitle}
               onChange={(e) => setNewTitle(e.target.value)}
-              placeholder="F.eks. Serviceavtale 2025"
+              placeholder={t("titlePlaceholder")}
               className={inputCls}
             />
           </div>
 
-          {/* Datoer */}
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1">
-              <label className="text-xs font-medium text-gray-500">Startdato *</label>
+              <label className="text-xs font-medium text-gray-500">{t("startDateLabel")}</label>
               <input
                 type="date"
                 value={newStart}
@@ -348,8 +331,8 @@ export default function AgreementSlideOver({
             </div>
             <div className="space-y-1">
               <label className="text-xs font-medium text-gray-500">
-                Sluttdato *
-                {selectedTemplateId && <span className="text-amber-500 ml-1">auto</span>}
+                {t("endDateLabel")}
+                {selectedTemplateId && <span className="text-amber-500 ml-1">{t("endDateAuto")}</span>}
               </label>
               <input
                 type="date"
@@ -360,42 +343,40 @@ export default function AgreementSlideOver({
             </div>
           </div>
 
-          {/* Kontaktperson */}
           <div className="space-y-1">
-            <label className="text-xs font-medium text-gray-500">Kontaktperson</label>
+            <label className="text-xs font-medium text-gray-500">{t("contactPerson")}</label>
             <input
               type="text"
               value={newContactName}
               onChange={(e) => setNewContactName(e.target.value)}
-              placeholder="Navn"
+              placeholder={t("contactNamePlaceholder")}
               className={inputCls}
             />
           </div>
 
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1">
-              <label className="text-xs font-medium text-gray-500">E-post</label>
+              <label className="text-xs font-medium text-gray-500">{t("contactEmailLabel")}</label>
               <input
                 type="email"
                 value={newContactEmail}
                 onChange={(e) => setNewContactEmail(e.target.value)}
-                placeholder="e-post@eksempel.no"
+                placeholder={t("contactEmailPlaceholder")}
                 className={inputCls}
               />
             </div>
             <div className="space-y-1">
-              <label className="text-xs font-medium text-gray-500">Telefon</label>
+              <label className="text-xs font-medium text-gray-500">{t("contactPhoneLabel")}</label>
               <input
                 type="text"
                 value={newContactPhone}
                 onChange={(e) => setNewContactPhone(e.target.value)}
-                placeholder="+47 000 00 000"
+                placeholder={t("contactPhonePlaceholder")}
                 className={inputCls}
               />
             </div>
           </div>
 
-          {/* Signert */}
           <label className="inline-flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
             <input
               type="checkbox"
@@ -403,38 +384,36 @@ export default function AgreementSlideOver({
               onChange={(e) => setNewSigned(e.target.checked)}
               className="h-4 w-4 rounded border-gray-300 text-slate-800"
             />
-            Signert
+            {t("signed")}
           </label>
 
-          {/* Eksisterende fil */}
           {editingAgreement?.file_url && !removeExistingFile && (
             <div className="rounded-lg bg-gray-50 border border-gray-200 px-3 py-2.5 text-sm space-y-1">
-              <p className="font-medium text-gray-700">Eksisterende fil</p>
+              <p className="font-medium text-gray-700">{t("existingFile")}</p>
               <a
                 href={editingAgreement.file_url}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-slate-700 underline hover:text-slate-900"
               >
-                Åpne avtale
+                {t("openAgreement")}
               </a>
               <button
                 type="button"
                 onClick={() => setRemoveExistingFile(true)}
                 className="block text-sm text-red-500 hover:text-red-700"
               >
-                Fjern fil
+                {t("removeFile")}
               </button>
             </div>
           )}
           {editingAgreement && removeExistingFile && (
-            <p className="text-sm text-red-600">Filen fjernes når du lagrer.</p>
+            <p className="text-sm text-red-600">{t("fileRemovedNote")}</p>
           )}
 
-          {/* Filopplasting — skjul når mal er valgt (PDF genereres automatisk) */}
           {!selectedTemplateId && (
             <div className="space-y-1">
-              <label className="text-xs font-medium text-gray-500">Last opp avtale (PDF)</label>
+              <label className="text-xs font-medium text-gray-500">{t("uploadPDF")}</label>
               <input
                 type="file"
                 accept="application/pdf"
@@ -445,23 +424,22 @@ export default function AgreementSlideOver({
           )}
         </div>
 
-        {/* Footer */}
         <div className="flex justify-end gap-3 px-5 py-4 border-t border-gray-100">
           <button
             onClick={onClose}
             className="text-sm text-gray-500 hover:text-gray-800 transition-colors"
           >
-            Avbryt
+            {t("cancel")}
           </button>
           <button
             onClick={handleSaveClick}
             className="rounded-lg bg-slate-800 px-4 py-2 text-sm font-medium text-white hover:bg-slate-700 transition-colors"
           >
             {editingAgreement
-              ? "Oppdater avtale"
+              ? t("updateAgreement")
               : selectedTemplateId
-              ? "Forhåndsvis →"
-              : "Lagre avtale"}
+              ? t("preview")
+              : t("saveAgreement")}
           </button>
         </div>
       </div>

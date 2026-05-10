@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation"
 import { supabase } from "@/lib/supabaseClient"
 import { useAuth } from "@/lib/AuthContext"
 import AgreementSlideOver from "@/app/components/AgreementSlideOver"
+import { useTranslations, useLocale } from "next-intl"
 
 type Agreement = {
   id: string
@@ -21,19 +22,22 @@ type Customer = { id: string; name: string }
 
 type Filter = "all" | "active" | "expired" | "upcoming" | "expiresSoon" | "archived"
 
-const filterOptions: { id: Filter; label: string }[] = [
-  { id: "all",         label: "Alle" },
-  { id: "active",      label: "Aktive" },
-  { id: "expiresSoon", label: "Utløper snart" },
-  { id: "upcoming",    label: "Kommende" },
-  { id: "expired",     label: "Utløpte" },
-  { id: "archived",    label: "Arkiverte" },
-]
-
 export default function AgreementsPage() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const { user, account, restrictToOwn } = useAuth()
+  const t = useTranslations("agreements")
+  const tc = useTranslations("common")
+  const locale = useLocale()
+
+  const filterOptions: { id: Filter; label: string }[] = [
+    { id: "all",         label: t("filterAll") },
+    { id: "active",      label: t("filterActive") },
+    { id: "expiresSoon", label: t("filterExpiresSoon") },
+    { id: "upcoming",    label: t("filterUpcoming") },
+    { id: "expired",     label: t("filterExpired") },
+    { id: "archived",    label: t("filterArchived") },
+  ]
 
   const [filter, setFilter] = useState<Filter>("all")
   const [agreements, setAgreements] = useState<Agreement[]>([])
@@ -180,37 +184,39 @@ export default function AgreementsPage() {
     return getStatus(a) === filter
   })
 
+  const dateLocale = locale === "en" ? "en-GB" : "no-NO"
+
+  function formatDate(dateStr: string) {
+    return new Date(dateStr).toLocaleDateString(dateLocale, { day: "2-digit", month: "short", year: "numeric" })
+  }
+
   function StatusBadge({ a }: { a: Agreement }) {
     const status = getStatus(a)
     const days = daysUntil(a.end_date)
 
     if (status === "archived")
-      return <span className="text-xs font-medium px-2.5 py-0.5 rounded-full bg-gray-100 text-gray-500 ring-1 ring-gray-200">Arkivert</span>
+      return <span className="text-xs font-medium px-2.5 py-0.5 rounded-full bg-gray-100 text-gray-500 ring-1 ring-gray-200">{t("statusArchived")}</span>
     if (status === "expired")
-      return <span className="text-xs font-medium px-2.5 py-0.5 rounded-full bg-red-50 text-red-600 ring-1 ring-red-200">Utløpt</span>
+      return <span className="text-xs font-medium px-2.5 py-0.5 rounded-full bg-red-50 text-red-600 ring-1 ring-red-200">{t("statusExpired")}</span>
     if (status === "upcoming")
-      return <span className="text-xs font-medium px-2.5 py-0.5 rounded-full bg-blue-50 text-blue-600 ring-1 ring-blue-200">Kommende</span>
+      return <span className="text-xs font-medium px-2.5 py-0.5 rounded-full bg-blue-50 text-blue-600 ring-1 ring-blue-200">{t("statusUpcoming")}</span>
     if (days <= 7)
-      return <span className="text-xs font-medium px-2.5 py-0.5 rounded-full bg-red-50 text-red-600 ring-1 ring-red-200">Utløper om {days}d</span>
+      return <span className="text-xs font-medium px-2.5 py-0.5 rounded-full bg-red-50 text-red-600 ring-1 ring-red-200">{t("statusExpiresDays", { days })}</span>
     if (days <= 30)
-      return <span className="text-xs font-medium px-2.5 py-0.5 rounded-full bg-amber-50 text-amber-700 ring-1 ring-amber-200">Utløper om {days}d</span>
-    return <span className="text-xs font-medium px-2.5 py-0.5 rounded-full bg-green-50 text-green-700 ring-1 ring-green-200">Aktiv</span>
-  }
-
-  function formatDate(dateStr: string) {
-    return new Date(dateStr).toLocaleDateString("no-NO", { day: "2-digit", month: "short", year: "numeric" })
+      return <span className="text-xs font-medium px-2.5 py-0.5 rounded-full bg-amber-50 text-amber-700 ring-1 ring-amber-200">{t("statusExpiresDays", { days })}</span>
+    return <span className="text-xs font-medium px-2.5 py-0.5 rounded-full bg-green-50 text-green-700 ring-1 ring-green-200">{t("statusActive")}</span>
   }
 
   return (
     <div className="p-8 max-w-6xl space-y-6">
 
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-gray-900">Avtaler</h1>
+        <h1 className="text-2xl font-bold text-gray-900">{t("title")}</h1>
         <button
           onClick={openSlideOver}
           className="bg-slate-800 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-slate-700 transition-colors"
         >
-          Ny avtale
+          {t("newAgreement")}
         </button>
       </div>
 
@@ -231,18 +237,18 @@ export default function AgreementsPage() {
       </div>
 
       {loading ? (
-        <p className="text-sm text-gray-400">Laster...</p>
+        <p className="text-sm text-gray-400">{tc("loading")}</p>
       ) : filtered.length === 0 ? (
-        <p className="text-sm text-gray-400">Ingen avtaler matcher valgt filter.</p>
+        <p className="text-sm text-gray-400">{t("noResults")}</p>
       ) : (
         <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-gray-200 bg-gray-50">
-                <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wide">Tittel</th>
-                <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wide">Kunde</th>
-                <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wide">Periode</th>
-                <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wide">Status</th>
+                <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wide">{t("columnTitle")}</th>
+                <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wide">{t("columnCustomer")}</th>
+                <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wide">{t("columnPeriod")}</th>
+                <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wide">{t("columnStatus")}</th>
               </tr>
             </thead>
             <tbody>
@@ -268,7 +274,7 @@ export default function AgreementsPage() {
       )}
 
       {!loading && filtered.length > 0 && (
-        <p className="text-xs text-gray-400">{filtered.length} avtale{filtered.length !== 1 ? "r" : ""}</p>
+        <p className="text-xs text-gray-400">{t("count", { count: filtered.length })}</p>
       )}
 
       <AgreementSlideOver

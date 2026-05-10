@@ -2,6 +2,7 @@
 
 import { useRef, useState } from "react"
 import { ArrowUpTrayIcon, XMarkIcon, CheckCircleIcon } from "@heroicons/react/24/outline"
+import { useTranslations } from "next-intl"
 
 type CustomerRow = {
   name: string
@@ -20,7 +21,6 @@ type Props = {
   onImported: () => void
 }
 
-// Normaliserer kolonnenavn fra Excel til våre felt
 const COL_MAP: Record<string, keyof CustomerRow> = {
   navn: "name", name: "name", firma: "name", company: "name", bedrift: "name",
   epost: "email", "e-post": "email", email: "email", mail: "email", epostadresse: "email",
@@ -56,6 +56,7 @@ function parseSheet(data: any[][]): CustomerRow[] {
 }
 
 export default function ExcelImportModal({ open, onClose, onImported }: Props) {
+  const t = useTranslations("excelImport")
   const inputRef = useRef<HTMLInputElement>(null)
   const [rows, setRows] = useState<CustomerRow[]>([])
   const [fileName, setFileName] = useState("")
@@ -65,6 +66,17 @@ export default function ExcelImportModal({ open, onClose, onImported }: Props) {
   const [dragOver, setDragOver] = useState(false)
 
   if (!open) return null
+
+  const fields: { key: keyof CustomerRow; label: string }[] = [
+    { key: "name",        label: t("columnName") },
+    { key: "email",       label: t("columnEmail") },
+    { key: "phone",       label: t("columnPhone") },
+    { key: "org_nummer",  label: t("columnOrg") },
+    { key: "address",     label: t("columnAddress") },
+    { key: "postal_code", label: t("columnPostal") },
+    { key: "city",        label: t("columnCity") },
+    { key: "website",     label: t("columnWebsite") },
+  ]
 
   async function handleFile(file: File) {
     setError("")
@@ -80,7 +92,7 @@ export default function ExcelImportModal({ open, onClose, onImported }: Props) {
     const parsed = parseSheet(data)
 
     if (parsed.length === 0) {
-      setError("Ingen gyldige rader funnet. Sjekk at filen har en Navn-kolonne.")
+      setError(t("noValidRows"))
       return
     }
     setRows(parsed)
@@ -109,7 +121,7 @@ export default function ExcelImportModal({ open, onClose, onImported }: Props) {
         body: JSON.stringify({ customers: rows }),
       })
       const json = await res.json()
-      if (!res.ok) { setError(json.error ?? "Noe gikk galt"); return }
+      if (!res.ok) { setError(json.error ?? t("cancel")); return }
       setImported(json.imported)
       onImported()
     } finally {
@@ -122,24 +134,12 @@ export default function ExcelImportModal({ open, onClose, onImported }: Props) {
     onClose()
   }
 
-  const fields: { key: keyof CustomerRow; label: string }[] = [
-    { key: "name", label: "Navn" },
-    { key: "email", label: "E-post" },
-    { key: "phone", label: "Telefon" },
-    { key: "org_nummer", label: "Org.nr" },
-    { key: "address", label: "Adresse" },
-    { key: "postal_code", label: "Postnr" },
-    { key: "city", label: "Sted" },
-    { key: "website", label: "Nettside" },
-  ]
-
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
       <div className="bg-white rounded-xl shadow-xl border border-gray-200 w-full max-w-4xl max-h-[90vh] flex flex-col">
 
-        {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 shrink-0">
-          <h2 className="text-base font-semibold text-gray-900">Importer kunder fra Excel</h2>
+          <h2 className="text-base font-semibold text-gray-900">{t("title")}</h2>
           <button onClick={handleClose} className="text-gray-400 hover:text-gray-700 transition-colors">
             <XMarkIcon className="h-5 w-5" />
           </button>
@@ -147,19 +147,17 @@ export default function ExcelImportModal({ open, onClose, onImported }: Props) {
 
         <div className="flex-1 overflow-y-auto px-6 py-5 space-y-5">
 
-          {/* Suksess */}
           {imported !== null ? (
             <div className="flex flex-col items-center justify-center py-12 gap-3">
               <CheckCircleIcon className="h-12 w-12 text-green-500" />
-              <p className="text-lg font-semibold text-gray-900">{imported} kunder importert!</p>
+              <p className="text-lg font-semibold text-gray-900">{t("successCount", { count: imported })}</p>
               <button onClick={handleClose}
                 className="mt-2 bg-slate-800 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-slate-700 transition-colors">
-                Lukk
+                {t("close")}
               </button>
             </div>
           ) : (
             <>
-              {/* Filslipp */}
               {!rows.length && (
                 <div
                   onDrop={handleDrop}
@@ -171,37 +169,34 @@ export default function ExcelImportModal({ open, onClose, onImported }: Props) {
                   }`}
                 >
                   <ArrowUpTrayIcon className="h-8 w-8 text-gray-300 mx-auto mb-3" />
-                  <p className="text-sm font-medium text-gray-700">Dra og slipp en Excel-fil her</p>
-                  <p className="text-xs text-gray-400 mt-1">eller klikk for å velge fil (.xlsx)</p>
+                  <p className="text-sm font-medium text-gray-700">{t("dropzone")}</p>
+                  <p className="text-xs text-gray-400 mt-1">{t("dropzoneHint")}</p>
                   <input ref={inputRef} type="file" accept=".xlsx,.xls" onChange={handleFileInput} className="hidden" />
                 </div>
               )}
 
-              {/* Hint om kolonner */}
               {!rows.length && (
                 <div className="rounded-lg bg-blue-50 border border-blue-100 px-4 py-3 text-xs text-blue-700 space-y-1">
-                  <p className="font-medium">Forventede kolonnenavn i Excel-filen:</p>
+                  <p className="font-medium">{t("columnsTitle")}</p>
                   <p className="text-blue-600">
-                    <strong>Navn</strong> (påkrevd) · E-post · Telefon · Org.nr · Adresse · Postnummer · Sted
+                    <strong>{t("columnName")}</strong> (påkrevd) · {t("columnEmail")} · {t("columnPhone")} · {t("columnOrg")} · {t("columnAddress")} · {t("columnPostal")} · {t("columnCity")}
                   </p>
-                  <p className="text-blue-500 mt-1">Kolonnenavnene kan også være på engelsk (Name, Email, Phone, osv.)</p>
+                  <p className="text-blue-500 mt-1">{t("columnsEnglish")}</p>
                 </div>
               )}
 
-              {/* Feilmelding */}
               {error && <p className="text-sm text-red-600">{error}</p>}
 
-              {/* Forhåndsvisning */}
               {rows.length > 0 && (
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-sm font-medium text-gray-900">{fileName}</p>
-                      <p className="text-xs text-gray-400">{rows.length} kunder klar til import</p>
+                      <p className="text-xs text-gray-400">{t("readyToImport", { count: rows.length })}</p>
                     </div>
                     <button onClick={() => { setRows([]); setFileName("") }}
                       className="text-xs text-gray-400 hover:text-gray-700 transition-colors">
-                      Velg ny fil
+                      {t("changeFile")}
                     </button>
                   </div>
 
@@ -237,18 +232,17 @@ export default function ExcelImportModal({ open, onClose, onImported }: Props) {
           )}
         </div>
 
-        {/* Footer */}
         {rows.length > 0 && imported === null && (
           <div className="flex items-center justify-between px-6 py-4 border-t border-gray-100 shrink-0">
             <button onClick={handleClose} className="text-sm text-gray-500 hover:text-gray-800 transition-colors">
-              Avbryt
+              {t("cancel")}
             </button>
             <button
               onClick={handleImport}
               disabled={importing}
               className="bg-slate-800 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-slate-700 disabled:opacity-50 transition-colors"
             >
-              {importing ? "Importerer..." : `Importer ${rows.length} kunder`}
+              {importing ? t("importing") : t("importButton", { count: rows.length })}
             </button>
           </div>
         )}

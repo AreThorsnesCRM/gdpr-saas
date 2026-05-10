@@ -9,6 +9,7 @@ import { supabase } from "../../../lib/supabaseClient"
 import { useAuth } from "@/lib/AuthContext"
 import { TrashIcon, ChevronUpDownIcon, ArrowUpTrayIcon } from "@heroicons/react/24/outline"
 import ExcelImportModal from "@/app/components/ExcelImportModal"
+import { useTranslations } from "next-intl"
 
 type Customer = {
   id: string
@@ -28,17 +29,19 @@ type TeamMember = {
   full_name: string
 }
 
-const statusFilters = [
-  { id: "all",      label: "Alle" },
-  { id: "active",   label: "Aktiv avtale" },
-  { id: "noActive", label: "Uten aktiv" },
-  { id: "never",    label: "Aldri hatt" },
-]
-
 export default function CustomersPage() {
   const { user, restrictToOwn } = useAuth()
   const router = useRouter()
   const searchParams = useSearchParams()
+  const t = useTranslations("customers")
+  const tc = useTranslations("common")
+
+  const statusFilters = [
+    { id: "all",      label: t("filterAll") },
+    { id: "active",   label: t("filterActive") },
+    { id: "noActive", label: t("filterNoActive") },
+    { id: "never",    label: t("filterNever") },
+  ]
 
   const [customers, setCustomers] = useState<Customer[]>([])
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>([])
@@ -108,7 +111,7 @@ export default function CustomersPage() {
 
   async function deleteCustomer(e: React.MouseEvent, id: string) {
     e.stopPropagation()
-    if (!supabase || !window.confirm("Er du sikker på at du vil slette denne kunden?")) return
+    if (!supabase || !window.confirm(t("deleteConfirm"))) return
     await supabase.from("customers").delete().eq("id", id)
     loadCustomers()
   }
@@ -140,11 +143,11 @@ export default function CustomersPage() {
 
   function Badge({ c }: { c: Customer }) {
     if (c.hasActiveAgreement)
-      return <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-green-50 text-green-700 ring-1 ring-green-200">Aktiv</span>
+      return <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-green-50 text-green-700 ring-1 ring-green-200">{t("badgeActive")}</span>
     if (c.hasNeverHadAgreement)
-      return <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-red-50 text-red-600 ring-1 ring-red-200">Ingen</span>
+      return <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-red-50 text-red-600 ring-1 ring-red-200">{t("badgeNone")}</span>
     if (c.daysSinceEnd != null)
-      return <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 ring-1 ring-amber-200">Utløpt {c.daysSinceEnd}d</span>
+      return <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 ring-1 ring-amber-200">{t("badgeExpired", { days: c.daysSinceEnd })}</span>
     return null
   }
 
@@ -153,18 +156,18 @@ export default function CustomersPage() {
 
       {/* Header */}
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-gray-900">Kunder</h1>
+        <h1 className="text-2xl font-bold text-gray-900">{t("title")}</h1>
         <div className="flex items-center gap-2">
           <button
             onClick={() => setImportOpen(true)}
             className="inline-flex items-center gap-2 border border-gray-200 text-gray-600 px-3 py-2 rounded-lg text-sm font-medium hover:bg-gray-50 hover:border-gray-300 transition-colors"
           >
             <ArrowUpTrayIcon className="h-4 w-4" />
-            Importer fra Excel
+            {t("importExcel")}
           </button>
           <Link href="/customers/new"
             className="bg-slate-800 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-slate-700 transition-colors">
-            Ny kunde
+            {t("newCustomer")}
           </Link>
         </div>
       </div>
@@ -182,7 +185,7 @@ export default function CustomersPage() {
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Søk på navn, e-post, org.nr eller sted..."
+            placeholder={t("searchPlaceholder")}
             className="flex-1 border border-gray-200 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-400 bg-white"
           />
           {teamMembers.length > 1 && (
@@ -191,7 +194,7 @@ export default function CustomersPage() {
               onChange={(e) => setManagerFilter(e.target.value)}
               className="border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-400 bg-white text-gray-700"
             >
-              <option value="">Alle ansvarlige</option>
+              <option value="">{t("allManagers")}</option>
               {teamMembers.map((m) => (
                 <option key={m.user_id} value={m.user_id}>{m.full_name}</option>
               ))}
@@ -214,9 +217,9 @@ export default function CustomersPage() {
 
       {/* Tabell */}
       {loading ? (
-        <p className="text-sm text-gray-400">Laster...</p>
+        <p className="text-sm text-gray-400">{tc("loading")}</p>
       ) : filtered.length === 0 ? (
-        <p className="text-sm text-gray-400">Ingen kunder matcher søket.</p>
+        <p className="text-sm text-gray-400">{t("noResults")}</p>
       ) : (
         <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
           <table className="w-full text-sm">
@@ -227,16 +230,16 @@ export default function CustomersPage() {
                     onClick={() => setSortDir(d => d === "asc" ? "desc" : "asc")}
                     className="flex items-center gap-1 text-xs font-medium text-gray-500 hover:text-gray-900 transition-colors"
                   >
-                    Navn
+                    {t("columnName")}
                     <ChevronUpDownIcon className="h-3.5 w-3.5" />
                   </button>
                 </th>
-                <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">Org.nr</th>
-                <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">Sted</th>
+                <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">{t("columnOrg")}</th>
+                <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">{t("columnCity")}</th>
                 {teamMembers.length > 0 && (
-                  <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">Ansvarlig</th>
+                  <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">{t("columnManager")}</th>
                 )}
-                <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">Avtale</th>
+                <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">{t("columnAgreement")}</th>
                 <th className="px-4 py-3" />
               </tr>
             </thead>
@@ -265,7 +268,7 @@ export default function CustomersPage() {
                       <button
                         onClick={(e) => deleteCustomer(e, c.id)}
                         className="text-gray-300 hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100"
-                        title="Slett kunde"
+                        title={t("deleteTooltip")}
                       >
                         <TrashIcon className="h-4 w-4" />
                       </button>
@@ -279,7 +282,7 @@ export default function CustomersPage() {
       )}
 
       {!loading && filtered.length > 0 && (
-        <p className="text-xs text-gray-400">{filtered.length} kunde{filtered.length !== 1 ? "r" : ""}</p>
+        <p className="text-xs text-gray-400">{t("count", { count: filtered.length })}</p>
       )}
     </div>
   )

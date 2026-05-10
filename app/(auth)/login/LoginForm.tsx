@@ -5,17 +5,15 @@ import { useState } from "react"
 import { supabase } from "@/lib/supabaseClient"
 import Link from "next/link"
 import { CheckCircleIcon } from "@heroicons/react/24/outline"
-
-const features = [
-  "Full oversikt over kunder og avtaler",
-  "GDPR-vennlig håndtering av kundeinformasjon",
-  "Automatiske varsler ved utløpende avtaler",
-]
+import { useTranslations } from "next-intl"
 
 export default function LoginForm() {
   const router = useRouter()
+  const t = useTranslations("auth")
   const [error, setError] = useState("")
   const [loading, setLoading] = useState(false)
+
+  const features = [t("feature1"), t("feature2"), t("feature3")]
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -34,7 +32,7 @@ export default function LoginForm() {
     })
 
     if (!res.ok) {
-      setError("Feil e‑post eller passord")
+      setError(t("wrongCredentials"))
       setLoading(false)
       return
     }
@@ -59,11 +57,11 @@ export default function LoginForm() {
 
         <div className="space-y-8">
           <div>
-            <h2 className="text-white text-3xl font-bold leading-snug">
-              Hold styr på kunder<br />og avtaler — enkelt.
+            <h2 className="text-white text-3xl font-bold leading-snug whitespace-pre-line">
+              {t("headline")}
             </h2>
             <p className="text-slate-400 mt-3 text-base leading-relaxed">
-              Et CRM bygget for bedrifter som tar GDPR på alvor.
+              {t("subheadline")}
             </p>
           </div>
           <ul className="space-y-3">
@@ -86,12 +84,12 @@ export default function LoginForm() {
           {/* Logo på mobil */}
           <p className="lg:hidden text-slate-900 text-xl font-bold mb-8 tracking-tight">AreCRM</p>
 
-          <h1 className="text-2xl font-bold text-gray-900">Logg inn</h1>
-          <p className="text-gray-500 text-sm mt-1 mb-8">Velkommen tilbake!</p>
+          <h1 className="text-2xl font-bold text-gray-900">{t("loginTitle")}</h1>
+          <p className="text-gray-500 text-sm mt-1 mb-8">{t("welcome")}</p>
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="block text-xs font-medium text-gray-500 mb-1">E-post</label>
+              <label className="block text-xs font-medium text-gray-500 mb-1">{t("emailLabel")}</label>
               <input
                 type="email"
                 name="email"
@@ -102,7 +100,7 @@ export default function LoginForm() {
             </div>
 
             <div>
-              <label className="block text-xs font-medium text-gray-500 mb-1">Passord</label>
+              <label className="block text-xs font-medium text-gray-500 mb-1">{t("passwordLabel")}</label>
               <input
                 type="password"
                 name="password"
@@ -119,16 +117,16 @@ export default function LoginForm() {
               disabled={loading}
               className="w-full bg-slate-800 text-white py-2.5 rounded-lg text-sm font-medium hover:bg-slate-700 transition-colors disabled:opacity-50"
             >
-              {loading ? "Logger inn..." : "Logg inn"}
+              {loading ? t("loggingIn") : t("loginButton")}
             </button>
           </form>
 
           <div className="mt-5 flex items-center justify-between text-sm">
             <Link href="/forgot-password" className="text-gray-500 hover:text-gray-900 transition-colors">
-              Glemt passord?
+              {t("forgotPassword")}
             </Link>
             <Link href="/register" className="text-gray-500 hover:text-gray-900 transition-colors">
-              Opprett konto →
+              {t("createAccount")}
             </Link>
           </div>
 

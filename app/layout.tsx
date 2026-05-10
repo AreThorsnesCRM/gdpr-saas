@@ -1,18 +1,25 @@
 import "./globals.css"
 import { AuthProvider } from "@/lib/AuthProvider"
+import { NextIntlClientProvider } from "next-intl"
+import { getLocale, getMessages } from "next-intl/server"
 
 export const metadata = {
   title: "AreCRM",
-  description: "Kunde- og avtalesystem",
+  description: "Customer and agreement management",
 }
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  const locale = await getLocale()
+  const messages = await getMessages()
+
   return (
-    <html lang="no">
+    <html lang={locale}>
       <body>
-        <AuthProvider>
-          {children}
-        </AuthProvider>
+        <NextIntlClientProvider locale={locale} messages={messages}>
+          <AuthProvider>
+            {children}
+          </AuthProvider>
+        </NextIntlClientProvider>
       </body>
     </html>
   )
