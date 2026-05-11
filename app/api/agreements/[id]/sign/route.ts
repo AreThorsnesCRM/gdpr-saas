@@ -55,7 +55,7 @@ export async function POST(
     documentId,
     title: agreement.title,
     externalReference,
-    language: "no",
+    language: "nb",
   })
 
   await supabaseAdmin
