@@ -602,7 +602,7 @@ export default function CustomerPage(props: CustomerPageProps) {
                           ) : (
                             <span className="text-gray-300" title={t("signingNoPDF")}>{t("signingButton")}</span>
                           )}
-                          <button onClick={() => handleGeneratePDF(a)} className="hover:text-gray-700 transition-colors">{t("pdf")}</button>
+                          <button onClick={() => a.signed_file_url ? window.open(a.signed_file_url, "_blank") : handleGeneratePDF(a)} className="hover:text-gray-700 transition-colors">{t("pdf")}</button>
                           <button onClick={() => handleEditAgreement(a)} className="hover:text-gray-700 transition-colors">{t("edit")}</button>
                           <button onClick={() => archiveAgreement(a.id)} className="hover:text-red-500 transition-colors">{t("archive")}</button>
                         </div>
