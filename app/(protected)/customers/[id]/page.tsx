@@ -45,7 +45,17 @@ interface Agreement {
   contact_name: string | null
   contact_email: string | null
   contact_phone: string | null
+  signing_status: string | null
+  signing_url: string | null
+  signer_name: string | null
+  signer_email: string | null
+  signed_file_url: string | null
 }
+
+type SigningModalState =
+  | { step: "form"; agreement: Agreement }
+  | { step: "link"; agreement: Agreement; signatureUrl: string }
+  | null
 
 interface TeamMember {
   user_id: string
@@ -93,6 +103,13 @@ export default function CustomerPage(props: CustomerPageProps) {
 
   const [slideOverOpen, setSlideOverOpen] = useState(false)
   const [editingAgreement, setEditingAgreement] = useState<Agreement | null>(null)
+
+  const [signingModal, setSigningModal] = useState<SigningModalState>(null)
+  const [signerName, setSignerName] = useState("")
+  const [signerEmail, setSignerEmail] = useState("")
+  const [signingLoading, setSigningLoading] = useState(false)
+  const [signingError, setSigningError] = useState("")
+  const [copiedLink, setCopiedLink] = useState(false)
 
   const [newTitle, setNewTitle] = useState("")
   const [newStart, setNewStart] = useState("")
@@ -275,6 +292,40 @@ export default function CustomerPage(props: CustomerPageProps) {
     }
     fetchAgreements()
     closeSlideOver()
+  }
+
+  function openSigningModal(a: Agreement) {
+    setSignerName(a.signer_name ?? a.contact_name ?? "")
+    setSignerEmail(a.signer_email ?? a.contact_email ?? "")
+    setSigningError("")
+    setSigningModal({ step: "form", agreement: a })
+  }
+
+  async function handleConfirmSigning() {
+    if (!signingModal || signingModal.step !== "form") return
+    setSigningLoading(true)
+    setSigningError("")
+    try {
+      const res = await fetch(`/api/agreements/${signingModal.agreement.id}/sign`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ signerName, signerEmail }),
+      })
+      const json = await res.json()
+      if (!res.ok) throw new Error(json.error)
+      setSigningModal({ step: "link", agreement: signingModal.agreement, signatureUrl: json.signatureUrl })
+      fetchAgreements()
+    } catch {
+      setSigningError(t("signingError"))
+    } finally {
+      setSigningLoading(false)
+    }
+  }
+
+  async function handleCopyLink(url: string) {
+    await navigator.clipboard.writeText(url)
+    setCopiedLink(true)
+    setTimeout(() => setCopiedLink(false), 2000)
   }
 
   async function archiveAgreement(agreementId: string) {
@@ -539,6 +590,18 @@ export default function CustomerPage(props: CustomerPageProps) {
                           </p>
                         </div>
                         <div className="flex items-center gap-3 shrink-0 text-xs text-gray-400">
+                          {a.signing_status === "signed" ? (
+                            <a href={a.signed_file_url ?? "#"} target="_blank" rel="noopener noreferrer"
+                              className="text-green-600 font-medium hover:text-green-700 transition-colors">
+                              {t("signingSigned")} ↗
+                            </a>
+                          ) : a.signing_status === "pending" ? (
+                            <span className="text-amber-500 font-medium">{t("signingPending")}</span>
+                          ) : a.file_url ? (
+                            <button onClick={() => openSigningModal(a)} className="hover:text-gray-700 transition-colors">{t("signingButton")}</button>
+                          ) : (
+                            <span className="text-gray-300" title={t("signingNoPDF")}>{t("signingButton")}</span>
+                          )}
                           <button onClick={() => handleGeneratePDF(a)} className="hover:text-gray-700 transition-colors">{t("pdf")}</button>
                           <button onClick={() => handleEditAgreement(a)} className="hover:text-gray-700 transition-colors">{t("edit")}</button>
                           <button onClick={() => archiveAgreement(a.id)} className="hover:text-red-500 transition-colors">{t("archive")}</button>
@@ -576,6 +639,72 @@ export default function CustomerPage(props: CustomerPageProps) {
           </div>
         </div>
       </div>
+
+      {signingModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
+          <div className="bg-white rounded-xl shadow-xl border border-gray-200 w-full max-w-md p-6 space-y-4">
+            <h2 className="text-base font-semibold text-gray-900">
+              {signingModal.step === "form" ? t("signingModalTitle") : t("signingLinkReady")}
+            </h2>
+
+            {signingModal.step === "form" ? (
+              <>
+                <p className="text-sm text-gray-500">{t("signingModalInfo")}</p>
+                <div className="space-y-3">
+                  <div>
+                    <label className="block text-xs font-medium text-gray-500 mb-1">{t("signingModalNameLabel")}</label>
+                    <input
+                      className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-400"
+                      value={signerName}
+                      onChange={(e) => setSignerName(e.target.value)}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-gray-500 mb-1">{t("signingModalEmailLabel")}</label>
+                    <input
+                      type="email"
+                      className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-400"
+                      value={signerEmail}
+                      onChange={(e) => setSignerEmail(e.target.value)}
+                    />
+                  </div>
+                </div>
+                {signingError && <p className="text-sm text-red-600">{signingError}</p>}
+                <div className="flex justify-between pt-1">
+                  <button onClick={() => setSigningModal(null)} className="text-sm text-gray-500 hover:text-gray-800 transition-colors">
+                    {tc("cancel")}
+                  </button>
+                  <button
+                    onClick={handleConfirmSigning}
+                    disabled={signingLoading}
+                    className="bg-slate-800 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-slate-700 disabled:opacity-50 transition-colors"
+                  >
+                    {signingLoading ? t("signingModalSending") : t("signingModalSend")}
+                  </button>
+                </div>
+              </>
+            ) : (
+              <>
+                <p className="text-sm text-gray-500">{t("signingLinkInfo")}</p>
+                <div className="bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-xs text-gray-700 break-all font-mono">
+                  {signingModal.signatureUrl}
+                </div>
+                <div className="flex justify-between pt-1">
+                  <button onClick={() => setSigningModal(null)} className="text-sm text-gray-500 hover:text-gray-800 transition-colors">
+                    {tc("close")}
+                  </button>
+                  <button
+                    onClick={() => handleCopyLink(signingModal.signatureUrl)}
+                    className="bg-slate-800 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-slate-700 transition-colors"
+                  >
+                    {copiedLink ? t("signingLinkCopied") : t("signingCopyLink")}
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+      )}
 
       <AgreementSlideOver
         open={slideOverOpen}
