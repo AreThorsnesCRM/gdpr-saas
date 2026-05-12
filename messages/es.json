@@ -144,6 +144,7 @@
     "edit": "Editar",
     "archive": "Archivar",
     "restore": "Restaurar",
+    "renewButton": "Renovar",
     "signingButton": "Firmar",
     "signingNoPDF": "Requiere PDF",
     "signingPending": "Esperando firma",

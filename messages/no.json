@@ -144,6 +144,7 @@
     "edit": "Rediger",
     "archive": "Arkiver",
     "restore": "Gjenopprett",
+    "renewButton": "Forny",
     "signingButton": "Signer",
     "signingNoPDF": "Krever PDF",
     "signingPending": "Venter på signering",
