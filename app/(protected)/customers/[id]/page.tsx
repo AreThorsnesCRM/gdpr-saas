@@ -54,7 +54,7 @@ interface Agreement {
 
 type SigningModalState =
   | { step: "form"; agreement: Agreement }
-  | { step: "link"; agreement: Agreement; signatureUrl: string }
+  | { step: "link"; agreement: Agreement; signatureUrl: string; emailSent: boolean }
   | null
 
 interface TeamMember {
@@ -313,7 +313,7 @@ export default function CustomerPage(props: CustomerPageProps) {
       })
       const json = await res.json()
       if (!res.ok) throw new Error(json.error)
-      setSigningModal({ step: "link", agreement: signingModal.agreement, signatureUrl: json.signatureUrl })
+      setSigningModal({ step: "link", agreement: signingModal.agreement, signatureUrl: json.signatureUrl, emailSent: json.emailSent })
       fetchAgreements()
     } catch {
       setSigningError(t("signingError"))
@@ -667,6 +667,7 @@ export default function CustomerPage(props: CustomerPageProps) {
                       value={signerEmail}
                       onChange={(e) => setSignerEmail(e.target.value)}
                     />
+                    <p className="text-xs text-gray-400 mt-1">{t("signingModalEmailHint")}</p>
                   </div>
                 </div>
                 {signingError && <p className="text-sm text-red-600">{signingError}</p>}
@@ -685,6 +686,11 @@ export default function CustomerPage(props: CustomerPageProps) {
               </>
             ) : (
               <>
+                {signingModal.emailSent && signerEmail && (
+                  <div className="bg-green-50 border border-green-200 rounded-lg px-4 py-3 text-sm text-green-700">
+                    E-post sendt til <strong>{signerEmail}</strong>
+                  </div>
+                )}
                 <p className="text-sm text-gray-500">{t("signingLinkInfo")}</p>
                 <div className="bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-xs text-gray-700 break-all font-mono">
                   {signingModal.signatureUrl}

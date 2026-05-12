@@ -81,6 +81,30 @@ export async function sendAgreementExpiredEmail(
   })
 }
 
+export async function sendSigningLinkEmail(
+  to: string,
+  signerName: string,
+  agreementTitle: string,
+  signatureUrl: string,
+  senderAccountName: string
+) {
+  if (!resend) return
+  await resend.emails.send({
+    from: FROM,
+    to,
+    subject: `${agreementTitle} — klar til signering`,
+    html: `
+      <p>Hei${signerName ? ` ${signerName}` : ""},</p>
+      <p><strong>${senderAccountName}</strong> har sendt deg avtalen <strong>${agreementTitle}</strong> til digital signering med BankID.</p>
+      <p>Klikk på knappen nedenfor for å åpne og signere avtalen:</p>
+      <p><a href="${signatureUrl}" style="${btnStyle("#1e293b")}">Signer avtalen</a></p>
+      <p>Eller kopier denne lenken direkte i nettleseren:<br>
+      <span style="color:#4b5563;font-size:13px">${signatureUrl}</span></p>
+      <p style="${footerStyle}">Denne signeringslenken er sendt via AreCRM.</p>
+    `,
+  })
+}
+
 const btnStyle = (bg: string) =>
   `background:${bg};color:white;padding:10px 20px;border-radius:6px;text-decoration:none;display:inline-block;margin-top:8px`
 

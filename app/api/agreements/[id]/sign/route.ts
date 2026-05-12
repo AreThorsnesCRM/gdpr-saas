@@ -3,6 +3,7 @@ import { supabaseAdmin } from "@/lib/supabaseAdmin"
 import { cookies } from "next/headers"
 import { createServerClient } from "@supabase/ssr"
 import { uploadDocument, createDocumentCollection, createSigningSession } from "@/lib/signicat"
+import { sendSigningLinkEmail } from "@/lib/email"
 import { randomUUID } from "crypto"
 
 async function getAccountUser() {
@@ -70,5 +71,22 @@ export async function POST(
     })
     .eq("id", agreementId)
 
-  return NextResponse.json({ signatureUrl, sessionId })
+  let emailSent = false
+  if (signerEmail) {
+    const { data: account } = await supabaseAdmin
+      .from("accounts")
+      .select("name")
+      .eq("id", accountUser.account_id)
+      .single()
+    await sendSigningLinkEmail(
+      signerEmail,
+      signerName || "",
+      agreement.title,
+      signatureUrl,
+      account?.name ?? "AreCRM"
+    )
+    emailSent = true
+  }
+
+  return NextResponse.json({ signatureUrl, sessionId, emailSent })
 }
