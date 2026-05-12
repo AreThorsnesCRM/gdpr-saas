@@ -44,6 +44,7 @@ export async function POST(req: Request) {
     .from("agreements")
     .update({
       signing_status: "signed",
+      signed: true,
       signed_file_url: urlData.publicUrl,
       signed_at: new Date().toISOString(),
     })

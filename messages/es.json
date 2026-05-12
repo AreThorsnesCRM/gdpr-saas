@@ -317,6 +317,7 @@
     "contactPhoneLabel": "Teléfono",
     "contactPhonePlaceholder": "+34 000 000 000",
     "signed": "Firmado",
+    "signedDigitally": "Firmado digitalmente",
     "existingFile": "Archivo existente",
     "openAgreement": "Abrir contrato",
     "removeFile": "Eliminar archivo",

@@ -317,6 +317,7 @@
     "contactPhoneLabel": "Telefon",
     "contactPhonePlaceholder": "+47 000 00 000",
     "signed": "Signert",
+    "signedDigitally": "Digitalt signert",
     "existingFile": "Eksisterende fil",
     "openAgreement": "Åpne avtale",
     "removeFile": "Fjern fil",

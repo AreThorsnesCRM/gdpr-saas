@@ -317,6 +317,7 @@
     "contactPhoneLabel": "Phone",
     "contactPhonePlaceholder": "+1 000 000 0000",
     "signed": "Signed",
+    "signedDigitally": "Digitally signed",
     "existingFile": "Existing file",
     "openAgreement": "Open agreement",
     "removeFile": "Remove file",

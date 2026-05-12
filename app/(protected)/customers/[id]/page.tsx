@@ -357,7 +357,7 @@ export default function CustomerPage(props: CustomerPageProps) {
     try {
       const { data: { user: u } } = await supabase.auth.getUser()
       if (!u) return
-      await supabase.from("agreements").insert({
+      const { data: newAgreement } = await supabase.from("agreements").insert({
         customer_id: id,
         title: renewTitle,
         start_date: renewStart,
@@ -369,9 +369,10 @@ export default function CustomerPage(props: CustomerPageProps) {
         contact_phone: renewModal.contact_phone,
         archived: false,
         user_id: u.id,
-      })
-      fetchAgreements()
+      }).select().single()
+      await fetchAgreements()
       setRenewModal(null)
+      if (newAgreement) handleEditAgreement(newAgreement as Agreement)
     } finally {
       setRenewLoading(false)
     }

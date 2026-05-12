@@ -377,15 +377,24 @@ export default function AgreementSlideOver({
             </div>
           </div>
 
-          <label className="inline-flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
-            <input
-              type="checkbox"
-              checked={newSigned}
-              onChange={(e) => setNewSigned(e.target.checked)}
-              className="h-4 w-4 rounded border-gray-300 text-slate-800"
-            />
-            {t("signed")}
-          </label>
+          {editingAgreement?.signing_status === "signed" ? (
+            <div className="inline-flex items-center gap-2 text-sm text-green-600 font-medium">
+              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+              </svg>
+              {t("signedDigitally")}
+            </div>
+          ) : (
+            <label className="inline-flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={newSigned}
+                onChange={(e) => setNewSigned(e.target.checked)}
+                className="h-4 w-4 rounded border-gray-300 text-slate-800"
+              />
+              {t("signed")}
+            </label>
+          )}
 
           {editingAgreement?.file_url && !removeExistingFile && (
             <div className="rounded-lg bg-gray-50 border border-gray-200 px-3 py-2.5 text-sm space-y-1">
