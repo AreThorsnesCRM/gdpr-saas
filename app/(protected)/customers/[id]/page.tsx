@@ -111,6 +111,12 @@ export default function CustomerPage(props: CustomerPageProps) {
   const [signingError, setSigningError] = useState("")
   const [copiedLink, setCopiedLink] = useState(false)
 
+  const [renewModal, setRenewModal] = useState<Agreement | null>(null)
+  const [renewTitle, setRenewTitle] = useState("")
+  const [renewStart, setRenewStart] = useState("")
+  const [renewEnd, setRenewEnd] = useState("")
+  const [renewLoading, setRenewLoading] = useState(false)
+
   const [newTitle, setNewTitle] = useState("")
   const [newStart, setNewStart] = useState("")
   const [newEnd, setNewEnd] = useState("")
@@ -339,17 +345,36 @@ export default function CustomerPage(props: CustomerPageProps) {
     const oldYear = String(new Date(a.end_date).getFullYear())
     const newYear = String(newEndDate.getFullYear())
     const updatedTitle = a.title.replace(oldYear, newYear)
-    setEditingAgreement(null)
-    setNewTitle(updatedTitle)
-    setNewStart(todayStr)
-    setNewEnd(newEndStr)
-    setNewSigned(false)
-    setNewContactName(a.contact_name ?? "")
-    setNewContactEmail(a.contact_email ?? "")
-    setNewContactPhone(a.contact_phone ?? "")
-    setNewFile(null)
-    setRemoveExistingFile(false)
-    setSlideOverOpen(true)
+    setRenewTitle(updatedTitle)
+    setRenewStart(todayStr)
+    setRenewEnd(newEndStr)
+    setRenewModal(a)
+  }
+
+  async function handleConfirmRenewal() {
+    if (!renewModal || !supabase) return
+    setRenewLoading(true)
+    try {
+      const { data: { user: u } } = await supabase.auth.getUser()
+      if (!u) return
+      await supabase.from("agreements").insert({
+        customer_id: id,
+        title: renewTitle,
+        start_date: renewStart,
+        end_date: renewEnd,
+        signed: false,
+        file_url: null,
+        contact_name: renewModal.contact_name,
+        contact_email: renewModal.contact_email,
+        contact_phone: renewModal.contact_phone,
+        archived: false,
+        user_id: u.id,
+      })
+      fetchAgreements()
+      setRenewModal(null)
+    } finally {
+      setRenewLoading(false)
+    }
   }
 
   async function archiveAgreement(agreementId: string) {
@@ -735,6 +760,62 @@ export default function CustomerPage(props: CustomerPageProps) {
                 </div>
               </>
             )}
+          </div>
+        </div>
+      )}
+
+      {renewModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
+          <div className="bg-white rounded-xl shadow-xl border border-gray-200 w-full max-w-md p-6 space-y-4">
+            <div>
+              <h2 className="text-base font-semibold text-gray-900">{t("renewModalTitle")}</h2>
+              <p className="text-sm text-gray-500 mt-1">{t("renewModalInfo")}</p>
+            </div>
+            <div className="space-y-3">
+              <div>
+                <label className="block text-xs font-medium text-gray-500 mb-1">{t("labelName")}</label>
+                <input
+                  className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-400"
+                  value={renewTitle}
+                  onChange={(e) => setRenewTitle(e.target.value)}
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-medium text-gray-500 mb-1">{t("renewStartLabel")}</label>
+                  <input
+                    type="date"
+                    className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-400"
+                    value={renewStart}
+                    onChange={(e) => setRenewStart(e.target.value)}
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-gray-500 mb-1">{t("renewEndLabel")}</label>
+                  <input
+                    type="date"
+                    className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-400"
+                    value={renewEnd}
+                    onChange={(e) => setRenewEnd(e.target.value)}
+                  />
+                </div>
+              </div>
+            </div>
+            <div className="flex justify-between pt-1">
+              <button
+                onClick={() => setRenewModal(null)}
+                className="text-sm text-gray-500 hover:text-gray-800 transition-colors"
+              >
+                {tc("cancel")}
+              </button>
+              <button
+                onClick={handleConfirmRenewal}
+                disabled={renewLoading || !renewTitle || !renewStart || !renewEnd}
+                className="bg-slate-800 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-slate-700 disabled:opacity-50 transition-colors"
+              >
+                {renewLoading ? t("renewCreating") : t("renewConfirm")}
+              </button>
+            </div>
           </div>
         </div>
       )}
