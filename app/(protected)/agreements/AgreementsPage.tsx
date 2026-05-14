@@ -138,7 +138,7 @@ export default function AgreementsPage() {
       }
     }
 
-    await supabase.from("agreements").insert({
+    const { data: newAgreement } = await supabase.from("agreements").insert({
       customer_id: customerId,
       user_id: user.id,
       title: newTitle,
@@ -152,10 +152,14 @@ export default function AgreementsPage() {
       archived: false,
       ...(opts?.content ? { content: opts.content } : {}),
       ...(opts?.templateId ? { template_id: opts.templateId } : {}),
-    })
+    }).select().single()
 
     closeSlideOver()
-    fetchAgreements()
+    if (newAgreement) {
+      router.push(`/agreements/${newAgreement.id}`)
+    } else {
+      fetchAgreements()
+    }
   }
 
   function daysUntil(dateStr: string) {
@@ -255,7 +259,7 @@ export default function AgreementsPage() {
               {filtered.map((a) => (
                 <tr
                   key={a.id}
-                  onClick={() => router.push(`/customers/${a.customer_id}?agreementId=${a.id}`)}
+                  onClick={() => router.push(`/agreements/${a.id}`)}
                   className="border-t border-gray-100 hover:bg-gray-50 cursor-pointer transition-colors"
                 >
                   <td className="px-4 py-3 font-medium text-gray-900">{a.title}</td>

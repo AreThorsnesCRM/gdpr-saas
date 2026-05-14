@@ -7,8 +7,6 @@ import { useState, useEffect, use } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { supabase } from "@/lib/supabaseClient"
-import AgreementSlideOver from "@/app/components/AgreementSlideOver"
-import { generateAgreementPDF } from "@/lib/pdfGenerator"
 import { useAuth } from "@/lib/AuthContext"
 import { ChevronLeftIcon, TrashIcon } from "@heroicons/react/24/outline"
 import { useTranslations, useLocale } from "next-intl"
@@ -52,11 +50,6 @@ interface Agreement {
   signed_file_url: string | null
 }
 
-type SigningModalState =
-  | { step: "form"; agreement: Agreement }
-  | { step: "link"; agreement: Agreement; signatureUrl: string; emailSent: boolean }
-  | null
-
 interface TeamMember {
   user_id: string
   full_name: string
@@ -70,15 +63,11 @@ export default function CustomerPage(props: CustomerPageProps) {
   const router = useRouter()
   const params = use(props.params)
   const id = params.id
-  const { user, profile, account } = useAuth()
+  const { user } = useAuth()
   const t = useTranslations("customerDetail")
   const tc = useTranslations("common")
+  const tad = useTranslations("agreementDetail")
   const locale = useLocale()
-
-  const agreementId =
-    typeof window !== "undefined"
-      ? new URLSearchParams(window.location.search).get("agreementId")
-      : null
 
   const [customer, setCustomer] = useState<Customer | null>(null)
   const [name, setName] = useState("")
@@ -101,31 +90,18 @@ export default function CustomerPage(props: CustomerPageProps) {
   const activeAgreements = agreements.filter((a) => !a.archived)
   const archivedAgreements = agreements.filter((a) => a.archived)
 
-  const [slideOverOpen, setSlideOverOpen] = useState(false)
-  const [editingAgreement, setEditingAgreement] = useState<Agreement | null>(null)
-
-  const [signingModal, setSigningModal] = useState<SigningModalState>(null)
-  const [signerName, setSignerName] = useState("")
-  const [signerEmail, setSignerEmail] = useState("")
-  const [signingLoading, setSigningLoading] = useState(false)
-  const [signingError, setSigningError] = useState("")
-  const [copiedLink, setCopiedLink] = useState(false)
-
   const [renewModal, setRenewModal] = useState<Agreement | null>(null)
   const [renewTitle, setRenewTitle] = useState("")
   const [renewStart, setRenewStart] = useState("")
   const [renewEnd, setRenewEnd] = useState("")
   const [renewLoading, setRenewLoading] = useState(false)
 
-  const [newTitle, setNewTitle] = useState("")
-  const [newStart, setNewStart] = useState("")
-  const [newEnd, setNewEnd] = useState("")
-  const [newSigned, setNewSigned] = useState(false)
-  const [newContactName, setNewContactName] = useState("")
-  const [newContactEmail, setNewContactEmail] = useState("")
-  const [newContactPhone, setNewContactPhone] = useState("")
-  const [newFile, setNewFile] = useState<File | null>(null)
-  const [removeExistingFile, setRemoveExistingFile] = useState(false)
+  // Quick create modal
+  const [quickModalOpen, setQuickModalOpen] = useState(false)
+  const [quickTitle, setQuickTitle] = useState("")
+  const [quickStart, setQuickStart] = useState("")
+  const [quickEnd, setQuickEnd] = useState("")
+  const [quickSaving, setQuickSaving] = useState(false)
 
   const activityTypes = [
     { value: "note",    label: t("activityTypeNote"),    icon: "📝", bg: "bg-gray-100",   badge: "bg-gray-100 text-gray-600" },
@@ -146,15 +122,6 @@ export default function CustomerPage(props: CustomerPageProps) {
       .then((r) => r.json())
       .then(({ members }) => { if (members) setTeamMembers(members) })
   }, [])
-
-  useEffect(() => {
-    if (!agreementId || agreements.length === 0) return
-    const target = agreements.find((a) => a.id === agreementId)
-    if (target) {
-      handleEditAgreement(target)
-      document.getElementById("agreements-section")?.scrollIntoView({ behavior: "smooth", block: "start" })
-    }
-  }, [agreements, agreementId])
 
   async function fetchCustomer() {
     if (!supabase) return
@@ -229,109 +196,25 @@ export default function CustomerPage(props: CustomerPageProps) {
     fetchNotes()
   }
 
-  function resetAgreementForm() {
-    setEditingAgreement(null)
-    setNewTitle(""); setNewStart(""); setNewEnd("")
-    setNewSigned(false)
-    setNewContactName(""); setNewContactEmail(""); setNewContactPhone("")
-    setNewFile(null); setRemoveExistingFile(false)
-  }
-
-  function handleNewAgreement() { resetAgreementForm(); setSlideOverOpen(true) }
-  function closeSlideOver() { resetAgreementForm(); setSlideOverOpen(false) }
-
-  function handleEditAgreement(a: Agreement) {
-    setEditingAgreement(a)
-    setNewTitle(a.title); setNewStart(a.start_date); setNewEnd(a.end_date)
-    setNewSigned(a.signed)
-    setNewContactName(a.contact_name ?? "")
-    setNewContactEmail(a.contact_email ?? "")
-    setNewContactPhone(a.contact_phone ?? "")
-    setSlideOverOpen(true)
-  }
-
-  function handleGeneratePDF(agreement: Agreement) {
-    if (agreement.file_url) {
-      window.open(agreement.file_url, "_blank")
-    } else {
-      generateAgreementPDF(agreement, customer, profile)
-    }
-  }
-
-  async function uploadAgreementFile(existingUrl: string | null, fileOverride?: File | null) {
-    if (!supabase) return existingUrl
-    let file_url = removeExistingFile ? null : existingUrl
-    const file = fileOverride ?? newFile
-    if (file) {
-      const fileExt = file.name.split(".").pop()
-      const fileName = `${id}/${Date.now()}.${fileExt}`
-      const { data: upload, error } = await supabase.storage.from("agreements").upload(fileName, file)
-      if (!error && upload) {
-        const { data: urlData } = supabase.storage.from("agreements").getPublicUrl(upload.path)
-        file_url = urlData.publicUrl
-      }
-    }
-    return file_url
-  }
-
-  async function handleSaveAgreement(opts?: { generatedFile?: File; content?: string; templateId?: string }) {
-    if (!supabase) return
-    const fileToUpload = opts?.generatedFile ?? newFile
-    if (editingAgreement) {
-      const file_url = await uploadAgreementFile(editingAgreement.file_url, fileToUpload)
-      await supabase.from("agreements").update({
-        title: newTitle, start_date: newStart, end_date: newEnd, signed: newSigned,
-        file_url, contact_name: newContactName, contact_email: newContactEmail, contact_phone: newContactPhone,
-      }).eq("id", editingAgreement.id)
-    } else {
+  async function handleCreateQuickAgreement() {
+    if (!supabase || !user) return
+    setQuickSaving(true)
+    try {
       const { data: { user: u } } = await supabase.auth.getUser()
       if (!u) return
-      const file_url = await uploadAgreementFile(null, fileToUpload)
-      await supabase.from("agreements").insert({
-        customer_id: id, title: newTitle, start_date: newStart, end_date: newEnd,
-        signed: newSigned, file_url, contact_name: newContactName,
-        contact_email: newContactEmail, contact_phone: newContactPhone,
-        archived: false, user_id: u.id,
-        ...(opts?.content ? { content: opts.content } : {}),
-        ...(opts?.templateId ? { template_id: opts.templateId } : {}),
-      })
-    }
-    fetchAgreements()
-    closeSlideOver()
-  }
-
-  function openSigningModal(a: Agreement) {
-    setSignerName(a.signer_name ?? a.contact_name ?? "")
-    setSignerEmail(a.signer_email ?? a.contact_email ?? "")
-    setSigningError("")
-    setSigningModal({ step: "form", agreement: a })
-  }
-
-  async function handleConfirmSigning() {
-    if (!signingModal || signingModal.step !== "form") return
-    setSigningLoading(true)
-    setSigningError("")
-    try {
-      const res = await fetch(`/api/agreements/${signingModal.agreement.id}/sign`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ signerName, signerEmail }),
-      })
-      const json = await res.json()
-      if (!res.ok) throw new Error(json.error)
-      setSigningModal({ step: "link", agreement: signingModal.agreement, signatureUrl: json.signatureUrl, emailSent: json.emailSent })
-      fetchAgreements()
-    } catch {
-      setSigningError(t("signingError"))
+      const { data: newAgreement } = await supabase.from("agreements").insert({
+        customer_id: id,
+        user_id: u.id,
+        title: quickTitle,
+        start_date: quickStart,
+        end_date: quickEnd,
+        signed: false,
+        archived: false,
+      }).select().single()
+      if (newAgreement) router.push(`/agreements/${newAgreement.id}`)
     } finally {
-      setSigningLoading(false)
+      setQuickSaving(false)
     }
-  }
-
-  async function handleCopyLink(url: string) {
-    await navigator.clipboard.writeText(url)
-    setCopiedLink(true)
-    setTimeout(() => setCopiedLink(false), 2000)
   }
 
   function handleRenewAgreement(a: Agreement) {
@@ -370,9 +253,8 @@ export default function CustomerPage(props: CustomerPageProps) {
         archived: false,
         user_id: u.id,
       }).select().single()
-      await fetchAgreements()
       setRenewModal(null)
-      // intentionally not auto-opening slide-over — user picks action from the list
+      if (newAgreement) router.push(`/agreements/${newAgreement.id}`)
     } finally {
       setRenewLoading(false)
     }
@@ -610,7 +492,7 @@ export default function CustomerPage(props: CustomerPageProps) {
             <div className="flex items-center justify-between">
               <h2 id="agreements-section" className="text-base font-semibold text-gray-900">{t("agreementsTitle")}</h2>
               <button
-                onClick={handleNewAgreement}
+                onClick={() => { setQuickTitle(""); setQuickStart(""); setQuickEnd(""); setQuickModalOpen(true) }}
                 className="bg-slate-800 text-white px-3 py-1.5 rounded-lg text-sm font-medium hover:bg-slate-700 transition-colors"
               >
                 {t("newAgreement")}
@@ -623,62 +505,31 @@ export default function CustomerPage(props: CustomerPageProps) {
               <ul>
                 {activeAgreements.map((a) => {
                   const badge = getExpiryBadge(a)
-                  const isSigned = a.signing_status === "signed"
-                  const isPending = a.signing_status === "pending"
-                  const hasFile = !!a.file_url
                   return (
                     <li key={a.id} className="border-t border-gray-100 first:border-0 py-3">
                       <div className="flex items-start justify-between gap-3">
-                        <div className="min-w-0 flex-1">
+                        <Link href={`/agreements/${a.id}`} className="min-w-0 flex-1 group">
                           <div className="flex items-center gap-2 flex-wrap">
-                            <p className="font-medium text-gray-900 text-sm">{a.title}</p>
+                            <p className="font-medium text-gray-900 text-sm group-hover:text-slate-600 transition-colors">{a.title}</p>
                             {badge && (
                               <span className={`text-xs font-medium px-2 py-0.5 rounded-full ring-1 ${badge.color}`}>
                                 {badge.text}
                               </span>
                             )}
-                          </div>
-                          <p className="text-xs text-gray-400 mt-0.5">
-                            {formatDate(a.start_date)} – {formatDate(a.end_date)}
-                          </p>
-                        </div>
-                        <div className="flex flex-col items-end gap-1.5 shrink-0">
-                          {/* Primær handling */}
-                          <div className="flex items-center gap-2">
-                            {isSigned ? (
-                              <a href={a.signed_file_url ?? "#"} target="_blank" rel="noopener noreferrer"
-                                className="text-xs font-semibold text-green-600 hover:text-green-700 transition-colors">
-                                {t("signingSigned")} ↗
-                              </a>
-                            ) : isPending ? (
-                              <span className="text-xs font-medium text-amber-500">{t("signingPending")}</span>
-                            ) : hasFile ? (
-                              <button
-                                onClick={() => openSigningModal(a)}
-                                className="inline-flex items-center gap-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium px-3 py-1.5 rounded-lg transition-colors"
-                              >
-                                ✍ {t("signingButton")}
-                              </button>
-                            ) : (
-                              <button
-                                onClick={() => handleEditAgreement(a)}
-                                className="text-xs border border-gray-200 hover:border-gray-300 text-gray-600 hover:text-gray-800 px-2.5 py-1.5 rounded-lg transition-colors"
-                              >
-                                {t("addPDF")}
-                              </button>
+                            {a.signing_status === "signed" && (
+                              <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-green-50 text-green-700 ring-1 ring-green-200">Signert</span>
+                            )}
+                            {a.signing_status === "pending" && (
+                              <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 ring-1 ring-amber-200">Venter</span>
                             )}
                           </div>
-                          {/* Sekundære handlinger */}
-                          <div className="flex items-center gap-2 text-xs text-gray-400">
-                            {hasFile && !isSigned && (
-                              <button onClick={() => window.open(a.file_url!, "_blank")} className="hover:text-gray-700 transition-colors">{t("pdf")}</button>
-                            )}
-                            {badge && (
-                              <button onClick={() => handleRenewAgreement(a)} className="text-blue-500 hover:text-blue-700 font-medium transition-colors">{t("renewButton")}</button>
-                            )}
-                            <button onClick={() => handleEditAgreement(a)} className="hover:text-gray-700 transition-colors">{t("edit")}</button>
-                            <button onClick={() => archiveAgreement(a.id)} className="hover:text-red-500 transition-colors">{t("archive")}</button>
-                          </div>
+                          <p className="text-xs text-gray-400 mt-0.5">{formatDate(a.start_date)} – {formatDate(a.end_date)}</p>
+                        </Link>
+                        <div className="flex items-center gap-2 shrink-0 text-xs text-gray-400">
+                          {badge && (
+                            <button onClick={() => handleRenewAgreement(a)} className="text-blue-500 hover:text-blue-700 font-medium transition-colors">{t("renewButton")}</button>
+                          )}
+                          <button onClick={() => archiveAgreement(a.id)} className="hover:text-red-500 transition-colors">{t("archive")}</button>
                         </div>
                       </div>
                     </li>
@@ -694,14 +545,13 @@ export default function CustomerPage(props: CustomerPageProps) {
                   {archivedAgreements.map((a) => (
                     <li key={a.id} className="group border-t border-gray-100 first:border-0 py-3 opacity-50 hover:opacity-100 transition-opacity">
                       <div className="flex items-start justify-between gap-3">
-                        <div className="min-w-0 flex-1">
-                          <p className="font-medium text-gray-700 text-sm">{a.title}</p>
+                        <Link href={`/agreements/${a.id}`} className="min-w-0 flex-1 group">
+                          <p className="font-medium text-gray-700 text-sm group-hover:text-slate-600 transition-colors">{a.title}</p>
                           <p className="text-xs text-gray-400 mt-0.5">
                             {formatDate(a.start_date)} – {formatDate(a.end_date)}
                           </p>
-                        </div>
+                        </Link>
                         <div className="flex items-center gap-3 shrink-0 text-xs text-gray-400">
-                          <button onClick={() => handleGeneratePDF(a)} className="hover:text-gray-700 transition-colors">{t("pdf")}</button>
                           <button onClick={() => unarchiveAgreement(a.id)} className="hover:text-gray-700 transition-colors">{t("restore")}</button>
                         </div>
                       </div>
@@ -714,78 +564,42 @@ export default function CustomerPage(props: CustomerPageProps) {
         </div>
       </div>
 
-      {signingModal && (
+      {/* Quick create agreement modal */}
+      {quickModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
           <div className="bg-white rounded-xl shadow-xl border border-gray-200 w-full max-w-md p-6 space-y-4">
-            <h2 className="text-base font-semibold text-gray-900">
-              {signingModal.step === "form" ? t("signingModalTitle") : t("signingLinkReady")}
-            </h2>
-
-            {signingModal.step === "form" ? (
-              <>
-                <p className="text-sm text-gray-500">{t("signingModalInfo")}</p>
-                <div className="space-y-3">
-                  <div>
-                    <label className="block text-xs font-medium text-gray-500 mb-1">{t("signingModalNameLabel")}</label>
-                    <input
-                      className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-400"
-                      value={signerName}
-                      onChange={(e) => setSignerName(e.target.value)}
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-medium text-gray-500 mb-1">{t("signingModalEmailLabel")}</label>
-                    <input
-                      type="email"
-                      className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-400"
-                      value={signerEmail}
-                      onChange={(e) => setSignerEmail(e.target.value)}
-                    />
-                    <p className="text-xs text-gray-400 mt-1">{t("signingModalEmailHint")}</p>
-                  </div>
+            <h2 className="text-base font-semibold text-gray-900">{t("newAgreement")}</h2>
+            <div className="space-y-3">
+              <div>
+                <label className="block text-xs font-medium text-gray-500 mb-1">{tad("quickTitleLabel")}</label>
+                <input className={inputClass} value={quickTitle} onChange={e => setQuickTitle(e.target.value)} autoFocus />
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-medium text-gray-500 mb-1">{tad("quickStartLabel")}</label>
+                  <input type="date" className={inputClass} value={quickStart} onChange={e => setQuickStart(e.target.value)} />
                 </div>
-                {signingError && <p className="text-sm text-red-600">{signingError}</p>}
-                <div className="flex justify-between pt-1">
-                  <button onClick={() => setSigningModal(null)} className="text-sm text-gray-500 hover:text-gray-800 transition-colors">
-                    {tc("cancel")}
-                  </button>
-                  <button
-                    onClick={handleConfirmSigning}
-                    disabled={signingLoading}
-                    className="bg-slate-800 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-slate-700 disabled:opacity-50 transition-colors"
-                  >
-                    {signingLoading ? t("signingModalSending") : t("signingModalSend")}
-                  </button>
+                <div>
+                  <label className="block text-xs font-medium text-gray-500 mb-1">{tad("quickEndLabel")}</label>
+                  <input type="date" className={inputClass} value={quickEnd} onChange={e => setQuickEnd(e.target.value)} />
                 </div>
-              </>
-            ) : (
-              <>
-                {signingModal.emailSent && signerEmail && (
-                  <div className="bg-green-50 border border-green-200 rounded-lg px-4 py-3 text-sm text-green-700">
-                    E-post sendt til <strong>{signerEmail}</strong>
-                  </div>
-                )}
-                <p className="text-sm text-gray-500">{t("signingLinkInfo")}</p>
-                <div className="bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-xs text-gray-700 break-all font-mono">
-                  {signingModal.signatureUrl}
-                </div>
-                <div className="flex justify-between pt-1">
-                  <button onClick={() => setSigningModal(null)} className="text-sm text-gray-500 hover:text-gray-800 transition-colors">
-                    {tc("close")}
-                  </button>
-                  <button
-                    onClick={() => handleCopyLink(signingModal.signatureUrl)}
-                    className="bg-slate-800 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-slate-700 transition-colors"
-                  >
-                    {copiedLink ? t("signingLinkCopied") : t("signingCopyLink")}
-                  </button>
-                </div>
-              </>
-            )}
+              </div>
+            </div>
+            <div className="flex justify-between pt-1">
+              <button onClick={() => setQuickModalOpen(false)} className="text-sm text-gray-500 hover:text-gray-800 transition-colors">{tc("cancel")}</button>
+              <button
+                onClick={handleCreateQuickAgreement}
+                disabled={quickSaving || !quickTitle || !quickStart || !quickEnd}
+                className="bg-slate-800 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-slate-700 disabled:opacity-50 transition-colors"
+              >
+                {quickSaving ? tad("creating") : tad("createButton")}
+              </button>
+            </div>
           </div>
         </div>
       )}
 
+      {/* Renew modal */}
       {renewModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
           <div className="bg-white rounded-xl shadow-xl border border-gray-200 w-full max-w-md p-6 space-y-4">
@@ -841,37 +655,6 @@ export default function CustomerPage(props: CustomerPageProps) {
           </div>
         </div>
       )}
-
-      <AgreementSlideOver
-        open={slideOverOpen}
-        onClose={closeSlideOver}
-        editingAgreement={editingAgreement}
-        newTitle={newTitle}
-        setNewTitle={setNewTitle}
-        newStart={newStart}
-        setNewStart={setNewStart}
-        newEnd={newEnd}
-        setNewEnd={setNewEnd}
-        newSigned={newSigned}
-        setNewSigned={setNewSigned}
-        newContactName={newContactName}
-        setNewContactName={setNewContactName}
-        newContactEmail={newContactEmail}
-        setNewContactEmail={setNewContactEmail}
-        newContactPhone={newContactPhone}
-        setNewContactPhone={setNewContactPhone}
-        newFile={newFile}
-        setNewFile={setNewFile}
-        removeExistingFile={removeExistingFile}
-        setRemoveExistingFile={setRemoveExistingFile}
-        customerName={customer?.name}
-        mergeData={{
-          kunde_navn: customer?.name,
-          org_nummer: orgNummer || undefined,
-          firma_navn: account?.name,
-        }}
-        onSave={handleSaveAgreement}
-      />
     </div>
   )
 }
