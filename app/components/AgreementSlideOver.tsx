@@ -118,11 +118,11 @@ export default function AgreementSlideOver({
   const [generating, setGenerating] = useState(false)
 
   useEffect(() => {
-    if (!open || editingAgreement) return
+    if (!open) return
     fetch("/api/templates")
       .then((r) => r.json())
       .then(({ templates }) => setTemplates(templates ?? []))
-  }, [open, editingAgreement])
+  }, [open])
 
   useEffect(() => {
     if (!open) {
@@ -248,7 +248,7 @@ export default function AgreementSlideOver({
   }
 
   const showCustomerPicker = customers && customers.length > 0 && !editingAgreement
-  const showTemplatePicker = !editingAgreement && templates.length > 0
+  const showTemplatePicker = templates.length > 0
 
   return (
     <div
@@ -272,7 +272,9 @@ export default function AgreementSlideOver({
 
           {showTemplatePicker && (
             <div className="space-y-1">
-              <label className="text-xs font-medium text-gray-500">{t("useTemplate")}</label>
+              <label className="text-xs font-medium text-gray-500">
+                {editingAgreement ? t("generatePDFFromTemplate") : t("useTemplate")}
+              </label>
               <select
                 value={selectedTemplateId}
                 onChange={(e) => handleTemplateSelect(e.target.value)}
@@ -285,8 +287,11 @@ export default function AgreementSlideOver({
                   </option>
                 ))}
               </select>
-              {selectedTemplateId && (
+              {selectedTemplateId && !editingAgreement && (
                 <p className="text-xs text-amber-600">{t("autoEndDateHint")}</p>
+              )}
+              {selectedTemplateId && editingAgreement && (
+                <p className="text-xs text-amber-600">{t("pdfWillBeGenerated")}</p>
               )}
             </div>
           )}

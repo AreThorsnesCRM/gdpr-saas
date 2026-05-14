@@ -372,7 +372,7 @@ export default function CustomerPage(props: CustomerPageProps) {
       }).select().single()
       await fetchAgreements()
       setRenewModal(null)
-      if (newAgreement) handleEditAgreement(newAgreement as Agreement)
+      // intentionally not auto-opening slide-over — user picks action from the list
     } finally {
       setRenewLoading(false)
     }
@@ -623,6 +623,9 @@ export default function CustomerPage(props: CustomerPageProps) {
               <ul>
                 {activeAgreements.map((a) => {
                   const badge = getExpiryBadge(a)
+                  const isSigned = a.signing_status === "signed"
+                  const isPending = a.signing_status === "pending"
+                  const hasFile = !!a.file_url
                   return (
                     <li key={a.id} className="border-t border-gray-100 first:border-0 py-3">
                       <div className="flex items-start justify-between gap-3">
@@ -639,25 +642,51 @@ export default function CustomerPage(props: CustomerPageProps) {
                             {formatDate(a.start_date)} – {formatDate(a.end_date)}
                           </p>
                         </div>
-                        <div className="flex items-center gap-3 shrink-0 text-xs text-gray-400">
-                          {a.signing_status === "signed" ? (
-                            <a href={a.signed_file_url ?? "#"} target="_blank" rel="noopener noreferrer"
-                              className="text-green-600 font-medium hover:text-green-700 transition-colors">
-                              {t("signingSigned")} ↗
-                            </a>
-                          ) : a.signing_status === "pending" ? (
-                            <span className="text-amber-500 font-medium">{t("signingPending")}</span>
-                          ) : a.file_url ? (
-                            <button onClick={() => openSigningModal(a)} className="hover:text-gray-700 transition-colors">{t("signingButton")}</button>
-                          ) : (
-                            <span className="text-gray-300" title={t("signingNoPDF")}>{t("signingButton")}</span>
-                          )}
-                          <button onClick={() => handleGeneratePDF(a)} className="hover:text-gray-700 transition-colors">{t("pdf")}</button>
-                          {badge && (
-                            <button onClick={() => handleRenewAgreement(a)} className="text-blue-600 hover:text-blue-700 transition-colors font-medium">{t("renewButton")}</button>
-                          )}
-                          <button onClick={() => handleEditAgreement(a)} className="hover:text-gray-700 transition-colors">{t("edit")}</button>
-                          <button onClick={() => archiveAgreement(a.id)} className="hover:text-red-500 transition-colors">{t("archive")}</button>
+                        <div className="flex flex-col items-end gap-1.5 shrink-0">
+                          {/* Primær handling */}
+                          <div className="flex items-center gap-2">
+                            {isSigned ? (
+                              <a href={a.signed_file_url ?? "#"} target="_blank" rel="noopener noreferrer"
+                                className="text-xs font-semibold text-green-600 hover:text-green-700 transition-colors">
+                                {t("signingSigned")} ↗
+                              </a>
+                            ) : isPending ? (
+                              <span className="text-xs font-medium text-amber-500">{t("signingPending")}</span>
+                            ) : hasFile ? (
+                              <button
+                                onClick={() => openSigningModal(a)}
+                                className="inline-flex items-center gap-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium px-3 py-1.5 rounded-lg transition-colors"
+                              >
+                                ✍ {t("signingButton")}
+                              </button>
+                            ) : (
+                              <div className="flex items-center gap-1.5">
+                                <button
+                                  onClick={() => handleEditAgreement(a)}
+                                  className="text-xs border border-gray-200 hover:border-gray-300 text-gray-600 hover:text-gray-800 px-2.5 py-1 rounded-lg transition-colors"
+                                >
+                                  {t("uploadShort")}
+                                </button>
+                                <button
+                                  onClick={() => handleEditAgreement(a)}
+                                  className="text-xs border border-gray-200 hover:border-gray-300 text-gray-600 hover:text-gray-800 px-2.5 py-1 rounded-lg transition-colors"
+                                >
+                                  {t("fromTemplate")}
+                                </button>
+                              </div>
+                            )}
+                          </div>
+                          {/* Sekundære handlinger */}
+                          <div className="flex items-center gap-2 text-xs text-gray-400">
+                            {hasFile && !isSigned && (
+                              <button onClick={() => window.open(a.file_url!, "_blank")} className="hover:text-gray-700 transition-colors">{t("pdf")}</button>
+                            )}
+                            {badge && (
+                              <button onClick={() => handleRenewAgreement(a)} className="text-blue-500 hover:text-blue-700 font-medium transition-colors">{t("renewButton")}</button>
+                            )}
+                            <button onClick={() => handleEditAgreement(a)} className="hover:text-gray-700 transition-colors">{t("edit")}</button>
+                            <button onClick={() => archiveAgreement(a.id)} className="hover:text-red-500 transition-colors">{t("archive")}</button>
+                          </div>
                         </div>
                       </div>
                     </li>
