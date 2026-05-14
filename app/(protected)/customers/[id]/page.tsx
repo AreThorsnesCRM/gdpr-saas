@@ -363,7 +363,7 @@ export default function CustomerPage(props: CustomerPageProps) {
         start_date: renewStart,
         end_date: renewEnd,
         signed: false,
-        file_url: null,
+        file_url: renewModal.file_url ?? null,
         contact_name: renewModal.contact_name,
         contact_email: renewModal.contact_email,
         contact_phone: renewModal.contact_phone,
@@ -660,20 +660,12 @@ export default function CustomerPage(props: CustomerPageProps) {
                                 ✍ {t("signingButton")}
                               </button>
                             ) : (
-                              <div className="flex items-center gap-1.5">
-                                <button
-                                  onClick={() => handleEditAgreement(a)}
-                                  className="text-xs border border-gray-200 hover:border-gray-300 text-gray-600 hover:text-gray-800 px-2.5 py-1 rounded-lg transition-colors"
-                                >
-                                  {t("uploadShort")}
-                                </button>
-                                <button
-                                  onClick={() => handleEditAgreement(a)}
-                                  className="text-xs border border-gray-200 hover:border-gray-300 text-gray-600 hover:text-gray-800 px-2.5 py-1 rounded-lg transition-colors"
-                                >
-                                  {t("fromTemplate")}
-                                </button>
-                              </div>
+                              <button
+                                onClick={() => handleEditAgreement(a)}
+                                className="text-xs border border-gray-200 hover:border-gray-300 text-gray-600 hover:text-gray-800 px-2.5 py-1.5 rounded-lg transition-colors"
+                              >
+                                {t("addPDF")}
+                              </button>
                             )}
                           </div>
                           {/* Sekundære handlinger */}
@@ -872,6 +864,7 @@ export default function CustomerPage(props: CustomerPageProps) {
         setNewFile={setNewFile}
         removeExistingFile={removeExistingFile}
         setRemoveExistingFile={setRemoveExistingFile}
+        customerName={customer?.name}
         mergeData={{
           kunde_navn: customer?.name,
           org_nummer: orgNummer || undefined,

@@ -40,6 +40,7 @@ type Props = {
   removeExistingFile: boolean
   setRemoveExistingFile: (v: boolean) => void
   mergeData?: { kunde_navn?: string; org_nummer?: string; firma_navn?: string }
+  customerName?: string
   onSave: (opts?: SaveOpts) => void
 }
 
@@ -107,6 +108,7 @@ export default function AgreementSlideOver({
   newFile, setNewFile,
   removeExistingFile, setRemoveExistingFile,
   mergeData,
+  customerName,
   onSave,
 }: Props) {
   const t = useTranslations("slideOver")
@@ -260,9 +262,14 @@ export default function AgreementSlideOver({
         className="h-full w-full max-w-md bg-white shadow-xl border-l border-gray-200 overflow-y-auto animate-slideIn"
       >
         <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
-          <h2 className="text-base font-semibold text-gray-900">
-            {editingAgreement ? t("editTitle") : t("newTitle")}
-          </h2>
+          <div>
+            <h2 className="text-base font-semibold text-gray-900">
+              {editingAgreement ? t("editTitle") : t("newTitle")}
+            </h2>
+            {customerName && (
+              <p className="text-xs text-gray-400 mt-0.5">{customerName}</p>
+            )}
+          </div>
           <button onClick={onClose} className="text-sm text-gray-400 hover:text-gray-700 transition-colors">
             {t("cancel")}
           </button>
