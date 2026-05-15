@@ -179,6 +179,7 @@
     "filterUpcoming": "Próximos",
     "filterExpired": "Vencidos",
     "filterArchived": "Archivados",
+    "searchPlaceholder": "Buscar por título o cliente...",
     "columnTitle": "Título",
     "columnCustomer": "Cliente",
     "columnPeriod": "Período",

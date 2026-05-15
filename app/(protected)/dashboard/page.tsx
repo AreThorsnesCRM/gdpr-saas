@@ -170,13 +170,13 @@ export default function DashboardPage() {
     let critQuery = supabase.from("customers").select("id, name, email")
     if (restrictToOwn && user) critQuery = critQuery.eq("account_manager_id", user.id)
     const { data: customers } = await critQuery
-    const { data: agreements } = await supabase.from("agreements").select("customer_id, archived, end_date")
+    const { data: agreements } = await supabase.from("agreements").select("customer_id, archived, start_date, end_date")
 
     if (!customers || !agreements) return
 
     const enriched = customers.map((c: any) => {
       const all = agreements.filter((a: any) => a.customer_id === c.id)
-      const hasActive = all.some((a: any) => !a.archived && (!a.end_date || a.end_date >= today))
+      const hasActive = all.some((a: any) => !a.archived && a.start_date <= today && a.end_date >= today)
       const ended = all
         .filter((a: any) => a.end_date && a.end_date < today)
         .sort((a: any, b: any) => b.end_date.localeCompare(a.end_date))

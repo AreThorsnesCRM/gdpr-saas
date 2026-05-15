@@ -179,6 +179,7 @@
     "filterUpcoming": "Kommende",
     "filterExpired": "Utløpte",
     "filterArchived": "Arkiverte",
+    "searchPlaceholder": "Søk på tittel eller kunde...",
     "columnTitle": "Tittel",
     "columnCustomer": "Kunde",
     "columnPeriod": "Periode",

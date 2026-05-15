@@ -179,6 +179,7 @@
     "filterUpcoming": "Upcoming",
     "filterExpired": "Expired",
     "filterArchived": "Archived",
+    "searchPlaceholder": "Search by title or customer...",
     "columnTitle": "Title",
     "columnCustomer": "Customer",
     "columnPeriod": "Period",

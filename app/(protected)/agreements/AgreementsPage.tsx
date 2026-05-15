@@ -40,6 +40,9 @@ export default function AgreementsPage() {
   ]
 
   const [filter, setFilter] = useState<Filter>("all")
+  const [search, setSearch] = useState("")
+  const [sortKey, setSortKey] = useState<"title" | "customer" | null>(null)
+  const [sortDir, setSortDir] = useState<"asc" | "desc">("asc")
   const [agreements, setAgreements] = useState<Agreement[]>([])
   const [customers, setCustomers] = useState<Customer[]>([])
   const [loading, setLoading] = useState(true)
@@ -179,14 +182,37 @@ export default function AgreementsPage() {
     router.push(f === "all" ? "/agreements" : `/agreements?filter=${f}`)
   }
 
-  const filtered = agreements.filter((a) => {
-    if (filter === "all") return true
-    if (filter === "expiresSoon") {
-      const days = daysUntil(a.end_date)
-      return !a.archived && days >= 0 && days <= 30
+  function toggleSort(key: "title" | "customer") {
+    if (sortKey === key) {
+      setSortDir(d => d === "asc" ? "desc" : "asc")
+    } else {
+      setSortKey(key)
+      setSortDir("asc")
     }
-    return getStatus(a) === filter
-  })
+  }
+
+  const filtered = agreements
+    .filter((a) => {
+      if (filter !== "all") {
+        if (filter === "expiresSoon") {
+          const days = daysUntil(a.end_date)
+          if (!(!a.archived && days >= 0 && days <= 30)) return false
+        } else if (getStatus(a) !== filter) {
+          return false
+        }
+      }
+      if (search) {
+        const q = search.toLowerCase()
+        return a.title.toLowerCase().includes(q) || (a.customers?.name ?? "").toLowerCase().includes(q)
+      }
+      return true
+    })
+    .sort((a, b) => {
+      if (!sortKey) return 0
+      const valA = sortKey === "title" ? a.title : (a.customers?.name ?? "")
+      const valB = sortKey === "title" ? b.title : (b.customers?.name ?? "")
+      return sortDir === "asc" ? valA.localeCompare(valB) : valB.localeCompare(valA)
+    })
 
   const dateLocale = locale === "en" ? "en-GB" : "no-NO"
 
@@ -224,7 +250,19 @@ export default function AgreementsPage() {
         </button>
       </div>
 
-      <div className="flex flex-wrap gap-2">
+      <div className="flex flex-wrap gap-2 items-center">
+        <div className="relative">
+          <input
+            type="text"
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            placeholder={t("searchPlaceholder")}
+            className="pl-3 pr-8 py-1.5 rounded-full text-sm border border-gray-200 focus:outline-none focus:ring-2 focus:ring-slate-300 w-64"
+          />
+          {search && (
+            <button onClick={() => setSearch("")} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 text-xs">✕</button>
+          )}
+        </div>
         {filterOptions.map((f) => (
           <button
             key={f.id}
@@ -249,8 +287,18 @@ export default function AgreementsPage() {
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-gray-200 bg-gray-50">
-                <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wide">{t("columnTitle")}</th>
-                <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wide">{t("columnCustomer")}</th>
+                <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wide">
+                  <button onClick={() => toggleSort("title")} className="flex items-center gap-1 hover:text-gray-800 transition-colors">
+                    {t("columnTitle")}
+                    <span className="text-gray-300">{sortKey === "title" ? (sortDir === "asc" ? "↑" : "↓") : "↕"}</span>
+                  </button>
+                </th>
+                <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wide">
+                  <button onClick={() => toggleSort("customer")} className="flex items-center gap-1 hover:text-gray-800 transition-colors">
+                    {t("columnCustomer")}
+                    <span className="text-gray-300">{sortKey === "customer" ? (sortDir === "asc" ? "↑" : "↓") : "↕"}</span>
+                  </button>
+                </th>
                 <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wide">{t("columnPeriod")}</th>
                 <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wide">{t("columnStatus")}</th>
               </tr>

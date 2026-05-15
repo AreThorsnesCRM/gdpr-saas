@@ -91,6 +91,7 @@ export default function AgreementDetailPage({ params }: { params: Promise<{ id: 
   const [contactName, setContactName] = useState("")
   const [contactEmail, setContactEmail] = useState("")
   const [contactPhone, setContactPhone] = useState("")
+  const [signed, setSigned] = useState(false)
   const [saved, setSaved] = useState(false)
 
   const [newFile, setNewFile] = useState<File | null>(null)
@@ -103,6 +104,7 @@ export default function AgreementDetailPage({ params }: { params: Promise<{ id: 
 
   const [signerName, setSignerName] = useState("")
   const [signerEmail, setSignerEmail] = useState("")
+  const [signerManuallySet, setSignerManuallySet] = useState(false)
   const [signingLoading, setSigningLoading] = useState(false)
   const [signingError, setSigningError] = useState("")
   const [signingDone, setSigningDone] = useState(false)
@@ -132,10 +134,17 @@ export default function AgreementDetailPage({ params }: { params: Promise<{ id: 
       setContactName(a.contact_name ?? "")
       setContactEmail(a.contact_email ?? "")
       setContactPhone(a.contact_phone ?? "")
+      setSigned(a.signed ?? false)
       setSignerName(a.signer_name ?? a.contact_name ?? "")
       setSignerEmail(a.signer_email ?? a.contact_email ?? "")
     }
   }
+
+  useEffect(() => {
+    if (signerManuallySet) return
+    if (!agreement?.signer_name) setSignerName(contactName)
+    if (!agreement?.signer_email) setSignerEmail(contactEmail)
+  }, [contactName, contactEmail])
 
   async function fetchTemplates() {
     const res = await fetch("/api/templates")
@@ -152,8 +161,9 @@ export default function AgreementDetailPage({ params }: { params: Promise<{ id: 
       contact_name: contactName || null,
       contact_email: contactEmail || null,
       contact_phone: contactPhone || null,
+      signed,
     }).eq("id", id)
-    setAgreement(prev => prev ? { ...prev, title, start_date: startDate, end_date: endDate, contact_name: contactName, contact_email: contactEmail, contact_phone: contactPhone } : prev)
+    setAgreement(prev => prev ? { ...prev, title, start_date: startDate, end_date: endDate, contact_name: contactName, contact_email: contactEmail, contact_phone: contactPhone, signed } : prev)
     setSaved(true)
     setTimeout(() => setSaved(false), 2000)
   }
@@ -364,12 +374,26 @@ export default function AgreementDetailPage({ params }: { params: Promise<{ id: 
             </div>
           </div>
         </div>
-        <button
-          onClick={handleSaveInfo}
-          className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${saved ? "bg-green-600 text-white" : "bg-slate-800 text-white hover:bg-slate-700"}`}
-        >
-          {saved ? tc("saved") : tc("saveChanges")}
-        </button>
+        <div className="flex items-center justify-between">
+          {agreement?.file_url && agreement?.signing_status !== "signed" && (
+            <label className={`flex items-center gap-2 text-sm cursor-pointer select-none ${agreement?.signing_status === "pending" ? "opacity-50 cursor-not-allowed" : "text-gray-700"}`}>
+              <input
+                type="checkbox"
+                checked={signed}
+                disabled={agreement?.signing_status === "pending"}
+                onChange={e => setSigned(e.target.checked)}
+                className="h-4 w-4 rounded border-gray-300 text-slate-800 focus:ring-slate-500 disabled:cursor-not-allowed"
+              />
+              {t("signingSignedLabel")}
+            </label>
+          )}
+          <button
+            onClick={handleSaveInfo}
+            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${saved ? "bg-green-600 text-white" : "bg-slate-800 text-white hover:bg-slate-700"}`}
+          >
+            {saved ? tc("saved") : tc("saveChanges")}
+          </button>
+        </div>
       </div>
 
       {/* PDF-dokument */}
@@ -498,11 +522,11 @@ export default function AgreementDetailPage({ params }: { params: Promise<{ id: 
           <div className="space-y-3">
             <div>
               <label className="block text-xs font-medium text-gray-500 mb-1">{t("signingNameLabel")}</label>
-              <input className={inputClass} value={signerName} onChange={e => setSignerName(e.target.value)} />
+              <input className={inputClass} value={signerName} onChange={e => { setSignerName(e.target.value); setSignerManuallySet(true) }} />
             </div>
             <div>
               <label className="block text-xs font-medium text-gray-500 mb-1">{t("signingEmailLabel")}</label>
-              <input type="email" className={inputClass} value={signerEmail} onChange={e => setSignerEmail(e.target.value)} />
+              <input type="email" className={inputClass} value={signerEmail} onChange={e => { setSignerEmail(e.target.value); setSignerManuallySet(true) }} />
               <p className="text-xs text-gray-400 mt-1">{t("signingEmailHint")}</p>
             </div>
             {signingError && <p className="text-sm text-red-600">{signingError}</p>}
