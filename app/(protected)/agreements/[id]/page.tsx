@@ -562,12 +562,14 @@ export default function AgreementDetailPage({ params }: { params: Promise<{ id: 
                 </div>
               </div>
             ))}
-            <button
-              onClick={() => setSigners(prev => [...prev, { name: "", email: "" }])}
-              className="text-xs text-slate-600 hover:text-slate-900 underline underline-offset-2 transition-colors"
-            >
-              + {t("addSigner")}
-            </button>
+            <div>
+              <button
+                onClick={() => setSigners(prev => [...prev, { name: "", email: "" }])}
+                className="text-xs text-slate-600 hover:text-slate-900 underline underline-offset-2 transition-colors"
+              >
+                + {t("addSigner")}
+              </button>
+            </div>
             {signers.length === 1 && <p className="text-xs text-gray-400">{t("signingEmailHint")}</p>}
             {signingError && <p className="text-sm text-red-600">{signingError}</p>}
             <button
