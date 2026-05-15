@@ -161,11 +161,16 @@ export default function AgreementDetailPage({ params }: { params: Promise<{ id: 
       contact_name: contactName || null,
       contact_email: contactEmail || null,
       contact_phone: contactPhone || null,
-      signed,
     }).eq("id", id)
-    setAgreement(prev => prev ? { ...prev, title, start_date: startDate, end_date: endDate, contact_name: contactName, contact_email: contactEmail, contact_phone: contactPhone, signed } : prev)
+    setAgreement(prev => prev ? { ...prev, title, start_date: startDate, end_date: endDate, contact_name: contactName, contact_email: contactEmail, contact_phone: contactPhone } : prev)
     setSaved(true)
     setTimeout(() => setSaved(false), 2000)
+  }
+
+  async function handleSaveSigned(value: boolean) {
+    if (!supabase) return
+    await supabase.from("agreements").update({ signed: value }).eq("id", id)
+    setAgreement(prev => prev ? { ...prev, signed: value } : prev)
   }
 
   async function handleUploadPDF() {
@@ -374,26 +379,12 @@ export default function AgreementDetailPage({ params }: { params: Promise<{ id: 
             </div>
           </div>
         </div>
-        <div className="flex items-center justify-between">
-          {agreement?.file_url && agreement?.signing_status !== "signed" && (
-            <label className={`flex items-center gap-2 text-sm cursor-pointer select-none ${agreement?.signing_status === "pending" ? "opacity-50 cursor-not-allowed" : "text-gray-700"}`}>
-              <input
-                type="checkbox"
-                checked={signed}
-                disabled={agreement?.signing_status === "pending"}
-                onChange={e => setSigned(e.target.checked)}
-                className="h-4 w-4 rounded border-gray-300 text-slate-800 focus:ring-slate-500 disabled:cursor-not-allowed"
-              />
-              {t("signingSignedLabel")}
-            </label>
-          )}
-          <button
-            onClick={handleSaveInfo}
-            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${saved ? "bg-green-600 text-white" : "bg-slate-800 text-white hover:bg-slate-700"}`}
-          >
-            {saved ? tc("saved") : tc("saveChanges")}
-          </button>
-        </div>
+        <button
+          onClick={handleSaveInfo}
+          className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${saved ? "bg-green-600 text-white" : "bg-slate-800 text-white hover:bg-slate-700"}`}
+        >
+          {saved ? tc("saved") : tc("saveChanges")}
+        </button>
       </div>
 
       {/* PDF-dokument */}
@@ -402,10 +393,21 @@ export default function AgreementDetailPage({ params }: { params: Promise<{ id: 
 
         {agreement?.file_url ? (
           <div className="space-y-4">
-            <div className="flex items-center gap-3">
+            <div className="flex items-center justify-between">
               <a href={agreement.file_url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 text-sm font-medium text-slate-700 hover:text-slate-900 border border-gray-200 px-3 py-1.5 rounded-lg transition-colors">
                 {t("pdfOpen")} ↗
               </a>
+              {!agreement?.signing_status && (
+                <label className="flex items-center gap-2 text-sm cursor-pointer select-none text-gray-700">
+                  <input
+                    type="checkbox"
+                    checked={signed}
+                    onChange={e => { setSigned(e.target.checked); handleSaveSigned(e.target.checked) }}
+                    className="h-4 w-4 rounded border-gray-300 text-slate-800 focus:ring-slate-500"
+                  />
+                  {t("signedLabel")}
+                </label>
+              )}
             </div>
             <div className="border-t border-gray-100 pt-4 space-y-3">
               <p className="text-xs font-medium text-gray-500">{t("pdfReplace")}</p>

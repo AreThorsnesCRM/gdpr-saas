@@ -137,7 +137,7 @@ export default function DashboardPage() {
     ).length ?? 0
 
     const customersWithActive = new Set(
-      agreements?.filter((a: any) => !a.archived && a.start_date <= today && a.end_date >= today)
+      agreements?.filter((a: any) => !a.archived && (!a.end_date || a.end_date >= today))
         .map((a: any) => a.customer_id)
     )
     const withoutActive = customers?.filter((c: any) => !customersWithActive.has(c.id)).length ?? 0
@@ -176,7 +176,7 @@ export default function DashboardPage() {
 
     const enriched = customers.map((c: any) => {
       const all = agreements.filter((a: any) => a.customer_id === c.id)
-      const hasActive = all.some((a: any) => !a.archived && a.start_date <= today && a.end_date >= today)
+      const hasActive = all.some((a: any) => !a.archived && (!a.end_date || a.end_date >= today))
       const ended = all
         .filter((a: any) => a.end_date && a.end_date < today)
         .sort((a: any, b: any) => b.end_date.localeCompare(a.end_date))

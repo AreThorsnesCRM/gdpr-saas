@@ -391,6 +391,7 @@
     "signingError": "Something went wrong. Please try again.",
     "signingPendingStatus": "Awaiting signature",
     "signingSignedLabel": "Digitally signed",
+    "signedLabel": "Signed",
     "signingSignedFile": "Open signed PDF",
     "archiveButton": "Archive",
     "restoreButton": "Restore",

@@ -391,6 +391,7 @@
     "signingError": "Algo salió mal. Inténtalo de nuevo.",
     "signingPendingStatus": "Esperando firma",
     "signingSignedLabel": "Firmado digitalmente",
+    "signedLabel": "Firmado",
     "signingSignedFile": "Abrir PDF firmado",
     "archiveButton": "Archivar",
     "restoreButton": "Restaurar",

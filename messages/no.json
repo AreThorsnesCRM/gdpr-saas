@@ -391,6 +391,7 @@
     "signingError": "Noe gikk galt. Prøv igjen.",
     "signingPendingStatus": "Venter på signering",
     "signingSignedLabel": "Digitalt signert",
+    "signedLabel": "Signert",
     "signingSignedFile": "Åpne signert PDF",
     "archiveButton": "Arkiver",
     "restoreButton": "Gjenopprett",
