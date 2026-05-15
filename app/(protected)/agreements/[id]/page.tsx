@@ -13,6 +13,8 @@ import RichTextEditor from "@/app/components/RichTextEditor"
 import { substituteMergeFields } from "@/lib/mergeFields"
 import { useTranslations, useLocale } from "next-intl"
 
+type DbSigner = { name: string; email: string; sessionId: string; url: string; signed: boolean }
+
 type AgreementDetail = {
   id: string
   title: string
@@ -29,6 +31,7 @@ type AgreementDetail = {
   signing_url: string | null
   signer_name: string | null
   signer_email: string | null
+  signers: DbSigner[] | null
   template_id: string | null
   content: string | null
   customer_id: string
@@ -102,15 +105,11 @@ export default function AgreementDetailPage({ params }: { params: Promise<{ id: 
   const [previewContent, setPreviewContent] = useState("")
   const [generating, setGenerating] = useState(false)
 
-  const [signerName, setSignerName] = useState("")
-  const [signerEmail, setSignerEmail] = useState("")
+  const [signers, setSigners] = useState<{ name: string; email: string }[]>([{ name: "", email: "" }])
   const [signerManuallySet, setSignerManuallySet] = useState(false)
   const [signingLoading, setSigningLoading] = useState(false)
   const [signingError, setSigningError] = useState("")
-  const [signingDone, setSigningDone] = useState(false)
-  const [signatureUrl, setSignatureUrl] = useState("")
-  const [emailSent, setEmailSent] = useState(false)
-  const [copiedLink, setCopiedLink] = useState(false)
+  const [copiedIndex, setCopiedIndex] = useState<number | null>(null)
 
   useEffect(() => {
     if (!user || !id) return
@@ -135,15 +134,21 @@ export default function AgreementDetailPage({ params }: { params: Promise<{ id: 
       setContactEmail(a.contact_email ?? "")
       setContactPhone(a.contact_phone ?? "")
       setSigned(a.signed ?? false)
-      setSignerName(a.signer_name ?? a.contact_name ?? "")
-      setSignerEmail(a.signer_email ?? a.contact_email ?? "")
+      if (!a.signing_status) {
+        setSigners([{ name: a.signer_name ?? a.contact_name ?? "", email: a.signer_email ?? a.contact_email ?? "" }])
+      }
     }
   }
 
   useEffect(() => {
     if (signerManuallySet) return
-    if (!agreement?.signer_name) setSignerName(contactName)
-    if (!agreement?.signer_email) setSignerEmail(contactEmail)
+    if (agreement?.signing_status) return
+    setSigners(prev => {
+      const updated = [...prev]
+      if (!agreement?.signer_name) updated[0] = { ...updated[0], name: contactName }
+      if (!agreement?.signer_email) updated[0] = { ...updated[0], email: contactEmail }
+      return updated
+    })
   }, [contactName, contactEmail])
 
   async function fetchTemplates() {
@@ -234,14 +239,11 @@ export default function AgreementDetailPage({ params }: { params: Promise<{ id: 
       const res = await fetch(`/api/agreements/${id}/sign`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ signerName, signerEmail }),
+        body: JSON.stringify({ signers }),
       })
       const json = await res.json()
       if (!res.ok) throw new Error(json.error)
-      setSignatureUrl(json.signatureUrl)
-      setEmailSent(json.emailSent)
-      setSigningDone(true)
-      setAgreement(prev => prev ? { ...prev, signing_status: "pending", signing_url: json.signatureUrl } : prev)
+      await fetchAgreement()
     } catch {
       setSigningError(t("signingError"))
     } finally {
@@ -263,10 +265,10 @@ export default function AgreementDetailPage({ params }: { params: Promise<{ id: 
     router.push(`/customers/${customerId}`)
   }
 
-  async function handleCopyLink() {
-    await navigator.clipboard.writeText(signatureUrl)
-    setCopiedLink(true)
-    setTimeout(() => setCopiedLink(false), 2000)
+  async function handleCopyLink(url: string, index: number) {
+    await navigator.clipboard.writeText(url)
+    setCopiedIndex(index)
+    setTimeout(() => setCopiedIndex(null), 2000)
   }
 
   function getExpiryBadge() {
@@ -492,49 +494,85 @@ export default function AgreementDetailPage({ params }: { params: Promise<{ id: 
             )}
           </div>
         ) : agreement?.signing_status === "pending" ? (
-          <div className="space-y-3">
-            <p className="text-sm font-medium text-amber-500">{t("signingPendingStatus")}</p>
-            {(agreement.signing_url || signatureUrl) && (
-              <div className="space-y-2">
-                <p className="text-sm text-gray-500">{t("signingLinkInfo")}</p>
-                <div className="bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-xs font-mono break-all text-gray-700">
-                  {agreement.signing_url ?? signatureUrl}
+          (() => {
+            const pendingSigners: DbSigner[] = (agreement.signers && agreement.signers.length > 0)
+              ? agreement.signers
+              : agreement.signing_url
+                ? [{ name: agreement.signer_name ?? "", email: "", sessionId: "", url: agreement.signing_url, signed: false }]
+                : []
+            return (
+              <div className="space-y-3">
+                <div className="space-y-2">
+                  {pendingSigners.map((s, i) => (
+                    <div key={i} className="flex items-center justify-between bg-gray-50 rounded-lg px-3 py-2.5 gap-3">
+                      <div className="min-w-0">
+                        <p className="text-sm font-medium text-gray-800 truncate">{s.name || `Signatar ${i + 1}`}</p>
+                        {s.signed
+                          ? <p className="text-xs text-green-600 font-medium">{t("signedLabel")} ✓</p>
+                          : <p className="text-xs text-amber-500">{t("signingPendingStatus")}</p>
+                        }
+                      </div>
+                      {s.url && (
+                        <button
+                          onClick={() => handleCopyLink(s.url, i)}
+                          className="shrink-0 text-xs text-slate-600 hover:text-slate-900 border border-gray-200 px-2.5 py-1 rounded-lg transition-colors"
+                        >
+                          {copiedIndex === i ? t("signingCopied") : t("signingCopyLink")}
+                        </button>
+                      )}
+                    </div>
+                  ))}
                 </div>
               </div>
-            )}
-          </div>
+            )
+          })()
         ) : !agreement?.file_url ? (
           <p className="text-sm text-gray-400">{t("signingNoPDF")}</p>
-        ) : signingDone ? (
-          <div className="space-y-3">
-            {emailSent && signerEmail && (
-              <div className="bg-green-50 border border-green-200 rounded-lg px-4 py-3 text-sm text-green-700">
-                E-post sendt til <strong>{signerEmail}</strong>
-              </div>
-            )}
-            <p className="text-sm text-gray-500">{t("signingLinkInfo")}</p>
-            <div className="bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-xs font-mono break-all text-gray-700">
-              {signatureUrl}
-            </div>
-            <button onClick={handleCopyLink} className="bg-slate-800 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-slate-700 transition-colors">
-              {copiedLink ? t("signingCopied") : t("signingCopyLink")}
-            </button>
-          </div>
         ) : (
-          <div className="space-y-3">
-            <div>
-              <label className="block text-xs font-medium text-gray-500 mb-1">{t("signingNameLabel")}</label>
-              <input className={inputClass} value={signerName} onChange={e => { setSignerName(e.target.value); setSignerManuallySet(true) }} />
-            </div>
-            <div>
-              <label className="block text-xs font-medium text-gray-500 mb-1">{t("signingEmailLabel")}</label>
-              <input type="email" className={inputClass} value={signerEmail} onChange={e => { setSignerEmail(e.target.value); setSignerManuallySet(true) }} />
-              <p className="text-xs text-gray-400 mt-1">{t("signingEmailHint")}</p>
-            </div>
+          <div className="space-y-4">
+            {signers.map((s, i) => (
+              <div key={i} className="space-y-2">
+                {signers.length > 1 && (
+                  <div className="flex items-center justify-between">
+                    <p className="text-xs font-medium text-gray-400">Signatar {i + 1}</p>
+                    <button
+                      onClick={() => setSigners(prev => prev.filter((_, j) => j !== i))}
+                      className="text-xs text-red-500 hover:text-red-700 transition-colors"
+                    >
+                      {tc("delete")}
+                    </button>
+                  </div>
+                )}
+                <div>
+                  <label className="block text-xs font-medium text-gray-500 mb-1">{t("signingNameLabel")}</label>
+                  <input
+                    className={inputClass}
+                    value={s.name}
+                    onChange={e => { const n = [...signers]; n[i] = { ...n[i], name: e.target.value }; setSigners(n); setSignerManuallySet(true) }}
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-gray-500 mb-1">{t("signingEmailLabel")}</label>
+                  <input
+                    type="email"
+                    className={inputClass}
+                    value={s.email}
+                    onChange={e => { const n = [...signers]; n[i] = { ...n[i], email: e.target.value }; setSigners(n); setSignerManuallySet(true) }}
+                  />
+                </div>
+              </div>
+            ))}
+            <button
+              onClick={() => setSigners(prev => [...prev, { name: "", email: "" }])}
+              className="text-xs text-slate-600 hover:text-slate-900 underline underline-offset-2 transition-colors"
+            >
+              + {t("addSigner")}
+            </button>
+            {signers.length === 1 && <p className="text-xs text-gray-400">{t("signingEmailHint")}</p>}
             {signingError && <p className="text-sm text-red-600">{signingError}</p>}
             <button
               onClick={handleSendForSigning}
-              disabled={signingLoading}
+              disabled={signingLoading || signers.every(s => !s.email)}
               className="inline-flex items-center gap-1.5 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium disabled:opacity-50 transition-colors"
             >
               ✍ {signingLoading ? t("signingSending") : t("signingSend")}

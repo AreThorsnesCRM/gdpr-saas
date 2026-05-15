@@ -37,37 +37,31 @@ export async function createDocumentCollection(documentId: string): Promise<stri
   return (await res.json()).id
 }
 
-export async function createSigningSession(opts: {
+export async function createSigningSessions(opts: {
   documentCollectionId: string
   documentId: string
   title: string
   externalReference: string
   language?: string
-}): Promise<{ sessionId: string; signatureUrl: string }> {
+  count: number
+}): Promise<{ sessionId: string; signatureUrl: string }[]> {
   const token = await getAccessToken()
-  const body = [{
+  const items = Array.from({ length: opts.count }, (_, i) => ({
     title: opts.title,
-    externalReference: opts.externalReference,
-    documents: [{
-      action: "SIGN",
-      documentCollectionId: opts.documentCollectionId,
-      documentId: opts.documentId,
-    }],
-    signingSetup: [{
-      identityProviders: [{ idpName: "nbid" }],
-      signingFlow: "AUTHENTICATION_BASED",
-    }],
+    externalReference: i === 0 ? opts.externalReference : `${opts.externalReference}-${i}`,
+    documents: [{ action: "SIGN", documentCollectionId: opts.documentCollectionId, documentId: opts.documentId }],
+    signingSetup: [{ identityProviders: [{ idpName: "nbid" }], signingFlow: "AUTHENTICATION_BASED" }],
     packageTo: ["PADES_CONTAINER"],
     ui: { language: opts.language ?? "no" },
-  }]
+  }))
   const res = await fetch(`${BASE_URL}/sign/signing-sessions`, {
     method: "POST",
     headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-    body: JSON.stringify(body),
+    body: JSON.stringify(items),
   })
   if (!res.ok) throw new Error(`Session error: ${res.status} ${await res.text()}`)
   const data = await res.json()
-  return { sessionId: data[0].id, signatureUrl: data[0].signatureUrl }
+  return data.map((s: any) => ({ sessionId: s.id, signatureUrl: s.signatureUrl }))
 }
 
 export async function getSigningSession(sessionId: string) {

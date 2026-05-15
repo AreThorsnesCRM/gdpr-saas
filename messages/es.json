@@ -390,6 +390,7 @@
     "signingCopied": "¡Copiado!",
     "signingError": "Algo salió mal. Inténtalo de nuevo.",
     "signingPendingStatus": "Esperando firma",
+    "addSigner": "Añadir firmante",
     "signingSignedLabel": "Firmado digitalmente",
     "signedLabel": "Firmado",
     "signingSignedFile": "Abrir PDF firmado",

@@ -2,7 +2,7 @@ import { NextResponse } from "next/server"
 import { supabaseAdmin } from "@/lib/supabaseAdmin"
 import { cookies } from "next/headers"
 import { createServerClient } from "@supabase/ssr"
-import { uploadDocument, createDocumentCollection, createSigningSession } from "@/lib/signicat"
+import { uploadDocument, createDocumentCollection, createSigningSessions } from "@/lib/signicat"
 import { sendSigningLinkEmail } from "@/lib/email"
 import { randomUUID } from "crypto"
 
@@ -32,7 +32,12 @@ export async function POST(
   if (!accountUser) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
 
   const { id: agreementId } = await params
-  const { signerName, signerEmail } = await req.json()
+  const body = await req.json()
+
+  // Support both old {signerName, signerEmail} and new {signers: [{name, email}]}
+  const signerList: { name: string; email: string }[] = body.signers
+    ? body.signers
+    : [{ name: body.signerName ?? "", email: body.signerEmail ?? "" }]
 
   const { data: agreement } = await supabaseAdmin
     .from("agreements")
@@ -51,42 +56,49 @@ export async function POST(
   const documentCollectionId = await createDocumentCollection(documentId)
   const externalReference = randomUUID()
 
-  const { sessionId, signatureUrl } = await createSigningSession({
+  const sessions = await createSigningSessions({
     documentCollectionId,
     documentId,
     title: agreement.title,
     externalReference,
     language: "nb",
+    count: signerList.length,
   })
+
+  const signersJsonb = signerList.map((s, i) => ({
+    name: s.name,
+    email: s.email,
+    sessionId: sessions[i].sessionId,
+    url: sessions[i].signatureUrl,
+    signed: false,
+  }))
 
   await supabaseAdmin
     .from("agreements")
     .update({
       signing_status: "pending",
-      signing_session_id: sessionId,
-      signing_url: signatureUrl,
-      signer_name: signerName || null,
-      signer_email: signerEmail || null,
+      signing_session_id: sessions[0].sessionId,
+      signing_url: sessions[0].signatureUrl,
+      signer_name: signerList[0].name || null,
+      signer_email: signerList[0].email || null,
+      signers: signersJsonb,
       signing_requested_at: new Date().toISOString(),
     })
     .eq("id", agreementId)
 
+  const { data: account } = await supabaseAdmin
+    .from("accounts")
+    .select("name")
+    .eq("id", accountUser.account_id)
+    .single()
+
   let emailSent = false
-  if (signerEmail) {
-    const { data: account } = await supabaseAdmin
-      .from("accounts")
-      .select("name")
-      .eq("id", accountUser.account_id)
-      .single()
-    await sendSigningLinkEmail(
-      signerEmail,
-      signerName || "",
-      agreement.title,
-      signatureUrl,
-      account?.name ?? "AreCRM"
-    )
-    emailSent = true
+  for (const s of signersJsonb) {
+    if (s.email) {
+      await sendSigningLinkEmail(s.email, s.name, agreement.title, s.url, account?.name ?? "AreCRM")
+      emailSent = true
+    }
   }
 
-  return NextResponse.json({ signatureUrl, sessionId, emailSent })
+  return NextResponse.json({ signatureUrl: sessions[0].signatureUrl, emailSent })
 }

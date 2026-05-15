@@ -390,6 +390,7 @@
     "signingCopied": "Copied!",
     "signingError": "Something went wrong. Please try again.",
     "signingPendingStatus": "Awaiting signature",
+    "addSigner": "Add signer",
     "signingSignedLabel": "Digitally signed",
     "signedLabel": "Signed",
     "signingSignedFile": "Open signed PDF",

@@ -390,6 +390,7 @@
     "signingCopied": "Kopiert!",
     "signingError": "Noe gikk galt. Prøv igjen.",
     "signingPendingStatus": "Venter på signering",
+    "addSigner": "Legg til signatar",
     "signingSignedLabel": "Digitalt signert",
     "signedLabel": "Signert",
     "signingSignedFile": "Åpne signert PDF",
