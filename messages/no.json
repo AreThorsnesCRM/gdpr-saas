@@ -399,6 +399,8 @@
     "deleteAgreement": "Slett avtale",
     "deleteConfirm": "Er du sikker på at du vil slette denne avtalen? Dette kan ikke angres.",
     "newAgreementTitle": "Ny avtale",
+    "labelCustomer": "Kunde",
+    "customerPlaceholder": "— Velg kunde —",
     "quickTitleLabel": "Tittel",
     "quickStartLabel": "Startdato",
     "quickEndLabel": "Sluttdato",

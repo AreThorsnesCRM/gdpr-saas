@@ -4,7 +4,6 @@ import { useEffect, useState } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { supabase } from "@/lib/supabaseClient"
 import { useAuth } from "@/lib/AuthContext"
-import AgreementSlideOver from "@/app/components/AgreementSlideOver"
 import { useTranslations, useLocale } from "next-intl"
 
 type Agreement = {
@@ -25,8 +24,9 @@ type Filter = "all" | "active" | "expired" | "upcoming" | "expiresSoon" | "archi
 export default function AgreementsPage() {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const { user, account, restrictToOwn } = useAuth()
+  const { user, restrictToOwn } = useAuth()
   const t = useTranslations("agreements")
+  const tad = useTranslations("agreementDetail")
   const tc = useTranslations("common")
   const locale = useLocale()
 
@@ -47,19 +47,12 @@ export default function AgreementsPage() {
   const [customers, setCustomers] = useState<Customer[]>([])
   const [loading, setLoading] = useState(true)
 
-  // Slide-over state
-  const [slideOverOpen, setSlideOverOpen] = useState(false)
-  const [customerId, setCustomerId] = useState("")
-  const [selectedCustomerOrg, setSelectedCustomerOrg] = useState<string | null>(null)
-  const [newTitle, setNewTitle] = useState("")
-  const [newStart, setNewStart] = useState("")
-  const [newEnd, setNewEnd] = useState("")
-  const [newContactName, setNewContactName] = useState("")
-  const [newContactEmail, setNewContactEmail] = useState("")
-  const [newContactPhone, setNewContactPhone] = useState("")
-  const [newSigned, setNewSigned] = useState(false)
-  const [newFile, setNewFile] = useState<File | null>(null)
-  const [removeExistingFile, setRemoveExistingFile] = useState(false)
+  const [quickModalOpen, setQuickModalOpen] = useState(false)
+  const [quickCustomerId, setQuickCustomerId] = useState("")
+  const [quickTitle, setQuickTitle] = useState("")
+  const [quickStart, setQuickStart] = useState("")
+  const [quickEnd, setQuickEnd] = useState("")
+  const [quickSaving, setQuickSaving] = useState(false)
 
   useEffect(() => {
     const urlFilter = searchParams.get("filter")
@@ -84,18 +77,9 @@ export default function AgreementsPage() {
 
   useEffect(() => {
     if (!supabase || !user) return
-    supabase
-      .from("customers")
-      .select("id, name")
-      .order("name")
+    supabase.from("customers").select("id, name").order("name")
       .then(({ data }) => setCustomers(data ?? []))
   }, [user])
-
-  useEffect(() => {
-    if (!customerId || !supabase) { setSelectedCustomerOrg(null); return }
-    supabase.from("customers").select("org_nummer").eq("id", customerId).single()
-      .then(({ data }) => setSelectedCustomerOrg(data?.org_nummer ?? null))
-  }, [customerId])
 
   async function fetchAgreements() {
     if (!supabase) return
@@ -115,53 +99,27 @@ export default function AgreementsPage() {
     setLoading(false)
   }
 
-  function resetForm() {
-    setCustomerId("")
-    setSelectedCustomerOrg(null)
-    setNewTitle(""); setNewStart(""); setNewEnd("")
-    setNewContactName(""); setNewContactEmail(""); setNewContactPhone("")
-    setNewSigned(false); setNewFile(null); setRemoveExistingFile(false)
+  function openQuickModal() {
+    setQuickCustomerId(""); setQuickTitle(""); setQuickStart(""); setQuickEnd("")
+    setQuickModalOpen(true)
   }
 
-  function openSlideOver() { resetForm(); setSlideOverOpen(true) }
-  function closeSlideOver() { resetForm(); setSlideOverOpen(false) }
-
-  async function handleSave(opts?: { generatedFile?: File; content?: string; templateId?: string }) {
-    if (!supabase || !user || !customerId || !newTitle || !newStart || !newEnd) return
-
-    const fileToUpload = opts?.generatedFile ?? newFile
-    let file_url: string | null = null
-    if (fileToUpload) {
-      const fileExt = fileToUpload.name.split(".").pop()
-      const fileName = `${customerId}/${Date.now()}.${fileExt}`
-      const { data: upload, error } = await supabase.storage.from("agreements").upload(fileName, fileToUpload)
-      if (!error && upload) {
-        const { data: urlData } = supabase.storage.from("agreements").getPublicUrl(upload.path)
-        file_url = urlData.publicUrl
-      }
-    }
-
-    const { data: newAgreement } = await supabase.from("agreements").insert({
-      customer_id: customerId,
-      user_id: user.id,
-      title: newTitle,
-      start_date: newStart,
-      end_date: newEnd,
-      contact_name: newContactName || null,
-      contact_email: newContactEmail || null,
-      contact_phone: newContactPhone || null,
-      signed: newSigned,
-      file_url,
-      archived: false,
-      ...(opts?.content ? { content: opts.content } : {}),
-      ...(opts?.templateId ? { template_id: opts.templateId } : {}),
-    }).select().single()
-
-    closeSlideOver()
-    if (newAgreement) {
-      router.push(`/agreements/${newAgreement.id}`)
-    } else {
-      fetchAgreements()
+  async function handleCreateQuickAgreement() {
+    if (!supabase || !user || !quickCustomerId || !quickTitle || !quickStart || !quickEnd) return
+    setQuickSaving(true)
+    try {
+      const { data: newAgreement } = await supabase.from("agreements").insert({
+        customer_id: quickCustomerId,
+        user_id: user.id,
+        title: quickTitle,
+        start_date: quickStart,
+        end_date: quickEnd,
+        signed: false,
+        archived: false,
+      }).select().single()
+      if (newAgreement) router.push(`/agreements/${newAgreement.id}`)
+    } finally {
+      setQuickSaving(false)
     }
   }
 
@@ -243,7 +201,7 @@ export default function AgreementsPage() {
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold text-gray-900">{t("title")}</h1>
         <button
-          onClick={openSlideOver}
+          onClick={openQuickModal}
           className="bg-slate-800 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-slate-700 transition-colors"
         >
           {t("newAgreement")}
@@ -329,38 +287,55 @@ export default function AgreementsPage() {
         <p className="text-xs text-gray-400">{t("count", { count: filtered.length })}</p>
       )}
 
-      <AgreementSlideOver
-        open={slideOverOpen}
-        onClose={closeSlideOver}
-        editingAgreement={null}
-        customers={customers}
-        customerId={customerId}
-        setCustomerId={setCustomerId}
-        newTitle={newTitle}
-        setNewTitle={setNewTitle}
-        newStart={newStart}
-        setNewStart={setNewStart}
-        newEnd={newEnd}
-        setNewEnd={setNewEnd}
-        newContactName={newContactName}
-        setNewContactName={setNewContactName}
-        newContactEmail={newContactEmail}
-        setNewContactEmail={setNewContactEmail}
-        newContactPhone={newContactPhone}
-        setNewContactPhone={setNewContactPhone}
-        newSigned={newSigned}
-        setNewSigned={setNewSigned}
-        newFile={newFile}
-        setNewFile={setNewFile}
-        removeExistingFile={removeExistingFile}
-        setRemoveExistingFile={setRemoveExistingFile}
-        mergeData={{
-          kunde_navn: customers.find((c) => c.id === customerId)?.name,
-          org_nummer: selectedCustomerOrg ?? undefined,
-          firma_navn: account?.name,
-        }}
-        onSave={handleSave}
-      />
+      {quickModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
+          <div className="bg-white rounded-xl shadow-xl border border-gray-200 w-full max-w-md p-6 space-y-4">
+            <h2 className="text-base font-semibold text-gray-900">{t("newAgreement")}</h2>
+            <div className="space-y-3">
+              <div>
+                <label className="block text-xs font-medium text-gray-500 mb-1">{tad("labelCustomer")}</label>
+                <select
+                  value={quickCustomerId}
+                  onChange={e => setQuickCustomerId(e.target.value)}
+                  className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-400"
+                  autoFocus
+                >
+                  <option value="">{tad("customerPlaceholder")}</option>
+                  {customers.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                </select>
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-gray-500 mb-1">{tad("quickTitleLabel")}</label>
+                <input
+                  className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-400"
+                  value={quickTitle}
+                  onChange={e => setQuickTitle(e.target.value)}
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-medium text-gray-500 mb-1">{tad("quickStartLabel")}</label>
+                  <input type="date" className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-400" value={quickStart} onChange={e => setQuickStart(e.target.value)} />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-gray-500 mb-1">{tad("quickEndLabel")}</label>
+                  <input type="date" className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-400" value={quickEnd} onChange={e => setQuickEnd(e.target.value)} />
+                </div>
+              </div>
+            </div>
+            <div className="flex justify-between pt-1">
+              <button onClick={() => setQuickModalOpen(false)} className="text-sm text-gray-500 hover:text-gray-800 transition-colors">{tc("cancel")}</button>
+              <button
+                onClick={handleCreateQuickAgreement}
+                disabled={quickSaving || !quickCustomerId || !quickTitle || !quickStart || !quickEnd}
+                className="bg-slate-800 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-slate-700 disabled:opacity-50 transition-colors"
+              >
+                {quickSaving ? tad("creating") : tad("createButton")}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
