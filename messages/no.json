@@ -365,6 +365,28 @@
     "columnCity": "Sted",
     "columnWebsite": "Nettside"
   },
+  "assistant": {
+    "title": "AreCRM Assistent",
+    "contextLimited": "Begrenset kontekst",
+    "contextFull": "Full kontekst",
+    "contextLimitedInfo": "Begrenset kontekst — kun statistikk, ingen persondata",
+    "contextFullInfo": "Full kontekst — assistenten kan se kundenavn og avtaler",
+    "welcome": "Hei! Hva kan jeg hjelpe deg med?",
+    "placeholder": "Skriv en melding...",
+    "openLabel": "Åpne assistent",
+    "contextTitle": "Velg kontekstnivå",
+    "suggested1": "Hvordan oppretter jeg en ny avtale?",
+    "suggested2": "Hjelp meg å skrive en serviceavtale",
+    "suggested3": "Hvordan fungerer digital signering?",
+    "pageHintDashboard": "Dashboard / Oversikt",
+    "pageHintCustomers": "Kundelisten",
+    "pageHintAgreements": "Avtalelisten",
+    "pageHintTemplates": "Avtalemaler",
+    "pageHintSettings": "Innstillinger",
+    "pageHintArchive": "Arkiv",
+    "pageHintCustomer": "Kundeside",
+    "pageHintAgreement": "Avtaleside"
+  },
   "onboarding": {
     "title": "Kom i gang med AreCRM",
     "subtitle": "Velg landet ditt for å sette opp riktig signaturmetode (BankID, MitID, osv.).",

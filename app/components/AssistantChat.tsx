@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from "react"
 import { usePathname } from "next/navigation"
+import { useTranslations } from "next-intl"
 import {
   ChatBubbleLeftRightIcon,
   XMarkIcon,
@@ -12,32 +13,10 @@ import { SparklesIcon } from "@heroicons/react/24/solid"
 type Message = { role: "user" | "assistant"; content: string }
 type ContextLevel = "limited" | "full"
 
-const PAGE_HINTS: Record<string, string> = {
-  "/dashboard": "Dashboard / Oversikt",
-  "/customers": "Kundelisten",
-  "/agreements": "Avtalelisten",
-  "/templates": "Avtalemaler",
-  "/settings": "Innstillinger",
-  "/archive": "Arkiv",
-}
-
-function getPageHint(pathname: string): string {
-  for (const [prefix, label] of Object.entries(PAGE_HINTS)) {
-    if (pathname.startsWith(prefix)) return label
-  }
-  if (pathname.startsWith("/customers/")) return "Kundeside"
-  if (pathname.startsWith("/agreements/")) return "Avtaleside"
-  return pathname
-}
-
-const SUGGESTED = [
-  "Hvordan oppretter jeg en ny avtale?",
-  "Hjelp meg å skrive en serviceavtale",
-  "Hvordan fungerer digital signering?",
-]
-
 export default function AssistantChat() {
   const pathname = usePathname()
+  const t = useTranslations("assistant")
+
   const [open, setOpen] = useState(false)
   const [contextLevel, setContextLevel] = useState<ContextLevel>(() => {
     if (typeof window !== "undefined") {
@@ -58,6 +37,18 @@ export default function AssistantChat() {
   useEffect(() => {
     if (open) inputRef.current?.focus()
   }, [open])
+
+  function getPageHint(path: string): string {
+    if (path.startsWith("/dashboard")) return t("pageHintDashboard")
+    if (path.match(/^\/customers\/[^/]+/)) return t("pageHintCustomer")
+    if (path.startsWith("/customers")) return t("pageHintCustomers")
+    if (path.match(/^\/agreements\/[^/]+/)) return t("pageHintAgreement")
+    if (path.startsWith("/agreements")) return t("pageHintAgreements")
+    if (path.startsWith("/templates")) return t("pageHintTemplates")
+    if (path.startsWith("/settings")) return t("pageHintSettings")
+    if (path.startsWith("/archive")) return t("pageHintArchive")
+    return path
+  }
 
   function handleContextChange(level: ContextLevel) {
     setContextLevel(level)
@@ -127,37 +118,37 @@ export default function AssistantChat() {
     }
   }
 
+  const suggested = [t("suggested1"), t("suggested2"), t("suggested3")]
+
   return (
     <>
-      {/* Boble */}
       <button
         onClick={() => setOpen(o => !o)}
         className="fixed bottom-6 right-6 z-40 w-14 h-14 bg-slate-800 hover:bg-slate-700 text-white rounded-full shadow-lg flex items-center justify-center transition-all"
-        aria-label="Åpne assistent"
+        aria-label={t("openLabel")}
       >
         {open ? <XMarkIcon className="h-6 w-6" /> : <ChatBubbleLeftRightIcon className="h-6 w-6" />}
       </button>
 
-      {/* Panel */}
       {open && (
-        <div className="fixed bottom-24 right-6 z-40 w-96 bg-white rounded-2xl shadow-2xl border border-gray-200 flex flex-col overflow-hidden"
-          style={{ height: "540px" }}>
-
-          {/* Header */}
+        <div
+          className="fixed bottom-24 right-6 z-40 w-96 bg-white rounded-2xl shadow-2xl border border-gray-200 flex flex-col overflow-hidden"
+          style={{ height: "540px" }}
+        >
           <div className="flex items-center justify-between px-4 py-3 bg-slate-800 text-white">
             <div className="flex items-center gap-2">
               <SparklesIcon className="h-4 w-4 text-amber-400" />
-              <span className="text-sm font-semibold">AreCRM Assistent</span>
+              <span className="text-sm font-semibold">{t("title")}</span>
             </div>
             <div className="flex items-center gap-2">
               <select
                 value={contextLevel}
                 onChange={e => handleContextChange(e.target.value as ContextLevel)}
                 className="text-xs bg-slate-700 text-white border-0 rounded-md px-2 py-1 focus:outline-none focus:ring-1 focus:ring-slate-400 cursor-pointer"
-                title="Velg kontekstnivå"
+                title={t("contextTitle")}
               >
-                <option value="limited">Begrenset kontekst</option>
-                <option value="full">Full kontekst</option>
+                <option value="limited">{t("contextLimited")}</option>
+                <option value="full">{t("contextFull")}</option>
               </select>
               <button onClick={() => setOpen(false)} className="hover:text-gray-300 transition-colors">
                 <XMarkIcon className="h-5 w-5" />
@@ -165,20 +156,16 @@ export default function AssistantChat() {
             </div>
           </div>
 
-          {/* Kontekst-info-stripe */}
           <div className={`px-4 py-1.5 text-xs text-center ${contextLevel === "full" ? "bg-amber-50 text-amber-700" : "bg-gray-50 text-gray-400"}`}>
-            {contextLevel === "full"
-              ? "Full kontekst — assistenten kan se kundenavn og avtaler"
-              : "Begrenset kontekst — kun statistikk, ingen persondata"}
+            {contextLevel === "full" ? t("contextFullInfo") : t("contextLimitedInfo")}
           </div>
 
-          {/* Meldinger */}
           <div className="flex-1 overflow-y-auto p-4 space-y-3">
             {messages.length === 0 && (
               <div className="space-y-3">
-                <p className="text-xs text-gray-400 text-center">Hei! Hva kan jeg hjelpe deg med?</p>
+                <p className="text-xs text-gray-400 text-center">{t("welcome")}</p>
                 <div className="space-y-2">
-                  {SUGGESTED.map(s => (
+                  {suggested.map(s => (
                     <button
                       key={s}
                       onClick={() => sendMessage(s)}
@@ -211,7 +198,6 @@ export default function AssistantChat() {
             <div ref={bottomRef} />
           </div>
 
-          {/* Input */}
           <div className="border-t border-gray-100 p-3 flex gap-2 items-end">
             <textarea
               ref={inputRef}
@@ -219,7 +205,7 @@ export default function AssistantChat() {
               value={input}
               onChange={e => setInput(e.target.value)}
               onKeyDown={handleKeyDown}
-              placeholder="Skriv en melding..."
+              placeholder={t("placeholder")}
               disabled={streaming}
               className="flex-1 resize-none border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-400 disabled:opacity-50 max-h-24"
               style={{ lineHeight: "1.4" }}

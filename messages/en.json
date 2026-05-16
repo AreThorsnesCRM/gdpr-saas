@@ -365,6 +365,28 @@
     "columnCity": "City",
     "columnWebsite": "Website"
   },
+  "assistant": {
+    "title": "AreCRM Assistant",
+    "contextLimited": "Limited context",
+    "contextFull": "Full context",
+    "contextLimitedInfo": "Limited context — statistics only, no personal data",
+    "contextFullInfo": "Full context — assistant can see customer names and agreements",
+    "welcome": "Hi! How can I help you?",
+    "placeholder": "Write a message...",
+    "openLabel": "Open assistant",
+    "contextTitle": "Select context level",
+    "suggested1": "How do I create a new agreement?",
+    "suggested2": "Help me write a service agreement",
+    "suggested3": "How does digital signing work?",
+    "pageHintDashboard": "Dashboard / Overview",
+    "pageHintCustomers": "Customer list",
+    "pageHintAgreements": "Agreement list",
+    "pageHintTemplates": "Agreement templates",
+    "pageHintSettings": "Settings",
+    "pageHintArchive": "Archive",
+    "pageHintCustomer": "Customer page",
+    "pageHintAgreement": "Agreement page"
+  },
   "onboarding": {
     "title": "Get started with AreCRM",
     "subtitle": "Select your country to set up the correct signature method (BankID, MitID, etc.).",

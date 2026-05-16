@@ -365,6 +365,28 @@
     "columnCity": "Ciudad",
     "columnWebsite": "Sitio web"
   },
+  "assistant": {
+    "title": "Asistente AreCRM",
+    "contextLimited": "Contexto limitado",
+    "contextFull": "Contexto completo",
+    "contextLimitedInfo": "Contexto limitado — solo estadísticas, sin datos personales",
+    "contextFullInfo": "Contexto completo — el asistente puede ver nombres de clientes y contratos",
+    "welcome": "¡Hola! ¿En qué puedo ayudarte?",
+    "placeholder": "Escribe un mensaje...",
+    "openLabel": "Abrir asistente",
+    "contextTitle": "Seleccionar nivel de contexto",
+    "suggested1": "¿Cómo creo un nuevo contrato?",
+    "suggested2": "Ayúdame a redactar un contrato de servicio",
+    "suggested3": "¿Cómo funciona la firma digital?",
+    "pageHintDashboard": "Panel / Resumen",
+    "pageHintCustomers": "Lista de clientes",
+    "pageHintAgreements": "Lista de contratos",
+    "pageHintTemplates": "Plantillas de contratos",
+    "pageHintSettings": "Configuración",
+    "pageHintArchive": "Archivo",
+    "pageHintCustomer": "Página de cliente",
+    "pageHintAgreement": "Página de contrato"
+  },
   "onboarding": {
     "title": "Empezar con AreCRM",
     "subtitle": "Selecciona tu país para configurar el método de firma correcto (BankID, MitID, etc.).",
