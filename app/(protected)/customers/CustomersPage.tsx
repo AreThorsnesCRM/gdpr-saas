@@ -7,7 +7,7 @@ import { useRouter, useSearchParams } from "next/navigation"
 import Link from "next/link"
 import { supabase } from "../../../lib/supabaseClient"
 import { useAuth } from "@/lib/AuthContext"
-import { TrashIcon, ChevronUpDownIcon, ArrowUpTrayIcon } from "@heroicons/react/24/outline"
+import { TrashIcon, ArrowUpTrayIcon } from "@heroicons/react/24/outline"
 import ExcelImportModal from "@/app/components/ExcelImportModal"
 import { useTranslations } from "next-intl"
 
@@ -22,6 +22,7 @@ type Customer = {
   hasActiveAgreement?: boolean
   hasNeverHadAgreement?: boolean
   daysSinceEnd?: number | null
+  lastActivity?: string | null
 }
 
 type TeamMember = {
@@ -51,6 +52,7 @@ export default function CustomersPage() {
   const [search, setSearch] = useState("")
   const [statusFilter, setStatusFilter] = useState("all")
   const [managerFilter, setManagerFilter] = useState("")
+  const [sortKey, setSortKey] = useState<"name" | "lastActivity">("name")
   const [sortDir, setSortDir] = useState<"asc" | "desc">("asc")
 
   useEffect(() => {
@@ -81,11 +83,19 @@ export default function CustomersPage() {
     if (restrictToOwn && user) customerQuery = customerQuery.eq("account_manager_id", user.id)
     const { data: customerData } = await customerQuery
 
-    const { data: agreements } = await supabase
-      .from("agreements")
-      .select("customer_id, archived, end_date")
+    const [{ data: agreements }, { data: notes }] = await Promise.all([
+      supabase.from("agreements").select("customer_id, archived, end_date"),
+      supabase.from("notes").select("customer_id, created_at").order("created_at", { ascending: false }),
+    ])
 
     if (!customerData) { setLoading(false); return }
+
+    const latestNoteMap = new Map<string, string>()
+    for (const note of notes ?? []) {
+      if (!latestNoteMap.has(note.customer_id)) {
+        latestNoteMap.set(note.customer_id, note.created_at)
+      }
+    }
 
     const enriched = customerData.map((c) => {
       const all = (agreements ?? []).filter((a) => a.customer_id === c.id)
@@ -102,6 +112,7 @@ export default function CustomersPage() {
         hasActiveAgreement: hasActive,
         hasNeverHadAgreement: all.length === 0,
         daysSinceEnd,
+        lastActivity: latestNoteMap.get(c.id) ?? null,
       }
     })
 
@@ -114,6 +125,19 @@ export default function CustomersPage() {
     if (!supabase || !window.confirm(t("deleteConfirm"))) return
     await supabase.from("customers").delete().eq("id", id)
     loadCustomers()
+  }
+
+  function relativeActivity(dateStr: string | null): string {
+    if (!dateStr) return t("neverContacted")
+    const days = Math.floor((Date.now() - new Date(dateStr).getTime()) / 86400000)
+    if (days === 0) return t("activityToday")
+    if (days === 1) return t("activityYesterday")
+    return t("activityDaysAgo", { days })
+  }
+
+  function toggleSort(key: "name" | "lastActivity") {
+    if (sortKey === key) setSortDir(d => d === "asc" ? "desc" : "asc")
+    else { setSortKey(key); setSortDir("asc") }
   }
 
   const filtered = customers
@@ -135,11 +159,16 @@ export default function CustomersPage() {
         false
       )
     })
-    .sort((a, b) =>
-      sortDir === "asc"
+    .sort((a, b) => {
+      if (sortKey === "lastActivity") {
+        const aTime = a.lastActivity ? new Date(a.lastActivity).getTime() : 0
+        const bTime = b.lastActivity ? new Date(b.lastActivity).getTime() : 0
+        return sortDir === "asc" ? aTime - bTime : bTime - aTime
+      }
+      return sortDir === "asc"
         ? a.name.localeCompare(b.name, "no")
         : b.name.localeCompare(a.name, "no")
-    )
+    })
 
   function Badge({ c }: { c: Customer }) {
     if (c.hasActiveAgreement)
@@ -226,20 +255,23 @@ export default function CustomersPage() {
             <thead>
               <tr className="border-b border-gray-200 bg-gray-50">
                 <th className="text-left px-4 py-3">
-                  <button
-                    onClick={() => setSortDir(d => d === "asc" ? "desc" : "asc")}
-                    className="flex items-center gap-1 text-xs font-medium text-gray-500 hover:text-gray-900 transition-colors"
-                  >
+                  <button onClick={() => toggleSort("name")} className="flex items-center gap-1 text-xs font-medium text-gray-500 hover:text-gray-900 transition-colors uppercase tracking-wide">
                     {t("columnName")}
-                    <ChevronUpDownIcon className="h-3.5 w-3.5" />
+                    <span className="text-gray-300">{sortKey === "name" ? (sortDir === "asc" ? "↑" : "↓") : "↕"}</span>
                   </button>
                 </th>
-                <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">{t("columnOrg")}</th>
-                <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">{t("columnCity")}</th>
+                <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wide">{t("columnOrg")}</th>
+                <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wide">{t("columnCity")}</th>
                 {teamMembers.length > 0 && (
-                  <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">{t("columnManager")}</th>
+                  <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wide">{t("columnManager")}</th>
                 )}
-                <th className="text-left px-4 py-3 text-xs font-medium text-gray-500">{t("columnAgreement")}</th>
+                <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wide">{t("columnAgreement")}</th>
+                <th className="text-left px-4 py-3">
+                  <button onClick={() => toggleSort("lastActivity")} className="flex items-center gap-1 text-xs font-medium text-gray-500 hover:text-gray-900 transition-colors uppercase tracking-wide">
+                    {t("columnLastActivity")}
+                    <span className="text-gray-300">{sortKey === "lastActivity" ? (sortDir === "asc" ? "↑" : "↓") : "↕"}</span>
+                  </button>
+                </th>
                 <th className="px-4 py-3" />
               </tr>
             </thead>
@@ -264,6 +296,11 @@ export default function CustomersPage() {
                       <td className="px-4 py-3 text-gray-500 text-sm">{managerName}</td>
                     )}
                     <td className="px-4 py-3"><Badge c={c} /></td>
+                    <td className="px-4 py-3 text-sm">
+                      <span className={c.lastActivity ? "text-gray-500" : "text-gray-300"}>
+                        {relativeActivity(c.lastActivity ?? null)}
+                      </span>
+                    </td>
                     <td className="px-4 py-3 text-right">
                       <button
                         onClick={(e) => deleteCustomer(e, c.id)}

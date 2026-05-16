@@ -1,5 +1,15 @@
 const BASE_URL = process.env.SIGNICAT_BASE_URL ?? "https://api.signicat.com"
 
+export function getIdpForCountry(country: string | null | undefined): string {
+  const map: Record<string, string> = {
+    NO: "nbid",
+    SE: "sebankid",
+    DK: "dkmitid",
+    FI: "ftn",
+  }
+  return map[(country ?? "").toUpperCase()] ?? "nbid"
+}
+
 async function getAccessToken(): Promise<string> {
   const res = await fetch(`${BASE_URL}/auth/open/connect/token`, {
     method: "POST",
@@ -44,13 +54,14 @@ export async function createSigningSessions(opts: {
   externalReference: string
   language?: string
   count: number
+  idpName?: string
 }): Promise<{ sessionId: string; signatureUrl: string }[]> {
   const token = await getAccessToken()
   const items = Array.from({ length: opts.count }, (_, i) => ({
     title: opts.title,
     externalReference: i === 0 ? opts.externalReference : `${opts.externalReference}-${i}`,
     documents: [{ action: "SIGN", documentCollectionId: opts.documentCollectionId, documentId: opts.documentId }],
-    signingSetup: [{ identityProviders: [{ idpName: "nbid" }], signingFlow: "AUTHENTICATION_BASED" }],
+    signingSetup: [{ identityProviders: [{ idpName: opts.idpName ?? "nbid" }], signingFlow: "AUTHENTICATION_BASED" }],
     packageTo: ["PADES_CONTAINER"],
     ui: { language: opts.language ?? "no" },
   }))

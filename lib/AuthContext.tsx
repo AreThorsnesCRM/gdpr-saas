@@ -5,6 +5,7 @@ import React, { createContext, useContext } from "react"
 export type Account = {
   id: string
   name: string
+  country: string | null
   subscription_status: string | null
   trial_start: string | null
   trial_end: string | null

@@ -2,7 +2,7 @@ import { NextResponse } from "next/server"
 import { supabaseAdmin } from "@/lib/supabaseAdmin"
 import { cookies } from "next/headers"
 import { createServerClient } from "@supabase/ssr"
-import { uploadDocument, createDocumentCollection, createSigningSessions } from "@/lib/signicat"
+import { uploadDocument, createDocumentCollection, createSigningSessions, getIdpForCountry } from "@/lib/signicat"
 import { sendSigningLinkEmail } from "@/lib/email"
 import { randomUUID } from "crypto"
 
@@ -52,6 +52,12 @@ export async function POST(
   if (!pdfRes.ok) return NextResponse.json({ error: "pdf_download_failed" }, { status: 500 })
   const pdfBuffer = await pdfRes.arrayBuffer()
 
+  const { data: account } = await supabaseAdmin
+    .from("accounts")
+    .select("name, country")
+    .eq("id", accountUser.account_id)
+    .single()
+
   const documentId = await uploadDocument(pdfBuffer)
   const documentCollectionId = await createDocumentCollection(documentId)
   const externalReference = randomUUID()
@@ -63,6 +69,7 @@ export async function POST(
     externalReference,
     language: "nb",
     count: signerList.length,
+    idpName: getIdpForCountry(account?.country),
   })
 
   const signersJsonb = signerList.map((s, i) => ({
@@ -85,12 +92,6 @@ export async function POST(
       signing_requested_at: new Date().toISOString(),
     })
     .eq("id", agreementId)
-
-  const { data: account } = await supabaseAdmin
-    .from("accounts")
-    .select("name")
-    .eq("id", accountUser.account_id)
-    .single()
 
   let emailSent = false
   for (const s of signersJsonb) {

@@ -11,6 +11,7 @@ import {
   CheckCircleIcon,
   ExclamationTriangleIcon,
   ClockIcon,
+  CheckIcon,
 } from "@heroicons/react/24/outline"
 import SubscribeButton from "../../components/SubscribeButton"
 import { useTranslations, useLocale } from "next-intl"
@@ -21,6 +22,7 @@ type StatsState = {
   activeAgreements: number
   expiringSoon: number
   customersWithoutActive: number
+  totalAgreements: number
 }
 
 export default function DashboardPage() {
@@ -36,9 +38,11 @@ export default function DashboardPage() {
     activeAgreements: 0,
     expiringSoon: 0,
     customersWithoutActive: 0,
+    totalAgreements: 0,
   })
   const [upcoming, setUpcoming] = useState<any[]>([])
   const [criticalCustomers, setCriticalCustomers] = useState<any[]>([])
+  const [uncontactedCustomers, setUncontactedCustomers] = useState<any[]>([])
 
   const [customersList, setCustomersList] = useState<{ id: string; name: string }[]>([])
   const [quickModalOpen, setQuickModalOpen] = useState(false)
@@ -53,6 +57,7 @@ export default function DashboardPage() {
     fetchStats()
     fetchUpcoming()
     fetchCriticalCustomers()
+    fetchUncontacted()
   }, [user, restrictToOwn])
 
   useEffect(() => {
@@ -115,6 +120,7 @@ export default function DashboardPage() {
       activeAgreements: active,
       expiringSoon: soon,
       customersWithoutActive: withoutActive,
+      totalAgreements: agreements?.length ?? 0,
     })
   }
 
@@ -165,8 +171,50 @@ export default function DashboardPage() {
     )
   }
 
+  async function fetchUncontacted() {
+    if (!supabase) return
+
+    let customersQuery = supabase.from("customers").select("id, name")
+    if (restrictToOwn && user) customersQuery = customersQuery.eq("account_manager_id", user.id)
+    const { data: customers } = await customersQuery
+    const { data: notes } = await supabase
+      .from("notes")
+      .select("customer_id, created_at")
+      .order("created_at", { ascending: false })
+
+    if (!customers) return
+
+    const latestNoteMap = new Map<string, string>()
+    for (const note of notes ?? []) {
+      if (!latestNoteMap.has(note.customer_id)) {
+        latestNoteMap.set(note.customer_id, note.created_at)
+      }
+    }
+
+    const enriched = customers.map((c: any) => {
+      const lastActivity = latestNoteMap.get(c.id) ?? null
+      const daysSince = lastActivity
+        ? Math.floor((Date.now() - new Date(lastActivity).getTime()) / 86400000)
+        : null
+      return { ...c, lastActivity, daysSince }
+    })
+
+    setUncontactedCustomers(
+      enriched
+        .sort((a: any, b: any) => {
+          if (!a.lastActivity && !b.lastActivity) return 0
+          if (!a.lastActivity) return -1
+          if (!b.lastActivity) return 1
+          return new Date(a.lastActivity).getTime() - new Date(b.lastActivity).getTime()
+        })
+        .slice(0, 4)
+    )
+  }
+
+  const to = useTranslations("onboarding")
   const status = account?.subscription_status
   const showBanner = !authLoading && status && status !== "active"
+  const checklistDone = !!(account?.country && stats.customers > 0 && stats.totalAgreements > 0)
   const dateLocale = locale === "en" ? "en-GB" : "no-NO"
 
   function daysLeft(dateString: string | null) {
@@ -252,7 +300,18 @@ export default function DashboardPage() {
         </Link>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      {!authLoading && !checklistDone && (
+        <div className="bg-white rounded-xl border border-gray-200 p-6">
+          <h2 className="text-base font-semibold text-gray-900 mb-4">{to("checklistTitle")}</h2>
+          <div className="space-y-3">
+            <ChecklistItem done={!!account?.country} label={to("checklistCountry")} />
+            <ChecklistItem done={stats.customers > 0} label={to("checklistCustomer")} />
+            <ChecklistItem done={stats.totalAgreements > 0} label={to("checklistAgreement")} />
+          </div>
+        </div>
+      )}
+
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
 
         <div className="bg-white rounded-xl border border-gray-200 p-6">
           <div className="flex items-center justify-between mb-4">
@@ -288,6 +347,30 @@ export default function DashboardPage() {
                     <p className="text-sm font-medium text-gray-800">{c.name}</p>
                     <p className="text-xs text-gray-400">
                       {c.neverHadAgreement ? t("neverHad") : t("expiredDaysAgo", { days: c.daysSinceEnd })}
+                    </p>
+                  </div>
+                  <Link href={`/customers/${c.id}`} className="text-xs text-slate-500 hover:text-slate-800">{t("open")}</Link>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+
+        <div className="bg-white rounded-xl border border-gray-200 p-6">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-base font-semibold text-gray-900">{t("uncontactedTitle")}</h2>
+            <Link href="/customers" className="text-xs text-slate-500 hover:text-slate-800">{t("seeAll")}</Link>
+          </div>
+          {uncontactedCustomers.length === 0 ? (
+            <p className="text-sm text-gray-400">{t("uncontactedEmpty")}</p>
+          ) : (
+            <ul className="space-y-2">
+              {uncontactedCustomers.map((c: any) => (
+                <li key={c.id} className="flex items-center justify-between py-2 border-t border-gray-100 first:border-0">
+                  <div>
+                    <p className="text-sm font-medium text-gray-800">{c.name}</p>
+                    <p className="text-xs text-gray-400">
+                      {c.lastActivity ? t("uncontactedDaysAgo", { days: c.daysSince }) : t("uncontactedNever")}
                     </p>
                   </div>
                   <Link href={`/customers/${c.id}`} className="text-xs text-slate-500 hover:text-slate-800">{t("open")}</Link>
@@ -348,6 +431,17 @@ export default function DashboardPage() {
           </div>
         </div>
       )}
+    </div>
+  )
+}
+
+function ChecklistItem({ done, label }: { done: boolean; label: string }) {
+  return (
+    <div className={`flex items-center gap-3 text-sm ${done ? "text-gray-400 line-through" : "text-gray-700"}`}>
+      <span className={`flex-shrink-0 w-5 h-5 rounded-full border-2 flex items-center justify-center ${done ? "bg-green-500 border-green-500" : "border-gray-300"}`}>
+        {done && <CheckIcon className="h-3 w-3 text-white" />}
+      </span>
+      {label}
     </div>
   )
 }
