@@ -6,6 +6,7 @@ export const dynamicParams = true
 import Sidebar from "./_components/sidebar"
 import AuthGuard from "./_components/AuthGuard"
 import OnboardingModal from "@/app/components/OnboardingModal"
+import AssistantChat from "@/app/components/AssistantChat"
 import React from "react"
 
 export default function ProtectedLayout({ children }: { children: React.ReactNode }) {
@@ -17,6 +18,7 @@ export default function ProtectedLayout({ children }: { children: React.ReactNod
         <OnboardingModal />
         {children}
       </main>
+      <AssistantChat />
     </div>
   )
 }
