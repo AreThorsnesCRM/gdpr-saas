@@ -8,7 +8,9 @@
       "Bash(Select-Object -ExpandProperty Name)",
       "PowerShell(Get-Process -Name \"node\" -ErrorAction SilentlyContinue)",
       "PowerShell(Stop-Process -Force -ErrorAction SilentlyContinue)",
-      "Bash(npm run *)"
+      "Bash(npm run *)",
+      "Bash(git add *)",
+      "PowerShell(cd \"c:\\\\MVP\\\\gdpr-saas\"; git add app/api/assistant/ app/components/OnboardingModal.tsx app/\\(protected\\)/layout.tsx app/\\(protected\\)/dashboard/page.tsx app/api/agreements/ lib/signicat.ts lib/AuthContext.tsx app/api/account/ messages/ package.json package-lock.json; git status)"
     ]
   }
 }
