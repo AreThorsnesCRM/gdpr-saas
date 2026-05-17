@@ -52,47 +52,51 @@ export async function POST(req: Request) {
     .eq("user_id", user.id)
     .single()
 
-  let contextBlock = `Nåværende side: ${pageHint || "ukjent"}`
+  if (!accountUser) return NextResponse.json({ error: "Ingen konto funnet" }, { status: 403 })
 
-  if (accountUser) {
-    const { data: account } = await supabaseAdmin
-      .from("accounts")
-      .select("name, country, subscription_status")
-      .eq("id", accountUser.account_id)
-      .single()
+  const { data: account } = await supabaseAdmin
+    .from("accounts")
+    .select("name, country, subscription_status, ai_assistant_enabled")
+    .eq("id", accountUser.account_id)
+    .single()
 
-    const [{ count: customerCount }, { count: agreementCount }] = await Promise.all([
-      supabase.from("customers").select("id", { count: "exact", head: true }),
-      supabase.from("agreements").select("id", { count: "exact", head: true }).eq("archived", false),
+  if (!account?.ai_assistant_enabled) {
+    return NextResponse.json({ error: "AI-assistenten er ikke aktivert for denne kontoen" }, { status: 403 })
+  }
+
+  const [{ count: customerCount }, { count: agreementCount }] = await Promise.all([
+    supabase.from("customers").select("id", { count: "exact", head: true }),
+    supabase.from("agreements").select("id", { count: "exact", head: true }).eq("archived", false),
+  ])
+
+  let contextBlock: string
+
+  if (contextLevel === "full") {
+    const [{ data: customers }, { data: agreements }] = await Promise.all([
+      supabase.from("customers").select("name").order("created_at", { ascending: false }).limit(10),
+      supabase.from("agreements").select("title, start_date, end_date, signing_status").eq("archived", false).order("end_date", { ascending: true }).limit(10),
     ])
 
-    if (contextLevel === "full") {
-      const [{ data: customers }, { data: agreements }] = await Promise.all([
-        supabase.from("customers").select("name").order("created_at", { ascending: false }).limit(10),
-        supabase.from("agreements").select("title, start_date, end_date, signing_status").eq("archived", false).order("end_date", { ascending: true }).limit(10),
-      ])
+    const customerList = customers?.map(c => c.name).join(", ") || "ingen"
+    const agreementList = agreements?.map(a =>
+      `${a.title} (${a.start_date} → ${a.end_date}${a.signing_status ? ", " + a.signing_status : ""})`
+    ).join("; ") || "ingen"
 
-      const customerList = customers?.map(c => c.name).join(", ") || "ingen"
-      const agreementList = agreements?.map(a =>
-        `${a.title} (${a.start_date} → ${a.end_date}${a.signing_status ? ", " + a.signing_status : ""})`
-      ).join("; ") || "ingen"
-
-      contextBlock = `Kontonavn: ${account?.name || "ukjent"}
-Land: ${account?.country || "ikke satt"}
-Abonnement: ${account?.subscription_status || "ukjent"}
+    contextBlock = `Kontonavn: ${account.name || "ukjent"}
+Land: ${account.country || "ikke satt"}
+Abonnement: ${account.subscription_status || "ukjent"}
 Antall kunder totalt: ${customerCount ?? 0}
 Aktive avtaler: ${agreementCount ?? 0}
 Nåværende side: ${pageHint || "ukjent"}
 Siste kunder: ${customerList}
 Aktive avtaler (nyligste): ${agreementList}`
-    } else {
-      contextBlock = `Land: ${account?.country || "ikke satt"}
-Abonnement: ${account?.subscription_status || "ukjent"}
+  } else {
+    contextBlock = `Land: ${account.country || "ikke satt"}
+Abonnement: ${account.subscription_status || "ukjent"}
 Antall kunder: ${customerCount ?? 0}
 Aktive avtaler: ${agreementCount ?? 0}
 Nåværende side: ${pageHint || "ukjent"}
 (Navn og innhold er skjult — bytt til full kontekst for mer spesifikk hjelp)`
-    }
   }
 
   const systemPrompt = buildSystemPrompt(contextBlock, contextLevel)

@@ -28,7 +28,7 @@ export async function GET() {
 
   const { data: account } = await supabaseAdmin
     .from("accounts")
-    .select("name, org_number, address, postal_code, city, phone, contact_email")
+    .select("name, org_number, address, postal_code, city, phone, contact_email, ai_assistant_enabled")
     .eq("id", accountUser.account_id)
     .single()
 
@@ -61,11 +61,14 @@ export async function PATCH(req: Request) {
   }
 
   const body = await req.json()
-  const allowed = ["name", "org_number", "address", "postal_code", "city", "phone", "contact_email", "country"]
-  const updates: Record<string, string> = {}
+  const stringFields = ["name", "org_number", "address", "postal_code", "city", "phone", "contact_email", "country"]
+  const updates: Record<string, string | boolean> = {}
 
-  for (const key of allowed) {
+  for (const key of stringFields) {
     if (typeof body[key] === "string") updates[key] = body[key]
+  }
+  if (typeof body.ai_assistant_enabled === "boolean") {
+    updates.ai_assistant_enabled = body.ai_assistant_enabled
   }
 
   if (Object.keys(updates).length === 0) {

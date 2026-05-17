@@ -11,6 +11,7 @@ export type Account = {
   trial_end: string | null
   stripe_customer_id: string | null
   stripe_subscription_id: string | null
+  ai_assistant_enabled: boolean | null
 }
 
 export type Profile = {

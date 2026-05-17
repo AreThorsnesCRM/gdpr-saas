@@ -3,10 +3,12 @@
 import { useState, useRef, useEffect } from "react"
 import { usePathname } from "next/navigation"
 import { useTranslations } from "next-intl"
+import { useAuth } from "@/lib/AuthContext"
 import {
   ChatBubbleLeftRightIcon,
   XMarkIcon,
   PaperAirplaneIcon,
+  LockClosedIcon,
 } from "@heroicons/react/24/outline"
 import { SparklesIcon } from "@heroicons/react/24/solid"
 
@@ -16,6 +18,8 @@ type ContextLevel = "limited" | "full"
 export default function AssistantChat() {
   const pathname = usePathname()
   const t = useTranslations("assistant")
+  const { account, role } = useAuth()
+  const isEnabled = account?.ai_assistant_enabled ?? false
 
   const [open, setOpen] = useState(false)
   const [contextLevel, setContextLevel] = useState<ContextLevel>(() => {
@@ -156,6 +160,23 @@ export default function AssistantChat() {
             </div>
           </div>
 
+          {!isEnabled ? (
+            <div className="flex-1 flex flex-col items-center justify-center p-8 text-center gap-4">
+              <LockClosedIcon className="h-10 w-10 text-gray-300" />
+              <div>
+                <p className="text-sm font-medium text-gray-700">{t("notEnabledTitle")}</p>
+                <p className="text-xs text-gray-400 mt-1">
+                  {role === "admin" ? t("notEnabledAdmin") : t("notEnabledMember")}
+                </p>
+              </div>
+              {role === "admin" && (
+                <a href="/settings#ai" className="text-xs text-slate-600 underline hover:text-slate-900">
+                  {t("notEnabledLink")}
+                </a>
+              )}
+            </div>
+          ) : (
+            <>
           <div className={`px-4 py-1.5 text-xs text-center ${contextLevel === "full" ? "bg-amber-50 text-amber-700" : "bg-gray-50 text-gray-400"}`}>
             {contextLevel === "full" ? t("contextFullInfo") : t("contextLimitedInfo")}
           </div>
@@ -218,6 +239,8 @@ export default function AssistantChat() {
               <PaperAirplaneIcon className="h-4 w-4" />
             </button>
           </div>
+            </>
+          )}
         </div>
       )}
     </>

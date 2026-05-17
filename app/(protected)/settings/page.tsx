@@ -50,6 +50,7 @@ export default function SettingsPage() {
     { id: "firma",       label: t("tabCompany") },
     { id: "brukere",     label: t("tabUsers") },
     { id: "varsler",     label: t("tabNotifications") },
+    { id: "ai",          label: t("tabAI") },
     { id: "abonnement",  label: t("tabSubscription") },
   ]
 
@@ -69,6 +70,8 @@ export default function SettingsPage() {
     notify_payment_failed: true,
   })
   const [savingPrefs, setSavingPrefs] = useState(false)
+  const [aiEnabled, setAiEnabled] = useState<boolean>(account?.ai_assistant_enabled ?? false)
+  const [savingAI, setSavingAI] = useState(false)
 
   const [company, setCompany] = useState<CompanyProfile>({
     name: "", org_number: "", address: "", postal_code: "", city: "", phone: "", contact_email: "",
@@ -241,6 +244,21 @@ export default function SettingsPage() {
       body: JSON.stringify({ [key]: value }),
     })
     setSavingPrefs(false)
+  }
+
+  useEffect(() => {
+    setAiEnabled(account?.ai_assistant_enabled ?? false)
+  }, [account])
+
+  async function handleToggleAI(value: boolean) {
+    setAiEnabled(value)
+    setSavingAI(true)
+    await fetch("/api/account/profile", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ ai_assistant_enabled: value }),
+    })
+    setSavingAI(false)
   }
 
   async function handleCompanySave(e: React.FormEvent) {
@@ -642,6 +660,34 @@ export default function SettingsPage() {
                 {savingPrefs && <p className="text-xs text-gray-400 mt-2">{tc("saving")}</p>}
               </>
             )}
+          </section>
+
+          <Divider />
+
+          {/* AI-assistent */}
+          <section id="ai" className="scroll-mt-8">
+            <div>
+              <h2 className="text-base font-semibold text-gray-900">{t("aiTitle")}</h2>
+              <p className="text-sm text-gray-500 mt-0.5">
+                {currentUserRole !== "admin" ? t("adminOnly") : t("aiDesc")}
+              </p>
+            </div>
+            {currentUserRole === "admin" && (
+              <div className="mt-4 border border-gray-200 rounded-xl divide-y divide-gray-100">
+                <ToggleRow
+                  label={t("aiEnableTitle")}
+                  description={t("aiEnableDesc")}
+                  checked={aiEnabled}
+                  onChange={handleToggleAI}
+                />
+                {aiEnabled && (
+                  <div className="px-4 py-3 bg-amber-50 rounded-b-xl">
+                    <p className="text-xs text-amber-700">{t("aiDataWarning")}</p>
+                  </div>
+                )}
+              </div>
+            )}
+            {savingAI && <p className="text-xs text-gray-400 mt-2">{tc("saving")}</p>}
           </section>
 
           <Divider />
