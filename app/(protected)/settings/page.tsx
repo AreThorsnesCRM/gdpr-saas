@@ -41,7 +41,7 @@ type CompanyProfile = {
 }
 
 export default function SettingsPage() {
-  const { account, user } = useAuth()
+  const { account, user, refreshAccount } = useAuth()
   const t = useTranslations("settings")
   const tc = useTranslations("common")
 
@@ -141,6 +141,7 @@ export default function SettingsPage() {
         phone: data.phone ?? "",
         contact_email: data.contact_email ?? "",
       })
+      setAiEnabled(data.ai_assistant_enabled ?? false)
     }
   }
 
@@ -253,11 +254,12 @@ export default function SettingsPage() {
   async function handleToggleAI(value: boolean) {
     setAiEnabled(value)
     setSavingAI(true)
-    await fetch("/api/account/profile", {
+    const res = await fetch("/api/account/profile", {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ ai_assistant_enabled: value }),
     })
+    if (res.ok) await refreshAccount()
     setSavingAI(false)
   }
 

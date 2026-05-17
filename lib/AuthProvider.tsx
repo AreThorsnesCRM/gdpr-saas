@@ -183,6 +183,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     restrictToOwn,
     loading,
     logout,
+    refreshAccount: fetchProfile,
   }
 
   return (
