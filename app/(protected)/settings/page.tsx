@@ -694,6 +694,26 @@ export default function SettingsPage() {
 
           <Divider />
 
+          {/* Personvern */}
+          <section className="scroll-mt-8">
+            <div>
+              <h2 className="text-base font-semibold text-gray-900">Personvern</h2>
+              <p className="text-sm text-gray-500 mt-0.5">
+                Les om hvordan AreCRM behandler personopplysninger.
+              </p>
+            </div>
+            <a
+              href="/privacy"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-block mt-4 text-sm text-slate-700 underline hover:text-slate-900 transition-colors"
+            >
+              Personvernerklæring →
+            </a>
+          </section>
+
+          <Divider />
+
           {/* Abonnement */}
           <section id="abonnement" className="scroll-mt-8">
             <div>

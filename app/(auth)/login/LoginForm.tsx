@@ -74,7 +74,12 @@ export default function LoginForm() {
           </ul>
         </div>
 
-        <p className="text-slate-600 text-xs">© {new Date().getFullYear()} AreCRM</p>
+        <div className="flex items-center gap-4">
+          <p className="text-slate-600 text-xs">© {new Date().getFullYear()} AreCRM</p>
+          <Link href="/privacy" className="text-slate-500 text-xs hover:text-slate-300 transition-colors">
+            Personvernerklæring
+          </Link>
+        </div>
       </div>
 
       {/* Høyre — skjema */}
