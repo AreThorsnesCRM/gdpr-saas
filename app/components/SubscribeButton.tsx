@@ -9,22 +9,18 @@ export default function SubscribeButton({
 }) {
   const handleClick = async () => {
     if (mode === "checkout") {
-      const res = await fetch("/api/create-checkout-session", {
-        method: "POST",
-      });
-
+      const res = await fetch("/api/create-checkout-session", { method: "POST" });
       const data = await res.json();
-      window.location.href = data.url;
+      if (data.url) window.location.href = data.url;
+      else console.error("Checkout error:", data.error);
       return;
     }
 
     if (mode === "portal") {
-      const res = await fetch("/api/create-portal-session", {
-        method: "POST",
-      });
-
+      const res = await fetch("/api/create-portal-session", { method: "POST" });
       const data = await res.json();
-      window.location.href = data.url;
+      if (data.url) window.location.href = data.url;
+      else console.error("Portal error:", data.error);
       return;
     }
   };

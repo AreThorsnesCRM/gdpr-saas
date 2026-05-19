@@ -31,13 +31,8 @@ export async function POST() {
       data: { user },
     } = await supabase.auth.getUser();
 
-    console.log("🔎 API user:", user);
-
     if (!user) {
-      return NextResponse.json(
-        { error: "Not authenticated" },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
     }
 
     // 2. Hent profil
@@ -48,17 +43,13 @@ export async function POST() {
       .single();
 
     if (!profile) {
-      return NextResponse.json(
-        { error: "Profile not found" },
-        { status: 404 }
-      );
+      console.error("[checkout] Profile not found for user:", user.id);
+      return NextResponse.json({ error: "Profile not found" }, { status: 404 });
     }
 
     if (!profile.stripe_customer_id) {
-      return NextResponse.json(
-        { error: "Missing stripe_customer_id" },
-        { status: 400 }
-      );
+      console.error("[checkout] Missing stripe_customer_id for user:", user.id, "profile:", JSON.stringify(profile));
+      return NextResponse.json({ error: "Missing stripe_customer_id" }, { status: 400 });
     }
 
     // 3. Hent landkode for å velge riktig valuta
@@ -98,10 +89,7 @@ export async function POST() {
 
     return NextResponse.json({ url: session.url });
   } catch (error) {
-    console.error("Stripe error:", error);
-    return NextResponse.json(
-      { error: "Stripe session error" },
-      { status: 500 }
-    );
+    console.error("[checkout] Unexpected error:", error);
+    return NextResponse.json({ error: "Stripe session error" }, { status: 500 });
   }
 }
