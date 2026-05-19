@@ -51,7 +51,7 @@ type ChartDataState = {
 }
 
 export default function Page() {
-  const { user, profile, account, loading: authLoading } = useAuth()
+  const { user, account, loading: authLoading } = useAuth()
   const [subscription, setSubscription] = useState<{ status: string | null; trial_end: string | null } | null>(null)
 
   const [stats, setStats] = useState<StatsState>({
@@ -118,18 +118,18 @@ export default function Page() {
     return Math.ceil(diff / (1000 * 60 * 60 * 24))
   }
 
-  // Update subscription when profile is ready
+  // Update subscription when account is ready
   useEffect(() => {
-    if (!profile) {
+    if (!account) {
       setSubscription(null)
       return
     }
 
     setSubscription({
-      status: profile.subscription_status,
-      trial_end: profile.trial_end,
+      status: account.subscription_status,
+      trial_end: account.trial_end,
     })
-  }, [profile])
+  }, [account])
 
   // Fetch dashboard data when user and session are ready
   useEffect(() => {
@@ -405,7 +405,7 @@ export default function Page() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-gray-700 font-medium">
-                {profile?.company_name}
+                {account?.name}
               </p>
 
               <h2 className="text-2xl font-bold mt-1">
