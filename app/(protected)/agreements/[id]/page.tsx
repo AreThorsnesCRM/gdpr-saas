@@ -87,7 +87,7 @@ export default function AgreementDetailPage({ params }: { params: Promise<{ id: 
     fetch("/api/account/profile")
       .then((r) => r.json())
       .then((d) => setBranding({
-        logoUrl: d.logo_url ?? null,
+        logoUrl: d.logo_url ? "/api/account/logo" : null,
         companyName: d.name ?? null,
         address: d.address ?? null,
         postal_code: d.postal_code ?? null,

@@ -3,7 +3,7 @@ import { createServerClient } from "@supabase/ssr"
 import { supabaseAdmin } from "@/lib/supabaseAdmin"
 import { cookies } from "next/headers"
 
-async function getAuthedAdmin(requiredRole = "admin") {
+async function getAuthedAdmin(requiredRole: "admin" | "any" = "admin") {
   if (!supabaseAdmin) return null
 
   const cookieStore = await cookies()
@@ -26,6 +26,44 @@ async function getAuthedAdmin(requiredRole = "admin") {
   if (requiredRole === "admin" && accountUser.role !== "admin") return null
 
   return { accountId: accountUser.account_id as string, role: accountUser.role as string }
+}
+
+export async function GET() {
+  if (!supabaseAdmin) return new Response(null, { status: 500 })
+
+  const auth = await getAuthedAdmin("any")
+  if (!auth) return new Response(null, { status: 401 })
+
+  const { data: account } = await supabaseAdmin
+    .from("accounts")
+    .select("logo_url")
+    .eq("id", auth.accountId)
+    .single()
+
+  if (!account?.logo_url) return new Response(null, { status: 404 })
+
+  const url = new URL(account.logo_url)
+  const match = url.pathname.match(/\/storage\/v1\/object\/public\/agreements\/(.+)$/)
+  if (!match) return new Response(null, { status: 404 })
+
+  const { data: fileData, error } = await supabaseAdmin.storage
+    .from("agreements")
+    .download(match[1])
+
+  if (error || !fileData) return new Response(null, { status: 404 })
+
+  const ext = match[1].split(".").pop()?.toLowerCase() ?? "png"
+  const contentTypes: Record<string, string> = {
+    png: "image/png", jpg: "image/jpeg", jpeg: "image/jpeg",
+    gif: "image/gif", svg: "image/svg+xml", webp: "image/webp",
+  }
+
+  return new Response(await fileData.arrayBuffer(), {
+    headers: {
+      "Content-Type": contentTypes[ext] ?? "image/png",
+      "Cache-Control": "private, max-age=3600",
+    },
+  })
 }
 
 export async function POST(req: Request) {

@@ -143,7 +143,7 @@ export default function SettingsPage() {
         city: data.city ?? "",
         phone: data.phone ?? "",
         contact_email: data.contact_email ?? "",
-        logo_url: data.logo_url ?? "",
+        logo_url: data.logo_url ? "/api/account/logo" : "",
       })
       setAiEnabled(data.ai_assistant_enabled ?? false)
     }
@@ -157,7 +157,7 @@ export default function SettingsPage() {
     const res = await fetch("/api/account/logo", { method: "POST", body: form })
     const data = await res.json()
     if (res.ok) {
-      setCompany((c) => ({ ...c, logo_url: data.logo_url }))
+      setCompany((c) => ({ ...c, logo_url: `/api/account/logo?t=${Date.now()}` }))
       setLogoMessage({ type: "success", text: "Logo lastet opp" })
     } else {
       setLogoMessage({ type: "error", text: data.error ?? "Opplasting feilet" })
