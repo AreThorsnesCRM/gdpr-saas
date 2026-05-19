@@ -20,6 +20,11 @@ export type Profile = {
   user_id: string
   account_id: string | null
   full_name: string | null
+  subscription_status: string | null
+  trial_start: string | null
+  trial_end: string | null
+  stripe_customer_id: string | null
+  stripe_subscription_id: string | null
 }
 
 export type AuthContextType = {
