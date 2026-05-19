@@ -420,6 +420,8 @@
     "labelPhone": "Phone",
     "pdfTitle": "PDF document",
     "pdfOpen": "Open PDF",
+    "pdfRemove": "Remove file",
+    "pdfRemoveConfirm": "Are you sure you want to remove the PDF file? You can generate a new one from a template afterwards.",
     "pdfReplace": "Replace file",
     "pdfUploadLabel": "Upload PDF",
     "pdfFromTemplateLabel": "Generate from template",

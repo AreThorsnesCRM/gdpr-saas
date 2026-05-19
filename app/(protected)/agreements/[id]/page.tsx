@@ -158,6 +158,13 @@ export default function AgreementDetailPage({ params }: { params: Promise<{ id: 
     setAgreement(prev => prev ? { ...prev, signed: value } : prev)
   }
 
+  async function handleRemoveFile() {
+    if (!supabase) return
+    if (!window.confirm(t("pdfRemoveConfirm"))) return
+    await supabase.from("agreements").update({ file_url: null }).eq("id", id)
+    setAgreement(prev => prev ? { ...prev, file_url: null } : prev)
+  }
+
   async function handleUploadPDF() {
     if (!supabase || !newFile || !agreement) return
     setUploading(true)
@@ -376,9 +383,19 @@ export default function AgreementDetailPage({ params }: { params: Promise<{ id: 
         {agreement?.file_url ? (
           <div className="space-y-4">
             <div className="flex items-center justify-between">
-              <a href={agreement.file_url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 text-sm font-medium text-slate-700 hover:text-slate-900 border border-gray-200 px-3 py-1.5 rounded-lg transition-colors">
-                {t("pdfOpen")} ↗
-              </a>
+              <div className="flex items-center gap-3">
+                <a href={agreement.file_url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 text-sm font-medium text-slate-700 hover:text-slate-900 border border-gray-200 px-3 py-1.5 rounded-lg transition-colors">
+                  {t("pdfOpen")} ↗
+                </a>
+                {!agreement?.signing_status && (
+                  <button
+                    onClick={handleRemoveFile}
+                    className="text-sm text-red-400 hover:text-red-600 transition-colors"
+                  >
+                    {t("pdfRemove")}
+                  </button>
+                )}
+              </div>
               {!agreement?.signing_status && (
                 <label className="flex items-center gap-2 text-sm cursor-pointer select-none text-gray-700">
                   <input

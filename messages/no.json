@@ -420,6 +420,8 @@
     "labelPhone": "Telefon",
     "pdfTitle": "PDF-dokument",
     "pdfOpen": "Åpne PDF",
+    "pdfRemove": "Fjern fil",
+    "pdfRemoveConfirm": "Er du sikker på at du vil fjerne PDF-filen? Du kan generere en ny fra en mal etterpå.",
     "pdfReplace": "Erstatt fil",
     "pdfUploadLabel": "Last opp PDF",
     "pdfFromTemplateLabel": "Generer fra mal",
