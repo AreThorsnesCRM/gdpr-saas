@@ -303,6 +303,8 @@
     "aiEnableTitle": "Enable AI assistant",
     "aiEnableDesc": "The assistant helps users with questions, guidance and agreement drafts. In full context, customer names and agreement data are processed by Anthropic API (US).",
     "aiDataWarning": "⚠ AI assistant is enabled. In full context, data may be sent to Anthropic API (US). Make sure this is covered in your privacy policy.",
+    "aiDashboardWidgetTitle": "Daily action suggestions",
+    "aiDashboardWidgetDesc": "Shows 3 AI-generated suggestions at the top of the dashboard based on customers and agreements.",
     "subStatusActive": "Active",
     "subStatusTrialing": "Trial",
     "subStatusPastDue": "Payment failed",

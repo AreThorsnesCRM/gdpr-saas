@@ -26,7 +26,7 @@ export async function GET() {
 
   const { data: account } = await supabaseAdmin
     .from("accounts")
-    .select("id, name, country, subscription_status, trial_start, trial_end, stripe_customer_id, stripe_subscription_id, ai_assistant_enabled")
+    .select("id, name, country, subscription_status, trial_start, trial_end, stripe_customer_id, stripe_subscription_id, ai_assistant_enabled, ai_dashboard_widget_enabled")
     .eq("id", accountUser.account_id)
     .single()
 

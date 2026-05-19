@@ -28,7 +28,7 @@ export async function GET() {
 
   const { data: account } = await supabaseAdmin
     .from("accounts")
-    .select("name, org_number, address, postal_code, city, phone, contact_email, ai_assistant_enabled, logo_url")
+    .select("name, org_number, address, postal_code, city, phone, contact_email, ai_assistant_enabled, ai_dashboard_widget_enabled, logo_url")
     .eq("id", accountUser.account_id)
     .single()
 
@@ -69,6 +69,9 @@ export async function PATCH(req: Request) {
   }
   if (typeof body.ai_assistant_enabled === "boolean") {
     updates.ai_assistant_enabled = body.ai_assistant_enabled
+  }
+  if (typeof body.ai_dashboard_widget_enabled === "boolean") {
+    updates.ai_dashboard_widget_enabled = body.ai_dashboard_widget_enabled
   }
 
   if (Object.keys(updates).length === 0) {

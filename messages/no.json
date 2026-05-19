@@ -303,6 +303,8 @@
     "aiEnableTitle": "Aktiver AI-assistent",
     "aiEnableDesc": "Assistenten hjelper brukere med spørsmål, veiledning og avtaleutkast. I full kontekst behandles kundenavn og avtaledata av Anthropic API (USA).",
     "aiDataWarning": "⚠ AI-assistenten er aktivert. Data kan i full kontekst sendes til Anthropic API (USA). Sørg for at dette er dekket i din personvernerklæring.",
+    "aiDashboardWidgetTitle": "Daglige handlingsforslag",
+    "aiDashboardWidgetDesc": "Viser 3 AI-genererte forslag øverst på dashboardet basert på kunder og avtaler.",
     "subStatusActive": "Aktivt",
     "subStatusTrialing": "Prøveperiode",
     "subStatusPastDue": "Betaling feilet",

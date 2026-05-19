@@ -72,6 +72,7 @@ export default function SettingsPage() {
   })
   const [savingPrefs, setSavingPrefs] = useState(false)
   const [aiEnabled, setAiEnabled] = useState<boolean>(account?.ai_assistant_enabled ?? false)
+  const [aiDashboardWidget, setAiDashboardWidget] = useState<boolean>(account?.ai_dashboard_widget_enabled ?? false)
   const [savingAI, setSavingAI] = useState(false)
 
   const [company, setCompany] = useState<CompanyProfile>({
@@ -146,6 +147,7 @@ export default function SettingsPage() {
         logo_url: data.logo_url ? "/api/account/logo" : "",
       })
       setAiEnabled(data.ai_assistant_enabled ?? false)
+      setAiDashboardWidget(data.ai_dashboard_widget_enabled ?? false)
     }
   }
 
@@ -283,6 +285,7 @@ export default function SettingsPage() {
 
   useEffect(() => {
     setAiEnabled(account?.ai_assistant_enabled ?? false)
+    setAiDashboardWidget(account?.ai_dashboard_widget_enabled ?? false)
   }, [account])
 
   async function handleToggleAI(value: boolean) {
@@ -294,6 +297,18 @@ export default function SettingsPage() {
       body: JSON.stringify({ ai_assistant_enabled: value }),
     })
     if (res.ok) await refreshAccount()
+    setSavingAI(false)
+  }
+
+  async function handleToggleDashboardWidget(value: boolean) {
+    setAiDashboardWidget(value)
+    setSavingAI(true)
+    await fetch("/api/account/profile", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ ai_dashboard_widget_enabled: value }),
+    })
+    await refreshAccount()
     setSavingAI(false)
   }
 
@@ -769,9 +784,25 @@ export default function SettingsPage() {
                   onChange={handleToggleAI}
                 />
                 {aiEnabled && (
-                  <div className="px-4 py-3 bg-amber-50 rounded-b-xl">
-                    <p className="text-xs text-amber-700">{t("aiDataWarning")}</p>
-                  </div>
+                  <>
+                    <div className="pl-8 pr-4 py-4 bg-gray-50/50 flex items-center justify-between">
+                      <div>
+                        <p className="text-sm font-medium text-gray-700">{t("aiDashboardWidgetTitle")}</p>
+                        <p className="text-xs text-gray-500 mt-0.5">{t("aiDashboardWidgetDesc")}</p>
+                      </div>
+                      <button
+                        role="switch"
+                        aria-checked={aiDashboardWidget}
+                        onClick={() => handleToggleDashboardWidget(!aiDashboardWidget)}
+                        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${aiDashboardWidget ? "bg-slate-800" : "bg-gray-200"}`}
+                      >
+                        <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform shadow ${aiDashboardWidget ? "translate-x-6" : "translate-x-1"}`} />
+                      </button>
+                    </div>
+                    <div className="px-4 py-3 bg-amber-50 rounded-b-xl">
+                      <p className="text-xs text-amber-700">{t("aiDataWarning")}</p>
+                    </div>
+                  </>
                 )}
               </div>
             )}

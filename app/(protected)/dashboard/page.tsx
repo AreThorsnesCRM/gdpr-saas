@@ -2,463 +2,739 @@
 
 export const dynamic = "force-dynamic"
 
+import "../../styles/dashboard.css"
+
 import Link from "next/link"
 import { useEffect, useState } from "react"
 import { supabase } from "@/lib/supabaseClient"
 import { useAuth } from "@/lib/AuthContext"
+
 import {
   UserGroupIcon,
   CheckCircleIcon,
   ExclamationTriangleIcon,
-  ClockIcon,
-  CheckIcon,
 } from "@heroicons/react/24/outline"
+
+import { Line } from "react-chartjs-2"
+import {
+  Chart as ChartJS,
+  LineElement,
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  Tooltip,
+  Legend,
+} from "chart.js"
+
 import SubscribeButton from "../../components/SubscribeButton"
-import { useTranslations, useLocale } from "next-intl"
-import { useRouter } from "next/navigation"
+
+ChartJS.register(
+  LineElement,
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  Tooltip,
+  Legend
+)
 
 type StatsState = {
   customers: number
+  agreements: number
   activeAgreements: number
   expiringSoon: number
   customersWithoutActive: number
-  totalAgreements: number
 }
 
-export default function DashboardPage() {
-  const { user, account, restrictToOwn, loading: authLoading } = useAuth()
-  const t = useTranslations("dashboard")
-  const tad = useTranslations("agreementDetail")
-  const tc = useTranslations("common")
-  const locale = useLocale()
-  const router = useRouter()
+type ChartDataState = {
+  labels: string[]
+  datasets: any[]
+}
+
+export default function Page() {
+  const { user, profile, account, loading: authLoading } = useAuth()
+  const [subscription, setSubscription] = useState<{ status: string | null; trial_end: string | null } | null>(null)
 
   const [stats, setStats] = useState<StatsState>({
     customers: 0,
+    agreements: 0,
     activeAgreements: 0,
     expiringSoon: 0,
     customersWithoutActive: 0,
-    totalAgreements: 0,
   })
+
+  const [recentActivity, setRecentActivity] = useState<any[]>([])
   const [upcoming, setUpcoming] = useState<any[]>([])
   const [criticalCustomers, setCriticalCustomers] = useState<any[]>([])
-  const [uncontactedCustomers, setUncontactedCustomers] = useState<any[]>([])
 
-  const [customersList, setCustomersList] = useState<{ id: string; name: string }[]>([])
-  const [quickModalOpen, setQuickModalOpen] = useState(false)
-  const [quickCustomerId, setQuickCustomerId] = useState("")
-  const [quickTitle, setQuickTitle] = useState("")
-  const [quickStart, setQuickStart] = useState("")
-  const [quickEnd, setQuickEnd] = useState("")
-  const [quickSaving, setQuickSaving] = useState(false)
+  const [aiSuggestions, setAiSuggestions] = useState<string[]>([])
+  const [aiLoading, setAiLoading] = useState(false)
 
-  useEffect(() => {
-    if (!user) return
-    fetchStats()
-    fetchUpcoming()
-    fetchCriticalCustomers()
-    fetchUncontacted()
-  }, [user, restrictToOwn])
+  const [graphType, setGraphType] = useState<
+    "agreements" | "customers" | "activity" | "archived"
+  >("agreements")
+
+  const [chartData, setChartData] = useState<ChartDataState>({
+    labels: [],
+    datasets: [],
+  })
+
+  // ⭐ Session hydrering
+  const [sessionReady, setSessionReady] = useState(false)
 
   useEffect(() => {
-    if (!supabase || !user) return
-    supabase.from("customers").select("id, name").order("name")
-      .then(({ data }) => setCustomersList(data ?? []))
-  }, [user])
+    let cleanup: (() => void) | undefined
 
-  function openQuickModal() {
-    setQuickCustomerId(""); setQuickTitle(""); setQuickStart(""); setQuickEnd("")
-    setQuickModalOpen(true)
-  }
-
-  async function handleCreateQuickAgreement() {
-    if (!supabase || !user || !quickCustomerId || !quickTitle || !quickStart || !quickEnd) return
-    setQuickSaving(true)
-    try {
-      const { data: newAgreement } = await supabase.from("agreements").insert({
-        customer_id: quickCustomerId,
-        user_id: user.id,
-        title: quickTitle,
-        start_date: quickStart,
-        end_date: quickEnd,
-        signed: false,
-        archived: false,
-      }).select().single()
-      if (newAgreement) router.push(`/agreements/${newAgreement.id}`)
-    } finally {
-      setQuickSaving(false)
-    }
-  }
-
-  async function fetchStats() {
-    if (!supabase) return
-
-    let customersQuery = supabase.from("customers").select("id")
-    if (restrictToOwn && user) customersQuery = customersQuery.eq("account_manager_id", user.id)
-    const { data: customers } = await customersQuery
-    const { data: agreements } = await supabase.from("agreements").select("id, archived, start_date, end_date, customer_id")
-
-    const today = new Date().toISOString().split("T")[0]
-    const in30Days = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split("T")[0]
-
-    const active = agreements?.filter(
-      (a: any) => !a.archived && a.start_date <= today && a.end_date >= today
-    ).length ?? 0
-
-    const soon = agreements?.filter(
-      (a: any) => !a.archived && a.end_date >= today && a.end_date <= in30Days
-    ).length ?? 0
-
-    const customersWithActive = new Set(
-      agreements?.filter((a: any) => !a.archived && (!a.end_date || a.end_date >= today))
-        .map((a: any) => a.customer_id)
-    )
-    const withoutActive = customers?.filter((c: any) => !customersWithActive.has(c.id)).length ?? 0
-
-    setStats({
-      customers: customers?.length ?? 0,
-      activeAgreements: active,
-      expiringSoon: soon,
-      customersWithoutActive: withoutActive,
-      totalAgreements: agreements?.length ?? 0,
-    })
-  }
-
-  async function fetchUpcoming() {
-    if (!supabase) return
-    const today = new Date().toISOString().split("T")[0]
-    const { data } = await supabase
-      .from("agreements")
-      .select("id, title, end_date")
-      .eq("archived", false)
-      .gte("end_date", today)
-      .order("end_date", { ascending: true })
-      .limit(4)
-    setUpcoming(data ?? [])
-  }
-
-  async function fetchCriticalCustomers() {
-    if (!supabase) return
-    const today = new Date().toISOString().split("T")[0]
-
-    let critQuery = supabase.from("customers").select("id, name, email")
-    if (restrictToOwn && user) critQuery = critQuery.eq("account_manager_id", user.id)
-    const { data: customers } = await critQuery
-    const { data: agreements } = await supabase.from("agreements").select("customer_id, archived, start_date, end_date")
-
-    if (!customers || !agreements) return
-
-    const enriched = customers.map((c: any) => {
-      const all = agreements.filter((a: any) => a.customer_id === c.id)
-      const hasActive = all.some((a: any) => !a.archived && (!a.end_date || a.end_date >= today))
-      const ended = all
-        .filter((a: any) => a.end_date && a.end_date < today)
-        .sort((a: any, b: any) => b.end_date.localeCompare(a.end_date))
-      const daysSinceEnd = ended[0]
-        ? Math.ceil((Date.now() - new Date(ended[0].end_date).getTime()) / 86400000)
-        : null
-      return { ...c, hasActive, neverHadAgreement: all.length === 0, daysSinceEnd }
-    })
-
-    setCriticalCustomers(
-      enriched
-        .filter((c: any) => !c.hasActive)
-        .sort((a: any, b: any) => {
-          if (a.neverHadAgreement !== b.neverHadAgreement) return a.neverHadAgreement ? -1 : 1
-          return (a.daysSinceEnd ?? 999999) - (b.daysSinceEnd ?? 999999)
-        })
-        .slice(0, 4)
-    )
-  }
-
-  async function fetchUncontacted() {
-    if (!supabase) return
-
-    let customersQuery = supabase.from("customers").select("id, name")
-    if (restrictToOwn && user) customersQuery = customersQuery.eq("account_manager_id", user.id)
-    const { data: customers } = await customersQuery
-    const { data: notes } = await supabase
-      .from("notes")
-      .select("customer_id, created_at")
-      .order("created_at", { ascending: false })
-
-    if (!customers) return
-
-    const latestNoteMap = new Map<string, string>()
-    for (const note of notes ?? []) {
-      if (!latestNoteMap.has(note.customer_id)) {
-        latestNoteMap.set(note.customer_id, note.created_at)
+    async function waitForSession() {
+      if (!supabase) {
+        console.error("[Dashboard] Supabase not available")
+        return
       }
+
+      const { data } = await supabase.auth.getSession()
+      if (data?.session) {
+        setSessionReady(true)
+        return
+      }
+
+      const {
+        data: { subscription },
+      } = supabase.auth.onAuthStateChange((_event, session) => {
+        if (session) setSessionReady(true)
+      })
+
+      cleanup = () => subscription.unsubscribe()
     }
 
-    const enriched = customers.map((c: any) => {
-      const lastActivity = latestNoteMap.get(c.id) ?? null
-      const daysSince = lastActivity
-        ? Math.floor((Date.now() - new Date(lastActivity).getTime()) / 86400000)
-        : null
-      return { ...c, lastActivity, daysSince }
-    })
+    waitForSession()
 
-    setUncontactedCustomers(
-      enriched
-        .sort((a: any, b: any) => {
-          if (!a.lastActivity && !b.lastActivity) return 0
-          if (!a.lastActivity) return -1
-          if (!b.lastActivity) return 1
-          return new Date(a.lastActivity).getTime() - new Date(b.lastActivity).getTime()
-        })
-        .slice(0, 4)
-    )
-  }
-
-  const to = useTranslations("onboarding")
-  const status = account?.subscription_status
-  const showBanner = !authLoading && status && status !== "active"
-  const checklistDone = !!(account?.country && stats.customers > 0 && stats.totalAgreements > 0)
-  const dateLocale = locale === "en" ? "en-GB" : "no-NO"
+    return () => cleanup?.()
+  }, [])
 
   function daysLeft(dateString: string | null) {
     if (!dateString) return null
-    return Math.ceil((new Date(dateString).getTime() - Date.now()) / 86400000)
+    const end = new Date(dateString)
+    const now = new Date()
+    const diff = end.getTime() - now.getTime()
+    return Math.ceil(diff / (1000 * 60 * 60 * 24))
   }
 
-  function formatDate(dateStr: string) {
-    return new Date(dateStr).toLocaleDateString(dateLocale, { day: "numeric", month: "short" })
+  // Update subscription when profile is ready
+  useEffect(() => {
+    if (!profile) {
+      setSubscription(null)
+      return
+    }
+
+    setSubscription({
+      status: profile.subscription_status,
+      trial_end: profile.trial_end,
+    })
+  }, [profile])
+
+  // Fetch dashboard data when user and session are ready
+  useEffect(() => {
+    if (!user || !sessionReady) return
+
+    fetchStats()
+    fetchRecentActivity()
+    fetchUpcoming()
+    fetchCriticalCustomers()
+  }, [user, sessionReady])
+
+  useEffect(() => {
+    if (!account?.ai_assistant_enabled || !account?.ai_dashboard_widget_enabled) return
+    if (!sessionReady) return
+    setAiLoading(true)
+    fetch("/api/ai/dashboard-suggestions")
+      .then((r) => r.json())
+      .then((data) => { if (data.suggestions) setAiSuggestions(data.suggestions) })
+      .finally(() => setAiLoading(false))
+  }, [account?.ai_assistant_enabled, account?.ai_dashboard_widget_enabled, sessionReady])
+
+  useEffect(() => {
+    if (!user || !sessionReady) return
+    fetchGraphData()
+  }, [graphType, user, sessionReady])
+
+  // -----------------------------
+  // FETCH FUNCTIONS
+  // -----------------------------
+  async function fetchStats() {
+    if (!supabase) {
+      console.error("[Dashboard] Supabase not available")
+      return
+    }
+
+    const { data: customers, error: customersError } = await supabase
+    .from("customers")
+    .select("id")
+
+  console.log("CUSTOMERS ERROR:", customersError)
+  console.log("CUSTOMERS DATA:", customers)
+
+  const { data: agreements, error: agreementsError } = await supabase
+    .from("agreements")
+    .select("*")
+
+  console.log("AGREEMENTS ERROR:", agreementsError)
+  console.log("AGREEMENTS DATA:", agreements)
+
+    const customerCount = customers?.length || 0
+    const agreementCount = agreements?.length || 0
+    const active = agreements?.filter((a: any) => !a.archived).length || 0
+
+    const today = new Date()
+    const in30Days = new Date()
+    in30Days.setDate(today.getDate() + 30)
+
+    const todayStr = today.toISOString().split("T")[0]
+    const in30DaysStr = in30Days.toISOString().split("T")[0]
+
+    const soon =
+      agreements?.filter(
+        (a: any) => a.end_date >= todayStr && a.end_date <= in30DaysStr
+      ).length || 0
+
+    const customersWithActive = new Set(
+      agreements?.filter((a: any) => !a.archived).map((a: any) => a.customer_id)
+    )
+
+    const customersWithoutActive =
+      customers?.filter((c: any) => !customersWithActive.has(c.id)).length || 0
+
+    setStats({
+      customers: customerCount,
+      agreements: agreementCount,
+      activeAgreements: active,
+      expiringSoon: soon,
+      customersWithoutActive,
+    })
   }
 
+  async function fetchRecentActivity() {
+    if (!supabase) {
+      console.error("[Dashboard] Supabase not available")
+      return
+    }
+
+    const { data: notes } = await supabase
+      .from("notes")
+      .select("*")
+      .order("created_at", { ascending: false })
+      .limit(5)
+
+    setRecentActivity(notes || [])
+  }
+
+  async function fetchUpcoming() {
+    if (!supabase) {
+      console.error("[Dashboard] Supabase not available")
+      return
+    }
+
+    const today = new Date().toISOString().split("T")[0]
+
+    const { data } = await supabase
+      .from("agreements")
+      .select("*")
+      .gt("end_date", today)
+      .order("end_date", { ascending: true })
+      .limit(5)
+
+    setUpcoming(data || [])
+  }
+
+  async function fetchCriticalCustomers() {
+    if (!user) return
+
+    if (!supabase) {
+      console.error("[Dashboard] Supabase not available")
+      return
+    }
+
+    const { data: customers } = await supabase
+      .from("customers")
+      .select("*")
+      .eq("user_id", user.id)
+
+    const { data: agreements } = await supabase
+      .from("agreements")
+      .select("customer_id, archived, end_date")
+
+    if (!customers || !agreements) {
+      setCriticalCustomers([])
+      return
+    }
+
+    const enriched = customers.map((c: any) => {
+      const customerAgreements = agreements.filter(
+        (a: any) => a.customer_id === c.id
+      )
+
+      if (customerAgreements.length === 0) {
+        return {
+          ...c,
+          hasNeverHadAgreement: true,
+          hasActiveAgreement: false,
+          lastAgreementEnd: null,
+          daysSinceEnd: null,
+        }
+      }
+
+      const hasActive = customerAgreements.some((a: any) => !a.archived)
+
+      const ended = customerAgreements
+        .filter((a: any) => a.archived)
+        .sort((a: any, b: any) => (a.end_date > b.end_date ? -1 : 1))
+
+      if (ended.length === 0) {
+        return {
+          ...c,
+          hasNeverHadAgreement: true,
+          hasActiveAgreement: hasActive,
+          lastAgreementEnd: null,
+          daysSinceEnd: null,
+        }
+      }
+
+      const lastEnd = ended[0].end_date
+      const days = Math.ceil(
+        (new Date().getTime() - new Date(lastEnd).getTime()) /
+          (1000 * 60 * 60 * 24)
+      )
+
+      return {
+        ...c,
+        hasNeverHadAgreement: false,
+        hasActiveAgreement: hasActive,
+        lastAgreementEnd: lastEnd,
+        daysSinceEnd: days,
+      }
+    })
+
+    let withoutActive = enriched.filter((c: any) => !c.hasActiveAgreement)
+
+    withoutActive = withoutActive.sort((a: any, b: any) => {
+      if (a.hasNeverHadAgreement && !b.hasNeverHadAgreement) return -1
+      if (!a.hasNeverHadAgreement && b.hasNeverHadAgreement) return 1
+
+      if (a.daysSinceEnd == null) return 1
+      if (b.daysSinceEnd == null) return -1
+
+      return a.daysSinceEnd - b.daysSinceEnd
+    })
+
+    setCriticalCustomers(withoutActive.slice(0, 3))
+  }
+
+  async function fetchGraphData() {
+    if (!supabase) {
+      console.error("[Dashboard] Supabase not available")
+      return
+    }
+
+    let data: any[] = []
+
+    if (graphType === "agreements") {
+      const { data: agreements } = await supabase
+        .from("agreements")
+        .select("start_date")
+      data = agreements || []
+    }
+
+    if (graphType === "customers") {
+      const { data: customers } = await supabase
+        .from("customers")
+        .select("created_at")
+      data = customers || []
+    }
+
+    if (graphType === "activity") {
+      const { data: notes } = await supabase.from("notes").select("created_at")
+      data = notes || []
+    }
+
+    if (graphType === "archived") {
+      const { data: agreements } = await supabase
+        .from("agreements")
+        .select("archived, start_date")
+      data = agreements?.filter((a: any) => a.archived) || []
+    }
+
+    const counts: Record<string, number> = {}
+
+    data.forEach((item: any) => {
+      const date =
+        item.start_date || item.created_at || item.end_date
+
+      if (!date) return
+
+      const month = new Date(date).toLocaleString("no-NO", {
+        month: "short",
+        year: "numeric",
+      })
+
+      counts[month] = (counts[month] || 0) + 1
+    })
+
+    const labels = Object.keys(counts)
+    const values = Object.values(counts)
+
+    setChartData({
+      labels,
+      datasets: [
+        {
+          label: "Antall",
+          data: values,
+          borderColor: "#2563eb",
+          backgroundColor: "rgba(37, 99, 235, 0.2)",
+          borderWidth: 2,
+          tension: 0.3,
+        },
+      ],
+    })
+  }
+
+  // RENDER
+  // ----
   return (
-    <div className="p-8 space-y-8 max-w-6xl">
+    <div className="p-8 space-y-10">
+      {/* Subscription Section */}
+      {!authLoading && subscription && (
+        <div className="bg-white rounded-xl shadow p-6 border border-gray-100">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-gray-700 font-medium">
+                {profile?.company_name}
+              </p>
 
-      {showBanner && (
-        <div className={`rounded-xl border px-6 py-4 flex items-center justify-between ${
-          status === "trialing" ? "bg-blue-50 border-blue-200" :
-          status === "past_due" ? "bg-red-50 border-red-200" :
-          "bg-gray-50 border-gray-200"
-        }`}>
-          <div>
-            <p className="font-semibold text-gray-900">
-              {status === "trialing" && t("trialDaysLeft", { days: daysLeft(account?.trial_end ?? null) ?? 0 })}
-              {status === "past_due" && t("paymentFailed")}
-              {status === "canceled" && t("canceled")}
-              {status === "incomplete" && t("incomplete")}
-            </p>
-            <p className="text-sm text-gray-500 mt-0.5">
-              {status === "trialing" && t("trialBannerDesc")}
-              {status === "past_due" && t("paymentFailedDesc")}
-              {status === "canceled" && t("canceledDesc")}
-              {status === "incomplete" && t("incompleteDesc")}
-            </p>
-          </div>
-          <div className="shrink-0 ml-6">
-            {status === "trialing" && <SubscribeButton label={t("startSubscription")} mode="checkout" />}
-            {status === "past_due" && <SubscribeButton label={t("updatePayment")} mode="portal" />}
-            {status === "canceled" && <SubscribeButton label={t("restart")} mode="checkout" />}
-            {status === "incomplete" && <SubscribeButton label={t("completePurchase")} mode="checkout" />}
-          </div>
-        </div>
-      )}
+              <h2 className="text-2xl font-bold mt-1">
+                {subscription.status === "active" && "Aktivt abonnement"}
+                {subscription.status === "trialing" && "Prøveperiode aktiv"}
+                {subscription.status === "past_due" && "Betaling feilet"}
+                {subscription.status === "canceled" && "Abonnement avsluttet"}
+                {subscription.status === "incomplete" &&
+                  "Betaling ikke fullført"}
+                {subscription.status === "unpaid" && "Abonnement ubetalt"}
+              </h2>
 
-      <div className="flex items-start justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">{t("title")}</h1>
-          <p className="text-gray-500 mt-1">{t("subtitle")}</p>
-        </div>
-        <div className="flex gap-3">
-          <Link href="/customers/new"
-            className="bg-slate-800 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-slate-700 transition-colors">
-            {t("newCustomer")}
-          </Link>
-          <button
-            onClick={openQuickModal}
-            className="bg-slate-800 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-slate-700 transition-colors">
-            {t("newAgreement")}
-          </button>
-        </div>
-      </div>
+              {subscription.status === "trialing" && (
+                <p className="text-gray-600 mt-1">
+                  {daysLeft(subscription.trial_end)} dager igjen av
+                  prøveperioden
+                </p>
+              )}
 
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <Link href="/customers">
-          <StatCard title={t("statCustomers")} value={stats.customers}
-            icon={<UserGroupIcon className="h-5 w-5 text-blue-600" />}
-            bg="bg-blue-50" />
-        </Link>
-        <Link href="/customers?noActive=true">
-          <StatCard title={t("statWithoutActive")} value={stats.customersWithoutActive}
-            icon={<ExclamationTriangleIcon className="h-5 w-5 text-red-500" />}
-            bg="bg-red-50" />
-        </Link>
-        <Link href="/agreements?status=active">
-          <StatCard title={t("statActiveAgreements")} value={stats.activeAgreements}
-            icon={<CheckCircleIcon className="h-5 w-5 text-green-600" />}
-            bg="bg-green-50" />
-        </Link>
-        <Link href="/agreements?expiresSoon=true">
-          <StatCard title={t("statExpiringSoon")} value={stats.expiringSoon}
-            subtitle={t("statExpiringSoonSubtitle")}
-            icon={<ClockIcon className="h-5 w-5 text-amber-500" />}
-            bg="bg-amber-50" />
-        </Link>
-      </div>
+              {subscription.status === "active" && (
+                <p className="text-gray-600 mt-1">
+                  Abonnementet ditt er aktivt
+                </p>
+              )}
 
-      {!authLoading && !checklistDone && (
-        <div className="bg-white rounded-xl border border-gray-200 p-6">
-          <h2 className="text-base font-semibold text-gray-900 mb-4">{to("checklistTitle")}</h2>
-          <div className="space-y-3">
-            <ChecklistItem done={!!account?.country} label={to("checklistCountry")} />
-            <ChecklistItem done={stats.customers > 0} label={to("checklistCustomer")} />
-            <ChecklistItem done={stats.totalAgreements > 0} label={to("checklistAgreement")} />
-          </div>
-        </div>
-      )}
+              {subscription.status === "past_due" && (
+                <p className="text-gray-600 mt-1">
+                  Betalingen feilet – oppdater betalingsmetode
+                </p>
+              )}
 
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+              {subscription.status === "canceled" && (
+                <p className="text-gray-600 mt-1">
+                  Abonnementet er avsluttet – aktiver på nytt
+                </p>
+              )}
 
-        <div className="bg-white rounded-xl border border-gray-200 p-6">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-base font-semibold text-gray-900">{t("upcomingTitle")}</h2>
-            <Link href="/agreements" className="text-xs text-slate-500 hover:text-slate-800">{t("seeAll")}</Link>
-          </div>
-          {upcoming.length === 0 ? (
-            <p className="text-sm text-gray-400">{t("upcomingEmpty")}</p>
-          ) : (
-            <ul className="space-y-2">
-              {upcoming.map((a: any) => (
-                <li key={a.id} className="flex items-center justify-between py-2 border-t border-gray-100 first:border-0">
-                  <span className="text-sm font-medium text-gray-800">{a.title}</span>
-                  <span className="text-xs text-gray-400">{formatDate(a.end_date)}</span>
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
+              {(subscription.status === "incomplete" ||
+                subscription.status === "unpaid") && (
+                <p className="text-gray-600 mt-1">
+                  Betalingen ble ikke fullført – fullfør kjøpet
+                </p>
+              )}
+            </div>
 
-        <div className="bg-white rounded-xl border border-gray-200 p-6">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-base font-semibold text-gray-900">{t("criticalTitle")}</h2>
-            <Link href="/customers?noActive=true" className="text-xs text-slate-500 hover:text-slate-800">{t("seeAll")}</Link>
-          </div>
-          {criticalCustomers.length === 0 ? (
-            <p className="text-sm text-gray-400">{t("criticalEmpty")}</p>
-          ) : (
-            <ul className="space-y-2">
-              {criticalCustomers.map((c: any) => (
-                <li key={c.id} className="flex items-center justify-between py-2 border-t border-gray-100 first:border-0">
-                  <div>
-                    <p className="text-sm font-medium text-gray-800">{c.name}</p>
-                    <p className="text-xs text-gray-400">
-                      {c.neverHadAgreement ? t("neverHad") : t("expiredDaysAgo", { days: c.daysSinceEnd })}
-                    </p>
-                  </div>
-                  <Link href={`/customers/${c.id}`} className="text-xs text-slate-500 hover:text-slate-800">{t("open")}</Link>
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
-
-        <div className="bg-white rounded-xl border border-gray-200 p-6">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-base font-semibold text-gray-900">{t("uncontactedTitle")}</h2>
-            <Link href="/customers" className="text-xs text-slate-500 hover:text-slate-800">{t("seeAll")}</Link>
-          </div>
-          {uncontactedCustomers.length === 0 ? (
-            <p className="text-sm text-gray-400">{t("uncontactedEmpty")}</p>
-          ) : (
-            <ul className="space-y-2">
-              {uncontactedCustomers.map((c: any) => (
-                <li key={c.id} className="flex items-center justify-between py-2 border-t border-gray-100 first:border-0">
-                  <div>
-                    <p className="text-sm font-medium text-gray-800">{c.name}</p>
-                    <p className="text-xs text-gray-400">
-                      {c.lastActivity ? t("uncontactedDaysAgo", { days: c.daysSince }) : t("uncontactedNever")}
-                    </p>
-                  </div>
-                  <Link href={`/customers/${c.id}`} className="text-xs text-slate-500 hover:text-slate-800">{t("open")}</Link>
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
-
-      </div>
-
-      {quickModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
-          <div className="bg-white rounded-xl shadow-xl border border-gray-200 w-full max-w-md p-6 space-y-4">
-            <h2 className="text-base font-semibold text-gray-900">{t("newAgreement")}</h2>
-            <div className="space-y-3">
-              <div>
-                <label className="block text-xs font-medium text-gray-500 mb-1">{tad("labelCustomer")}</label>
-                <select
-                  value={quickCustomerId}
-                  onChange={e => setQuickCustomerId(e.target.value)}
-                  className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-400"
-                  autoFocus
-                >
-                  <option value="">{tad("customerPlaceholder")}</option>
-                  {customersList.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
-                </select>
-              </div>
-              <div>
-                <label className="block text-xs font-medium text-gray-500 mb-1">{tad("quickTitleLabel")}</label>
-                <input
-                  className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-400"
-                  value={quickTitle}
-                  onChange={e => setQuickTitle(e.target.value)}
+            <div>
+              {subscription.status === "trialing" && (
+                <SubscribeButton
+                  label="Start abonnement"
+                  mode="checkout"
                 />
-              </div>
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-xs font-medium text-gray-500 mb-1">{tad("quickStartLabel")}</label>
-                  <input type="date" className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-400" value={quickStart} onChange={e => setQuickStart(e.target.value)} />
-                </div>
-                <div>
-                  <label className="block text-xs font-medium text-gray-500 mb-1">{tad("quickEndLabel")}</label>
-                  <input type="date" className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-400" value={quickEnd} onChange={e => setQuickEnd(e.target.value)} />
-                </div>
-              </div>
-            </div>
-            <div className="flex justify-between pt-1">
-              <button onClick={() => setQuickModalOpen(false)} className="text-sm text-gray-500 hover:text-gray-800 transition-colors">{tc("cancel")}</button>
-              <button
-                onClick={handleCreateQuickAgreement}
-                disabled={quickSaving || !quickCustomerId || !quickTitle || !quickStart || !quickEnd}
-                className="bg-slate-800 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-slate-700 disabled:opacity-50 transition-colors"
-              >
-                {quickSaving ? tad("creating") : tad("createButton")}
-              </button>
+              )}
+
+              {subscription.status === "active" && (
+                <SubscribeButton
+                  label="Administrer abonnement"
+                  mode="portal"
+                />
+              )}
+
+              {subscription.status === "past_due" && (
+                <SubscribeButton
+                  label="Oppdater betalingsmetode"
+                  mode="portal"
+                />
+              )}
+
+              {subscription.status === "canceled" && (
+                <SubscribeButton
+                  label="Start abonnement på nytt"
+                  mode="checkout"
+                />
+              )}
+
+              {(subscription.status === "incomplete" ||
+                subscription.status === "unpaid") && (
+                <SubscribeButton
+                  label="Fullfør betaling"
+                  mode="checkout"
+                />
+              )}
             </div>
           </div>
         </div>
       )}
+
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div>
+          <div className="text-sm text-gray-400 mb-1">Dashboard</div>
+          <h1 className="text-3xl font-bold tracking-tight">Oversikt</h1>
+          <p className="text-gray-600 mt-1">
+            Kunder, avtaler og aktivitet samlet på ett sted
+          </p>
+        </div>
+
+        <div className="flex gap-3">
+          <Link
+            href="/customers/new"
+            className="bg-blue-600 text-white px-4 py-2 rounded-lg shadow hover:bg-blue-700 transition"
+          >
+            Ny kunde
+          </Link>
+          <Link
+            href="/agreements/new"
+            className="bg-green-600 text-white px-4 py-2 rounded-lg shadow hover:bg-green-700 transition"
+          >
+            Ny avtale
+          </Link>
+        </div>
+      </div>
+
+      {/* AI daglig handlingsforslag */}
+      {account?.ai_assistant_enabled && account?.ai_dashboard_widget_enabled && (
+        <div className="bg-gradient-to-r from-slate-800 to-slate-700 rounded-xl p-5 text-white">
+          <div className="flex items-center gap-2 mb-3">
+            <span className="text-amber-400 text-base">✦</span>
+            <p className="text-sm font-semibold">Hva bør du gjøre i dag?</p>
+          </div>
+          {aiLoading ? (
+            <div className="flex gap-1.5 items-center">
+              <span className="w-1.5 h-1.5 bg-white/50 rounded-full animate-bounce" style={{ animationDelay: "0ms" }} />
+              <span className="w-1.5 h-1.5 bg-white/50 rounded-full animate-bounce" style={{ animationDelay: "150ms" }} />
+              <span className="w-1.5 h-1.5 bg-white/50 rounded-full animate-bounce" style={{ animationDelay: "300ms" }} />
+            </div>
+          ) : aiSuggestions.length > 0 ? (
+            <ol className="space-y-1.5">
+              {aiSuggestions.map((s, i) => (
+                <li key={i} className="flex items-start gap-2 text-sm text-white/90">
+                  <span className="text-amber-400 font-bold shrink-0">{i + 1}.</span>
+                  {s}
+                </li>
+              ))}
+            </ol>
+          ) : (
+            <p className="text-sm text-white/60">Ingen forslag tilgjengelig akkurat nå.</p>
+          )}
+        </div>
+      )}
+
+      {/* Stats Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+        <Link href="/customers">
+          <StatCard
+            title="Kunder"
+            value={stats.customers}
+            icon={<UserGroupIcon className="h-8 w-8 text-blue-600" />}
+            color="blue"
+          />
+        </Link>
+
+        <Link href="/customers?noActive=true">
+          <StatCard
+            title="Kunder uten avtale"
+            value={stats.customersWithoutActive}
+            icon={<ExclamationTriangleIcon className="h-8 w-8 text-red-600" />}
+            color="yellow"
+          />
+        </Link>
+
+        <Link href="/agreements?status=active">
+          <StatCard
+            title="Aktive avtaler"
+            value={stats.activeAgreements}
+            icon={<CheckCircleIcon className="h-8 w-8 text-green-600" />}
+            color="green"
+          />
+        </Link>
+
+        <Link href="/agreements?expiresSoon=true">
+          <StatCard
+            title="Utløper snart"
+            value={stats.expiringSoon}
+            icon={<ExclamationTriangleIcon className="h-8 w-8 text-yellow-600" />}
+            color="yellow"
+          />
+        </Link>
+      </div>
+
+      {/* Graph Section */}
+      <div className="bg-white rounded-xl shadow p-6">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-xl font-semibold">Statistikk</h2>
+
+          <div className="flex gap-2">
+            {["agreements", "customers", "activity", "archived"].map((type) => (
+              <button
+                key={type}
+                onClick={() => setGraphType(type as any)}
+                className={`px-3 py-1 rounded-lg text-sm border ${
+                  graphType === type
+                    ? "bg-blue-600 text-white border-blue-600"
+                    : "bg-gray-100 text-gray-700 border-gray-300"
+                }`}
+              >
+                {type === "agreements" && "Avtaler"}
+                {type === "customers" && "Kunder"}
+                {type === "activity" && "Aktivitet"}
+                {type === "archived" && "Arkiverte"}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <Line data={chartData} options={chartOptions} />
+      </div>
+
+      {/* Upcoming deadlines */}
+      <div className="bg-white rounded-xl shadow p-6">
+        <h2 className="text-xl font-semibold mb-4">Kommende avtaler</h2>
+        <ul className="space-y-3">
+          {upcoming.length === 0 && (
+            <p className="text-gray-500 text-sm">Ingen kommende avtaler</p>
+          )}
+          {upcoming.map((a: any) => (
+            <li key={a.id} className="border rounded p-3">
+              <div className="font-medium">{a.title}</div>
+                            <div className="text-sm text-gray-600">
+                Utløper: {a.end_date}
+              </div>
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      {/* Critical customers */}
+      <div className="bg-white rounded-xl shadow p-6">
+        <h2 className="text-xl font-semibold mb-4">Mest kritiske kunder</h2>
+
+        {criticalCustomers.length === 0 && (
+          <p className="text-gray-500 text-sm">Ingen kritiske kunder akkurat nå</p>
+        )}
+
+        <ul className="space-y-3">
+          {criticalCustomers.map((c: any) => (
+            <li
+              key={c.id}
+              className="border rounded p-3 flex justify-between items-center"
+            >
+              <div>
+                <Link href={`/customers/${c.id}`}>
+                  <span className="font-medium text-blue-600 cursor-pointer">
+                    {c.name}
+                  </span>
+                </Link>
+
+                <div className="text-sm text-gray-600">
+                  {c.email || "Ingen e‑post"}
+                </div>
+
+                <div className="mt-1 text-xs text-gray-500">
+                  {c.hasNeverHadAgreement && "Aldri hatt avtale"}
+                  {!c.hasNeverHadAgreement &&
+                    c.daysSinceEnd != null &&
+                    `Sist avtale utløp for ${c.daysSinceEnd} dager siden`}
+                </div>
+              </div>
+
+              <Link
+                href={`/customers/${c.id}`}
+                className="text-blue-600 hover:underline text-sm"
+              >
+                Åpne
+              </Link>
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      {/* Recent activity */}
+      <div className="bg-white rounded-xl shadow p-6">
+        <h2 className="text-xl font-semibold mb-4">Siste aktivitet</h2>
+        <ul className="space-y-3">
+          {recentActivity.length === 0 && (
+            <p className="text-gray-500 text-sm">Ingen aktivitet registrert</p>
+          )}
+          {recentActivity.map((n: any) => (
+            <li key={n.id} className="border rounded p-3">
+              <div className="font-medium">{n.content}</div>
+              <div className="text-sm text-gray-600">
+                {new Date(n.created_at).toLocaleString("no-NO")}
+              </div>
+            </li>
+          ))}
+        </ul>
+      </div>
     </div>
   )
 }
 
-function ChecklistItem({ done, label }: { done: boolean; label: string }) {
-  return (
-    <div className={`flex items-center gap-3 text-sm ${done ? "text-gray-400 line-through" : "text-gray-700"}`}>
-      <span className={`flex-shrink-0 w-5 h-5 rounded-full border-2 flex items-center justify-center ${done ? "bg-green-500 border-green-500" : "border-gray-300"}`}>
-        {done && <CheckIcon className="h-3 w-3 text-white" />}
-      </span>
-      {label}
-    </div>
-  )
-}
-
-function StatCard({ title, value, icon, bg, subtitle }: {
+function StatCard({
+  title,
+  value,
+  icon,
+  color,
+}: {
   title: string
   value: number
   icon: React.ReactNode
-  bg: string
-  subtitle?: string
+  color: string
 }) {
+  const bg = {
+    blue: "bg-blue-50",
+    indigo: "bg-indigo-50",
+    green: "bg-green-50",
+    yellow: "bg-yellow-50",
+  }[color]
+
   return (
-    <div className="bg-white rounded-xl border border-gray-200 p-5 hover:border-gray-300 transition-colors cursor-pointer">
-      <div className={`inline-flex p-2 rounded-lg ${bg} mb-3`}>{icon}</div>
-      <div className="text-2xl font-bold text-gray-900">{value}</div>
-      <div className="text-sm text-gray-500 mt-0.5">{title}</div>
-      {subtitle && <div className="text-xs text-gray-400 mt-0.5">{subtitle}</div>}
+    <div className="bg-white shadow-sm rounded-xl p-6 border border-gray-100 hover:shadow-md transition-shadow">
+      <div className="flex items-center justify-between">
+        <div className={`p-3 rounded-lg ${bg}`}>{icon}</div>
+      </div>
+      <div className="mt-4 text-gray-500 text-sm">{title}</div>
+      <div className="text-3xl font-bold mt-1">{value}</div>
     </div>
   )
 }
+
+const chartOptions = {
+  responsive: true,
+  plugins: {
+    legend: { display: false },
+  },
+  scales: {
+    y: {
+      beginAtZero: true,
+      ticks: { stepSize: 1 },
+    },
+  },
+}
+

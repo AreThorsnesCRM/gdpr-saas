@@ -303,6 +303,8 @@
     "aiEnableTitle": "Activar asistente IA",
     "aiEnableDesc": "El asistente ayuda a los usuarios con preguntas, orientación y borradores de contratos. En contexto completo, los nombres de clientes y datos de contratos son procesados por Anthropic API (EE.UU.).",
     "aiDataWarning": "⚠ El asistente IA está activado. En contexto completo, los datos pueden enviarse a Anthropic API (EE.UU.). Asegúrese de que esto esté cubierto en su política de privacidad.",
+    "aiDashboardWidgetTitle": "Sugerencias de acción diarias",
+    "aiDashboardWidgetDesc": "Muestra 3 sugerencias generadas por IA en la parte superior del dashboard basadas en clientes y contratos.",
     "subStatusActive": "Activo",
     "subStatusTrialing": "Prueba",
     "subStatusPastDue": "Pago fallido",
