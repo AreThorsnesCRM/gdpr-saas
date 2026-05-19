@@ -1,70 +1,49 @@
 "use client"
 
-import React, { useEffect, useState, useCallback } from "react"
+import React, { useEffect, useState, useCallback, useRef } from "react"
 import { useRouter } from "next/navigation"
 import { supabase } from "@/lib/supabaseClient"
-import { AuthContext, type AuthContextType, type Profile, type Account } from "./AuthContext"
+import { AuthContext, type AuthContextType, type Profile } from "./AuthContext"
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const router = useRouter()
   const [user, setUser] = useState<{ id: string; email?: string } | null>(null)
   const [profile, setProfile] = useState<Profile | null>(null)
-  const [account, setAccount] = useState<Account | null>(null)
-  const [role, setRole] = useState<"admin" | "member" | null>(null)
-  const [restrictToOwn, setRestrictToOwn] = useState(false)
   const [loading, setLoading] = useState(true)
 
+  // Hent profil fra klient når bruker er til stede
   const fetchProfile = useCallback(async (retries = 3) => {
     if (!supabase || !user) {
+      console.error("[AuthProvider] Supabase not configured or no user")
       setProfile(null)
-      setAccount(null)
       return
     }
 
     for (let i = 0; i < retries; i++) {
       try {
-        const { data: profileData, error } = await supabase
+        console.log(`[AuthProvider] Fetching profile via client (attempt ${i + 1}) for user ${user.id}`)
+        const { data: profile, error } = await supabase
           .from("profiles")
           .select("*")
           .eq("user_id", user.id)
           .single()
 
         if (error) {
+          console.error("Error fetching profile:", error)
           if (i === retries - 1) {
             setProfile(null)
-            setAccount(null)
           } else {
             await new Promise(resolve => setTimeout(resolve, 1000 * (i + 1)))
           }
         } else {
-          setProfile(profileData)
-
-          if (profileData?.account_id) {
-            const { data: { session } } = await supabase.auth.getSession()
-            const token = session?.access_token ?? ""
-            const [{ data: accountData }, meRes] = await Promise.all([
-              supabase.from("accounts").select("*").eq("id", profileData.account_id).single(),
-              fetch("/api/account/me", {
-                headers: { Authorization: `Bearer ${token}` },
-              }),
-            ])
-            const meData = meRes.ok ? await meRes.json() : null
-            setAccount(accountData ?? null)
-            const fetchedRole = meData?.role ?? null
-            setRole(fetchedRole)
-            // Admin har alltid full tilgang uavhengig av DB-verdi
-            setRestrictToOwn(fetchedRole === "admin" ? false : (profileData?.restrict_to_own ?? false))
-          } else {
-            setRestrictToOwn(profileData?.restrict_to_own ?? false)
-            setAccount(null)
-            setRole(null)
-          }
+          console.log("[AuthProvider] Profile fetched:", profile)
+          setProfile(profile)
           return
         }
       } catch (error) {
+        console.error(`[AuthProvider] Exception in fetchProfile (attempt ${i + 1}):`, error)
         if (i === retries - 1) {
           setProfile(null)
-          setAccount(null)
         } else {
           await new Promise(resolve => setTimeout(resolve, 1000 * (i + 1)))
         }
@@ -74,6 +53,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     if (!user) return
+
     fetchProfile()
   }, [user, fetchProfile])
 
@@ -84,6 +64,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     async function initAuth() {
       if (!supabase) {
+        console.error("[AuthProvider] Supabase not configured, skipping auth init")
         setLoading(false)
         return
       }
@@ -95,44 +76,52 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         try {
           const sessionData = JSON.parse(decodeURIComponent(tempSessionValue))
           await supabase.auth.setSession(sessionData)
+          // Delete the cookie
           document.cookie = 'temp_session=; path=/; maxAge=0'
         } catch (error) {
           console.error("[AuthProvider] Failed to parse temp session:", error)
         }
       }
 
-      // Sett alltid opp lytteren — fanger SIGNED_IN, SIGNED_OUT, TOKEN_REFRESHED
-      const {
-        data: { subscription },
-      } = supabase.auth.onAuthStateChange((event, session) => {
-        if (!mounted) return
-        if (session?.user) {
-          setUser({
-            id: session.user.id,
-            email: session.user.email,
-          })
-        } else {
-          setUser(null)
-          setProfile(null)
-          setAccount(null)
-          setRole(null)
-          setRestrictToOwn(false)
-        }
-        setLoading(false)
-      })
-
-      cleanup = () => subscription.unsubscribe()
-
       try {
+        // Prøv å hent session fra cookies
         const { data: sessionData } = await supabase.auth.getSession()
+
         if (!mounted) return
+
         if (sessionData?.session?.user) {
+          console.log("[AuthProvider] Session found from cookies")
           setUser({
             id: sessionData.session.user.id,
             email: sessionData.session.user.email,
           })
+          setLoading(false)
+          return
         }
-        setLoading(false)
+
+        console.log("[AuthProvider] No session in cookies, waiting for auth state change...")
+
+        // Hvis ingen session, sett opp listener
+        const {
+          data: { subscription },
+        } = supabase.auth.onAuthStateChange((event, session) => {
+          console.log("[AuthProvider] Auth event:", event, "- Session:", !!session?.user)
+
+          if (!mounted) return
+
+          if (session?.user) {
+            setUser({
+              id: session.user.id,
+              email: session.user.email,
+            })
+          } else {
+            setUser(null)
+            setProfile(null)
+          }
+          setLoading(false)
+        })
+
+        cleanup = () => subscription.unsubscribe()
       } catch (error) {
         console.error("[AuthProvider] Error during init:", error)
         if (mounted) setLoading(false)
@@ -145,32 +134,38 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       mounted = false
       cleanup?.()
     }
-  }, [])
+  }, [fetchProfile])
 
-  // Oppdater profil når siden blir synlig igjen
+  // Listen for page visibility changes (e.g., returning from external site)
   useEffect(() => {
     const handleVisibilityChange = () => {
-      if (!document.hidden && user) fetchProfile()
+      if (!document.hidden && user) {
+        console.log("[AuthProvider] Page became visible, refetching profile")
+        fetchProfile()
+      }
     }
+
     document.addEventListener("visibilitychange", handleVisibilityChange)
     return () => document.removeEventListener("visibilitychange", handleVisibilityChange)
   }, [user, fetchProfile])
 
   const logout = async () => {
     if (!supabase) {
+      console.error("[AuthProvider] Supabase not configured")
       router.replace("/login")
       return
     }
+
     try {
       await fetch("/api/logout", { method: "POST" })
       await supabase.auth.signOut()
-      setUser(null); setProfile(null); setAccount(null)
-      setRole(null); setRestrictToOwn(false)
+      setUser(null)
+      setProfile(null)
       router.replace("/login")
     } catch (error) {
       console.error("[AuthProvider] Logout error:", error)
-      setUser(null); setProfile(null); setAccount(null)
-      setRole(null); setRestrictToOwn(false)
+      setUser(null)
+      setProfile(null)
       router.replace("/login")
     }
   }
@@ -178,12 +173,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const value: AuthContextType = {
     user,
     profile,
-    account,
-    role,
-    restrictToOwn,
     loading,
     logout,
-    refreshAccount: fetchProfile,
   }
 
   return (

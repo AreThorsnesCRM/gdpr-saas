@@ -12,6 +12,7 @@ import { ChevronLeftIcon } from "@heroicons/react/24/outline"
 import RichTextEditor from "@/app/components/RichTextEditor"
 import { substituteMergeFields } from "@/lib/mergeFields"
 import { useTranslations, useLocale } from "next-intl"
+import { generateBrandedPDF, type PDFBranding } from "@/lib/generateBrandedPDF"
 
 type DbSigner = { name: string; email: string; sessionId: string; url: string; signed: boolean }
 
@@ -40,39 +41,6 @@ type AgreementDetail = {
 
 type Template = { id: string; name: string; duration_months: number; content: string }
 
-async function generatePDFFile(html: string, title: string): Promise<File> {
-  const container = document.createElement("div")
-  container.style.cssText = "position:fixed;left:-9999px;top:0;width:794px;padding:60px 80px;font-family:Arial,sans-serif;font-size:13px;line-height:1.7;background:white;color:#111;"
-  container.innerHTML = `<style>h1{font-size:22px;font-weight:700;margin:0 0 1em}h2{font-size:18px;font-weight:600;margin:1.2em 0 0.4em}h3{font-size:15px;font-weight:600;margin:1em 0 0.3em}p{margin:0 0 0.8em}ul,ol{margin:0 0 0.8em;padding-left:1.8em}li{margin:0.2em 0}strong{font-weight:700}em{font-style:italic}u{text-decoration:underline}s{text-decoration:line-through}hr{border:none;border-top:1px solid #ccc;margin:1.5em 0}blockquote{border-left:3px solid #ccc;padding-left:1em;color:#555;margin:1em 0}</style>${html}`
-  document.body.appendChild(container)
-  const html2canvasLib = (await import("html2canvas")).default
-  const canvas = await html2canvasLib(container, { scale: 2, useCORS: true, backgroundColor: "#ffffff", logging: false })
-  document.body.removeChild(container)
-  const { jsPDF } = await import("jspdf")
-  const pdf = new jsPDF({ unit: "mm", format: "a4" })
-  const pdfW = 210
-  const pdfH = 297
-  const pageHeightPx = (pdfH / pdfW) * canvas.width
-  let yPx = 0
-  let page = 0
-  while (yPx < canvas.height) {
-    if (page > 0) pdf.addPage()
-    const sliceH = Math.min(pageHeightPx, canvas.height - yPx)
-    const tmp = document.createElement("canvas")
-    tmp.width = canvas.width
-    tmp.height = sliceH
-    const ctx = tmp.getContext("2d")!
-    ctx.fillStyle = "#ffffff"
-    ctx.fillRect(0, 0, canvas.width, sliceH)
-    ctx.drawImage(canvas, 0, yPx, canvas.width, sliceH, 0, 0, canvas.width, sliceH)
-    pdf.addImage(tmp.toDataURL("image/png"), "PNG", 0, 0, pdfW, (sliceH / pageHeightPx) * pdfH)
-    yPx += pageHeightPx
-    page++
-  }
-  const blob = pdf.output("blob")
-  const safeName = (title || "avtale").replace(/[^a-z0-9æøå\s.-]/gi, "_")
-  return new File([blob], `${safeName}.pdf`, { type: "application/pdf" })
-}
 
 function formatDateNO(dateStr: string) {
   if (!dateStr) return ""
@@ -110,11 +78,23 @@ export default function AgreementDetailPage({ params }: { params: Promise<{ id: 
   const [signingLoading, setSigningLoading] = useState(false)
   const [signingError, setSigningError] = useState("")
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null)
+  const [branding, setBranding] = useState<PDFBranding | undefined>(undefined)
 
   useEffect(() => {
     if (!user || !id) return
     fetchAgreement()
     fetchTemplates()
+    fetch("/api/account/profile")
+      .then((r) => r.json())
+      .then((d) => setBranding({
+        logoUrl: d.logo_url ?? null,
+        companyName: d.name ?? null,
+        address: d.address ?? null,
+        postal_code: d.postal_code ?? null,
+        city: d.city ?? null,
+        phone: d.phone ?? null,
+        email: d.contact_email ?? null,
+      }))
   }, [user, id])
 
   async function fetchAgreement() {
@@ -212,7 +192,7 @@ export default function AgreementDetailPage({ params }: { params: Promise<{ id: 
     if (!supabase || !agreement) return
     setGenerating(true)
     try {
-      const generatedFile = await generatePDFFile(previewContent, title)
+      const generatedFile = await generateBrandedPDF(previewContent, title, branding)
       const fileName = `${agreement.customers.id}/${Date.now()}.pdf`
       const { data: upload, error } = await supabase.storage.from("agreements").upload(fileName, generatedFile)
       if (!error && upload) {

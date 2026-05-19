@@ -38,6 +38,7 @@ type CompanyProfile = {
   city: string
   phone: string
   contact_email: string
+  logo_url: string
 }
 
 export default function SettingsPage() {
@@ -74,11 +75,13 @@ export default function SettingsPage() {
   const [savingAI, setSavingAI] = useState(false)
 
   const [company, setCompany] = useState<CompanyProfile>({
-    name: "", org_number: "", address: "", postal_code: "", city: "", phone: "", contact_email: "",
+    name: "", org_number: "", address: "", postal_code: "", city: "", phone: "", contact_email: "", logo_url: "",
   })
   const [savingCompany, setSavingCompany] = useState(false)
   const [companySaved, setCompanySaved] = useState(false)
   const [companyMessage, setCompanyMessage] = useState<{ type: "error"; text: string } | null>(null)
+  const [logoUploading, setLogoUploading] = useState(false)
+  const [logoMessage, setLogoMessage] = useState<{ type: "success" | "error"; text: string } | null>(null)
 
   const [fullName, setFullName] = useState("")
   const [profileSaved, setProfileSaved] = useState(false)
@@ -140,9 +143,40 @@ export default function SettingsPage() {
         city: data.city ?? "",
         phone: data.phone ?? "",
         contact_email: data.contact_email ?? "",
+        logo_url: data.logo_url ?? "",
       })
       setAiEnabled(data.ai_assistant_enabled ?? false)
     }
+  }
+
+  async function handleLogoUpload(file: File) {
+    setLogoUploading(true)
+    setLogoMessage(null)
+    const form = new FormData()
+    form.append("logo", file)
+    const res = await fetch("/api/account/logo", { method: "POST", body: form })
+    const data = await res.json()
+    if (res.ok) {
+      setCompany((c) => ({ ...c, logo_url: data.logo_url }))
+      setLogoMessage({ type: "success", text: "Logo lastet opp" })
+    } else {
+      setLogoMessage({ type: "error", text: data.error ?? "Opplasting feilet" })
+    }
+    setLogoUploading(false)
+  }
+
+  async function handleLogoDelete() {
+    if (!window.confirm("Fjern logoen?")) return
+    setLogoUploading(true)
+    setLogoMessage(null)
+    const res = await fetch("/api/account/logo", { method: "DELETE" })
+    if (res.ok) {
+      setCompany((c) => ({ ...c, logo_url: "" }))
+      setLogoMessage({ type: "success", text: "Logo fjernet" })
+    } else {
+      setLogoMessage({ type: "error", text: "Kunne ikke fjerne logo" })
+    }
+    setLogoUploading(false)
   }
 
   async function handleSaveProfile(e: React.FormEvent) {
@@ -393,6 +427,56 @@ export default function SettingsPage() {
             </div>
             {currentUserRole === "admin" && (
               <form onSubmit={handleCompanySave} className="mt-4 space-y-4">
+                {/* Logo */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Firmalogo</label>
+                  <p className="text-xs text-gray-400 mb-3">Vises i headeren på avtale-PDF-er. PNG, JPG eller SVG anbefales.</p>
+                  {company.logo_url ? (
+                    <div className="flex items-center gap-4">
+                      <div className="border border-gray-200 rounded-lg p-3 bg-gray-50 inline-flex">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src={company.logo_url} alt="Firmalogo" className="h-12 max-w-[160px] object-contain" />
+                      </div>
+                      <div className="flex flex-col gap-2">
+                        <label className="cursor-pointer text-sm text-slate-700 underline hover:text-slate-900 transition-colors">
+                          Bytt logo
+                          <input
+                            type="file"
+                            accept="image/png,image/jpeg,image/gif,image/svg+xml,image/webp"
+                            className="hidden"
+                            disabled={logoUploading}
+                            onChange={(e) => { const f = e.target.files?.[0]; if (f) handleLogoUpload(f) }}
+                          />
+                        </label>
+                        <button
+                          type="button"
+                          onClick={handleLogoDelete}
+                          disabled={logoUploading}
+                          className="text-sm text-red-400 hover:text-red-600 transition-colors text-left disabled:opacity-50"
+                        >
+                          Fjern logo
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <label className={`cursor-pointer inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-dashed border-gray-300 text-sm text-gray-500 hover:border-slate-400 hover:text-slate-700 transition-colors ${logoUploading ? "opacity-50 pointer-events-none" : ""}`}>
+                      {logoUploading ? "Laster opp..." : "Last opp logo"}
+                      <input
+                        type="file"
+                        accept="image/png,image/jpeg,image/gif,image/svg+xml,image/webp"
+                        className="hidden"
+                        disabled={logoUploading}
+                        onChange={(e) => { const f = e.target.files?.[0]; if (f) handleLogoUpload(f) }}
+                      />
+                    </label>
+                  )}
+                  {logoMessage && (
+                    <p className={`mt-2 text-sm ${logoMessage.type === "success" ? "text-green-600" : "text-red-600"}`}>
+                      {logoMessage.text}
+                    </p>
+                  )}
+                </div>
+
                 <div className="grid grid-cols-2 gap-4">
                   <Field label={t("companyNameLabel")} colSpan={2}>
                     <input type="text" value={company.name}

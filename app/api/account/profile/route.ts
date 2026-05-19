@@ -28,7 +28,7 @@ export async function GET() {
 
   const { data: account } = await supabaseAdmin
     .from("accounts")
-    .select("name, org_number, address, postal_code, city, phone, contact_email, ai_assistant_enabled")
+    .select("name, org_number, address, postal_code, city, phone, contact_email, ai_assistant_enabled, logo_url")
     .eq("id", accountUser.account_id)
     .single()
 
