@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import Stripe from "stripe";
 import { createServerClient } from "@supabase/ssr";
+import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { cookies } from "next/headers";
 
 const stripe = process.env.STRIPE_SECRET_KEY ? new Stripe(process.env.STRIPE_SECRET_KEY) : null;
@@ -39,37 +40,52 @@ export async function POST() {
       );
     }
 
-    // 2. Hent account via profil
+    // 2. Hent profil
     const { data: profile } = await supabase
       .from("profiles")
-      .select("account_id")
+      .select("*")
       .eq("user_id", user.id)
       .single();
 
-    if (!profile?.account_id) {
-      return NextResponse.json({ error: "Profile or account not found" }, { status: 404 });
+    if (!profile) {
+      return NextResponse.json(
+        { error: "Profile not found" },
+        { status: 404 }
+      );
     }
 
-    const { data: account } = await supabase
-      .from("accounts")
-      .select("stripe_customer_id")
-      .eq("id", profile.account_id)
-      .single();
-
-    if (!account?.stripe_customer_id) {
-      return NextResponse.json({ error: "Missing stripe_customer_id" }, { status: 400 });
+    if (!profile.stripe_customer_id) {
+      return NextResponse.json(
+        { error: "Missing stripe_customer_id" },
+        { status: 400 }
+      );
     }
 
-    // 3. Base URL
+    // 3. Hent landkode for å velge riktig valuta
+    let country: string | null = null
+    if (supabaseAdmin && profile.account_id) {
+      const { data: account } = await supabaseAdmin
+        .from("accounts")
+        .select("country")
+        .eq("id", profile.account_id)
+        .single()
+      country = account?.country ?? null
+    }
+
+    const priceId = country === "NO"
+      ? process.env.STRIPE_PRICE_ID!
+      : (process.env.STRIPE_PRICE_ID_USD || process.env.STRIPE_PRICE_ID!)
+
+    // 4. Base URL
     const baseUrl = process.env.NEXT_PUBLIC_APP_URL!;
 
-    // 4. Lag checkout-session
+    // 5. Lag checkout-session
     const session = await stripe.checkout.sessions.create({
       mode: "subscription",
-      customer: account.stripe_customer_id,
+      customer: profile.stripe_customer_id,
       line_items: [
         {
-          price: process.env.STRIPE_PRICE_ID!,
+          price: priceId,
           quantity: 1,
         },
       ],

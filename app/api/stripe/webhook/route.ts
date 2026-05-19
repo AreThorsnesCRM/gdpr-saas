@@ -2,7 +2,6 @@ import { NextResponse } from "next/server";
 import Stripe from "stripe";
 import { createClient } from "@supabase/supabase-js";
 import { headers } from "next/headers";
-import { sendPaymentFailedEmail } from "@/lib/email";
 
 const stripe = process.env.STRIPE_SECRET_KEY ? new Stripe(process.env.STRIPE_SECRET_KEY) : null;
 
@@ -13,17 +12,18 @@ const supabase = process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.SUPABASE_SE
     )
   : null;
 
-async function getAccountIdFromCustomer(customerId: string | null) {
-  if (!customerId || !supabase) return null;
+// 🔍 Hjelpefunksjon: Finn user_id basert på stripe_customer_id
+async function getUserIdFromCustomer(customerId: string | null) {
+  if (!customerId) return null;
 
-  const { data, error } = await supabase
-    .from("accounts")
-    .select("id")
+  const { data, error } = await supabase!
+    .from("profiles")
+    .select("user_id")
     .eq("stripe_customer_id", customerId)
     .single();
 
   if (error || !data) return null;
-  return data.id;
+  return data.user_id;
 }
 
 export async function POST(req: Request) {
@@ -56,112 +56,75 @@ export async function POST(req: Request) {
 
   console.log("🔔 Received Stripe event:", event.type);
 
+  let userId: string | null = null;
+
+  // 1️⃣ checkout.session.completed → metadata har user_id
+  if (event.type === "checkout.session.completed") {
+    const session = event.data.object as Stripe.Checkout.Session;
+    userId = session.metadata?.user_id ?? null;
+  }
+
+  // 2️⃣ subscription events → finn user_id via stripe_customer_id
+  if (
+    event.type === "customer.subscription.updated" ||
+    event.type === "customer.subscription.created" ||
+    event.type === "customer.subscription.deleted"
+  ) {
+    const subscription = event.data.object as Stripe.Subscription;
+    const customerId = subscription.customer as string;
+
+    userId = await getUserIdFromCustomer(customerId);
+  }
+
+  console.log("👤 Resolved user ID:", userId);
+
+  if (!userId) {
+    console.log("⚠️ No user_id found. Skipping Supabase update.");
+    return NextResponse.json({ received: true });
+  }
+
+  // 🔄 Håndter eventene
   switch (event.type) {
     case "checkout.session.completed": {
       const session = event.data.object as Stripe.Checkout.Session;
-      const customerId = session.customer as string;
-
-      const accountId = await getAccountIdFromCustomer(customerId);
-      if (!accountId) {
-        console.log("⚠️ No account found for customer:", customerId);
-        break;
-      }
 
       await supabase
-        .from("accounts")
+        .from("profiles")
         .update({
+          stripe_customer_id: session.customer,
           stripe_subscription_id: session.subscription,
           subscription_status: "active",
         })
-        .eq("id", accountId);
+        .eq("user_id", userId);
 
-      console.log("✅ checkout.session.completed — account updated:", accountId);
       break;
     }
 
     case "customer.subscription.updated":
     case "customer.subscription.created": {
       const subscription = event.data.object as Stripe.Subscription;
-      const customerId = subscription.customer as string;
-
-      const accountId = await getAccountIdFromCustomer(customerId);
-      if (!accountId) {
-        console.log("⚠️ No account found for customer:", customerId);
-        break;
-      }
 
       await supabase
-        .from("accounts")
+        .from("profiles")
         .update({
           subscription_status: subscription.status,
           stripe_subscription_id: subscription.id,
         })
-        .eq("id", accountId);
+        .eq("user_id", userId);
 
-      console.log("✅", event.type, "— account updated:", accountId);
       break;
     }
 
     case "customer.subscription.deleted": {
-      const subscription = event.data.object as Stripe.Subscription;
-      const customerId = subscription.customer as string;
-
-      const accountId = await getAccountIdFromCustomer(customerId);
-      if (!accountId) {
-        console.log("⚠️ No account found for customer:", customerId);
-        break;
-      }
-
       await supabase
-        .from("accounts")
-        .update({ subscription_status: "canceled" })
-        .eq("id", accountId);
-
-      console.log("✅ customer.subscription.deleted — account updated:", accountId);
-      break;
-    }
-
-    case "invoice.payment_failed": {
-      const invoice = event.data.object as Stripe.Invoice;
-      const customerId = invoice.customer as string;
-
-      const accountId = await getAccountIdFromCustomer(customerId);
-      if (!accountId) break;
-
-      const { data: account } = await supabase
-        .from("accounts")
-        .select("notify_payment_failed")
-        .eq("id", accountId)
-        .single();
-
-      if (!account?.notify_payment_failed) break;
-
-      const { data: adminUser } = await supabase
-        .from("account_users")
-        .select("user_id")
-        .eq("account_id", accountId)
-        .eq("role", "admin")
-        .single();
-
-      if (!adminUser) break;
-
-      const { data: authUser } = await supabase.auth.admin.getUserById(adminUser.user_id);
-      if (!authUser?.user?.email) break;
-
-      const { data: profile } = await supabase
         .from("profiles")
-        .select("full_name")
-        .eq("user_id", adminUser.user_id)
-        .single();
+        .update({
+          subscription_status: "canceled",
+        })
+        .eq("user_id", userId);
 
-      const name = profile?.full_name ?? authUser.user.email.split("@")[0];
-      await sendPaymentFailedEmail(authUser.user.email, name);
-      console.log("✅ invoice.payment_failed — email sent to:", authUser.user.email);
       break;
     }
-
-    default:
-      console.log("ℹ️ Unhandled event type:", event.type);
   }
 
   return NextResponse.json({ received: true });

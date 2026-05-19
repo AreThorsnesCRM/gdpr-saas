@@ -32,28 +32,20 @@ export async function POST() {
 
   const { data: profile } = await supabase
     .from("profiles")
-    .select("account_id")
+    .select("stripe_customer_id")
     .eq("user_id", userData.user.id)
     .single()
 
-  if (!profile?.account_id) {
-    return NextResponse.json({ error: "Profile or account not found" }, { status: 400 })
-  }
-
-  const { data: account } = await supabase
-    .from("accounts")
-    .select("stripe_customer_id")
-    .eq("id", profile.account_id)
-    .single()
-
-  if (!account?.stripe_customer_id) {
+  if (!profile?.stripe_customer_id) {
     return NextResponse.json({ error: "No Stripe customer ID" }, { status: 400 })
   }
 
+  // IMPORTANT: Use NEXT_PUBLIC_APP_URL (the one you added in Vercel)
   const returnUrl = `${process.env.NEXT_PUBLIC_APP_URL}/dashboard`
+  console.log("[create-portal-session] Return URL:", returnUrl)
 
   const session = await stripe.billingPortal.sessions.create({
-    customer: account.stripe_customer_id,
+    customer: profile.stripe_customer_id,
     return_url: returnUrl,
   })
 
