@@ -47,9 +47,26 @@ export async function POST() {
       return NextResponse.json({ error: "Profile not found" }, { status: 404 });
     }
 
-    if (!profile.stripe_customer_id) {
-      console.error("[checkout] Missing stripe_customer_id for user:", user.id, "profile:", JSON.stringify(profile));
-      return NextResponse.json({ error: "Missing stripe_customer_id" }, { status: 400 });
+    let stripeCustomerId = profile.stripe_customer_id;
+
+    if (!stripeCustomerId) {
+      console.log("[checkout] No stripe_customer_id for user:", user.id, "— creating on the fly");
+      const customer = await stripe.customers.create({
+        email: user.email,
+        metadata: { user_id: user.id },
+      });
+      stripeCustomerId = customer.id;
+
+      if (supabaseAdmin) {
+        const trialEnd = new Date();
+        trialEnd.setDate(trialEnd.getDate() + 7);
+        await supabaseAdmin.from("profiles").update({
+          stripe_customer_id: customer.id,
+          subscription_status: "trialing",
+          trial_start: new Date().toISOString(),
+          trial_end: trialEnd.toISOString(),
+        }).eq("user_id", user.id);
+      }
     }
 
     // 3. Hent landkode for å velge riktig valuta
@@ -73,7 +90,7 @@ export async function POST() {
     // 5. Lag checkout-session
     const session = await stripe.checkout.sessions.create({
       mode: "subscription",
-      customer: profile.stripe_customer_id,
+      customer: stripeCustomerId,
       line_items: [
         {
           price: priceId,
