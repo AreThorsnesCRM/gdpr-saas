@@ -1,61 +1,67 @@
 "use client"
 
-import React, { useEffect, useState, useCallback, useRef } from "react"
+import React, { useEffect, useState, useCallback } from "react"
 import { useRouter } from "next/navigation"
 import { supabase } from "@/lib/supabaseClient"
-import { AuthContext, type AuthContextType, type Profile } from "./AuthContext"
+import { AuthContext, type AuthContextType, type Profile, type Account } from "./AuthContext"
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const router = useRouter()
   const [user, setUser] = useState<{ id: string; email?: string } | null>(null)
   const [profile, setProfile] = useState<Profile | null>(null)
+  const [account, setAccount] = useState<Account | null>(null)
+  const [role, setRole] = useState<"admin" | "member" | null>(null)
+  const [restrictToOwn, setRestrictToOwn] = useState(false)
   const [loading, setLoading] = useState(true)
 
-  // Hent profil fra klient når bruker er til stede
+  const refreshAccount = useCallback(async () => {
+    const res = await fetch("/api/account/context")
+    if (!res.ok) return
+    const data = await res.json()
+    if (data.account) setAccount(data.account as Account)
+    if (data.role) setRole(data.role as "admin" | "member")
+    setRestrictToOwn(data.restrict_to_own ?? false)
+  }, [])
+
   const fetchProfile = useCallback(async (retries = 3) => {
     if (!supabase || !user) {
-      console.error("[AuthProvider] Supabase not configured or no user")
       setProfile(null)
       return
     }
 
     for (let i = 0; i < retries; i++) {
       try {
-        console.log(`[AuthProvider] Fetching profile via client (attempt ${i + 1}) for user ${user.id}`)
-        const { data: profile, error } = await supabase
+        const { data: profileData, error } = await supabase
           .from("profiles")
           .select("*")
           .eq("user_id", user.id)
           .single()
 
         if (error) {
-          console.error("Error fetching profile:", error)
-          if (i === retries - 1) {
-            setProfile(null)
-          } else {
-            await new Promise(resolve => setTimeout(resolve, 1000 * (i + 1)))
-          }
+          if (i === retries - 1) setProfile(null)
+          else await new Promise(resolve => setTimeout(resolve, 1000 * (i + 1)))
         } else {
-          console.log("[AuthProvider] Profile fetched:", profile)
-          setProfile(profile)
+          setProfile(profileData)
           return
         }
-      } catch (error) {
-        console.error(`[AuthProvider] Exception in fetchProfile (attempt ${i + 1}):`, error)
-        if (i === retries - 1) {
-          setProfile(null)
-        } else {
-          await new Promise(resolve => setTimeout(resolve, 1000 * (i + 1)))
-        }
+      } catch {
+        if (i === retries - 1) setProfile(null)
+        else await new Promise(resolve => setTimeout(resolve, 1000 * (i + 1)))
       }
     }
   }, [user])
 
   useEffect(() => {
-    if (!user) return
-
+    if (!user) {
+      setProfile(null)
+      setAccount(null)
+      setRole(null)
+      setRestrictToOwn(false)
+      return
+    }
     fetchProfile()
-  }, [user, fetchProfile])
+    refreshAccount()
+  }, [user, fetchProfile, refreshAccount])
 
   // Initialisér session på mount
   useEffect(() => {
@@ -64,7 +70,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     async function initAuth() {
       if (!supabase) {
-        console.error("[AuthProvider] Supabase not configured, skipping auth init")
         setLoading(false)
         return
       }
@@ -76,7 +81,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         try {
           const sessionData = JSON.parse(decodeURIComponent(tempSessionValue))
           await supabase.auth.setSession(sessionData)
-          // Delete the cookie
           document.cookie = 'temp_session=; path=/; maxAge=0'
         } catch (error) {
           console.error("[AuthProvider] Failed to parse temp session:", error)
@@ -84,13 +88,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
 
       try {
-        // Prøv å hent session fra cookies
         const { data: sessionData } = await supabase.auth.getSession()
 
         if (!mounted) return
 
         if (sessionData?.session?.user) {
-          console.log("[AuthProvider] Session found from cookies")
           setUser({
             id: sessionData.session.user.id,
             email: sessionData.session.user.email,
@@ -99,14 +101,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           return
         }
 
-        console.log("[AuthProvider] No session in cookies, waiting for auth state change...")
-
-        // Hvis ingen session, sett opp listener
         const {
           data: { subscription },
-        } = supabase.auth.onAuthStateChange((event, session) => {
-          console.log("[AuthProvider] Auth event:", event, "- Session:", !!session?.user)
-
+        } = supabase.auth.onAuthStateChange((_event, session) => {
           if (!mounted) return
 
           if (session?.user) {
@@ -116,7 +113,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             })
           } else {
             setUser(null)
-            setProfile(null)
           }
           setLoading(false)
         })
@@ -134,38 +130,29 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       mounted = false
       cleanup?.()
     }
-  }, [fetchProfile])
+  }, [])
 
-  // Listen for page visibility changes (e.g., returning from external site)
   useEffect(() => {
     const handleVisibilityChange = () => {
-      if (!document.hidden && user) {
-        console.log("[AuthProvider] Page became visible, refetching profile")
-        fetchProfile()
-      }
+      if (!document.hidden && user) refreshAccount()
     }
-
     document.addEventListener("visibilitychange", handleVisibilityChange)
     return () => document.removeEventListener("visibilitychange", handleVisibilityChange)
-  }, [user, fetchProfile])
+  }, [user, refreshAccount])
 
   const logout = async () => {
     if (!supabase) {
-      console.error("[AuthProvider] Supabase not configured")
       router.replace("/login")
       return
     }
-
     try {
       await fetch("/api/logout", { method: "POST" })
       await supabase.auth.signOut()
       setUser(null)
-      setProfile(null)
       router.replace("/login")
     } catch (error) {
       console.error("[AuthProvider] Logout error:", error)
       setUser(null)
-      setProfile(null)
       router.replace("/login")
     }
   }
@@ -173,8 +160,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const value: AuthContextType = {
     user,
     profile,
+    account,
+    role,
+    restrictToOwn,
     loading,
     logout,
+    refreshAccount,
   }
 
   return (
