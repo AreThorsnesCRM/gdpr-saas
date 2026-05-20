@@ -1,255 +1,376 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import Link from "next/link"
 import { useRouter, useSearchParams } from "next/navigation"
 import { supabase } from "@/lib/supabaseClient"
+import { useAuth } from "@/lib/AuthContext"
+import { useTranslations, useLocale } from "next-intl"
+
+type Agreement = {
+  id: string
+  title: string
+  description: string | null
+  start_date: string
+  end_date: string
+  archived: boolean
+  customer_id: string
+  category_id: string | null
+  customers: { name: string; account_manager_id: string | null }
+  agreement_categories: { id: string; name: string } | null
+}
+
+type Customer = { id: string; name: string }
+type Category = { id: string; name: string }
+type Filter = "all" | "active" | "expired" | "upcoming" | "expiresSoon" | "archived"
 
 export default function AgreementsPage() {
   const router = useRouter()
   const searchParams = useSearchParams()
+  const { user, restrictToOwn } = useAuth()
+  const t = useTranslations("agreements")
+  const tad = useTranslations("agreementDetail")
+  const tc = useTranslations("common")
+  const locale = useLocale()
 
-  const [filter, setFilter] = useState<
-    "all" | "active" | "expired" | "upcoming" | "archived" | "expiresSoon"
-  >("all")
+  const filterOptions: { id: Filter; label: string }[] = [
+    { id: "all",         label: t("filterAll") },
+    { id: "active",      label: t("filterActive") },
+    { id: "expiresSoon", label: t("filterExpiresSoon") },
+    { id: "upcoming",    label: t("filterUpcoming") },
+    { id: "expired",     label: t("filterExpired") },
+    { id: "archived",    label: t("filterArchived") },
+  ]
 
-  const [agreements, setAgreements] = useState<any[]>([])
+  const [filter, setFilter] = useState<Filter>("all")
+  const [search, setSearch] = useState("")
+  const [sortKey, setSortKey] = useState<"title" | "customer" | null>(null)
+  const [sortDir, setSortDir] = useState<"asc" | "desc">("asc")
+  const [agreements, setAgreements] = useState<Agreement[]>([])
+  const [customers, setCustomers] = useState<Customer[]>([])
+  const [categories, setCategories] = useState<Category[]>([])
   const [loading, setLoading] = useState(true)
 
-  // Vent på session før vi henter data
-  async function waitForSession() {
-    let session = null
+  const [quickModalOpen, setQuickModalOpen] = useState(false)
+  const [quickCustomerId, setQuickCustomerId] = useState("")
+  const [quickTitle, setQuickTitle] = useState("")
+  const [quickStart, setQuickStart] = useState("")
+  const [quickEnd, setQuickEnd] = useState("")
+  const [quickCategoryId, setQuickCategoryId] = useState("")
+  const [quickSaving, setQuickSaving] = useState(false)
 
-    while (!session) {
-      if (!supabase) {
-        throw new Error("Supabase not available")
-      }
-      const { data } = await supabase.auth.getSession()
-      session = data.session
-      if (!session) await new Promise((r) => setTimeout(r, 50))
-    }
-
-    return session
-  }
-
-  // Hent avtaler
-  useEffect(() => {
-    async function fetchAgreements() {
-      if (!supabase) {
-        console.error("[AgreementsPage] Supabase not available")
-        setAgreements([])
-        setLoading(false)
-        return
-      }
-
-      setLoading(true)
-
-      await waitForSession()
-
-      const { data, error } = await supabase
-        .from("agreements")
-        .select("*, customers(name), agreement_categories(id, name)")
-        .order("start_date", { ascending: true })
-
-      if (error) {
-        console.error("Error fetching agreements:", error)
-        setAgreements([])
-      } else if (data) {
-        setAgreements(data)
-      }
-
-      setLoading(false)
-    }
-
-    fetchAgreements()
-  }, [])
-
-  // Filter fra URL
   useEffect(() => {
     const urlFilter = searchParams.get("filter")
-    const status = searchParams.get("status")
     const expiresSoon = searchParams.get("expiresSoon")
+    const status = searchParams.get("status")
 
-    if (
-      urlFilter === "active" ||
-      urlFilter === "expired" ||
-      urlFilter === "upcoming" ||
-      urlFilter === "archived" ||
-      urlFilter === "expiresSoon"
-    ) {
-      setFilter(urlFilter)
-      return
-    }
-
-    if (status === "active") {
-      setFilter("active")
-      return
-    }
-
-    if (expiresSoon === "true") {
+    if (urlFilter && filterOptions.some((f) => f.id === urlFilter)) {
+      setFilter(urlFilter as Filter)
+    } else if (expiresSoon === "true") {
       setFilter("expiresSoon")
-      return
+    } else if (status === "active") {
+      setFilter("active")
+    } else {
+      setFilter("all")
     }
-
-    setFilter("all")
   }, [searchParams])
 
-  function applyFilter(newFilter: typeof filter) {
-    setFilter(newFilter)
+  useEffect(() => {
+    if (!supabase) return
+    fetchAgreements()
+  }, [user, restrictToOwn])
 
-    if (newFilter === "all") {
-      router.push("/agreements")
-    } else {
-      router.push(`/agreements?filter=${newFilter}`)
+  useEffect(() => {
+    if (!supabase || !user) return
+    supabase.from("customers").select("id, name").order("name")
+      .then(({ data }) => setCustomers(data ?? []))
+  }, [user])
+
+  useEffect(() => {
+    fetch("/api/account/agreement-categories")
+      .then((r) => r.json())
+      .then((d) => setCategories(d.categories ?? []))
+  }, [])
+
+  async function fetchAgreements() {
+    if (!supabase) return
+    setLoading(true)
+
+    let query = supabase
+      .from("agreements")
+      .select("*, customers!inner(name, account_manager_id), agreement_categories(id, name)")
+      .order("end_date", { ascending: true })
+
+    if (restrictToOwn && user) {
+      query = query.eq("customers.account_manager_id", user.id)
+    }
+
+    const { data } = await query
+    setAgreements(data ?? [])
+    setLoading(false)
+  }
+
+  function openQuickModal() {
+    setQuickCustomerId(""); setQuickTitle(""); setQuickStart(""); setQuickEnd(""); setQuickCategoryId("")
+    setQuickModalOpen(true)
+  }
+
+  async function handleCreateQuickAgreement() {
+    if (!supabase || !user || !quickCustomerId || !quickTitle || !quickStart || !quickEnd) return
+    setQuickSaving(true)
+    try {
+      const { data: newAgreement } = await supabase.from("agreements").insert({
+        customer_id: quickCustomerId,
+        user_id: user.id,
+        title: quickTitle,
+        start_date: quickStart,
+        end_date: quickEnd,
+        signed: false,
+        archived: false,
+        ...(quickCategoryId ? { category_id: quickCategoryId } : {}),
+      }).select().single()
+      if (newAgreement) router.push(`/agreements/${newAgreement.id}`)
+    } finally {
+      setQuickSaving(false)
     }
   }
 
   function daysUntil(dateStr: string) {
-    const today = new Date()
-    const target = new Date(dateStr)
-    const diff = target.getTime() - today.getTime()
-    return Math.ceil(diff / (1000 * 60 * 60 * 24))
+    return Math.ceil((new Date(dateStr).getTime() - Date.now()) / 86400000)
   }
 
-  function getStatus(a: any) {
+  function getStatus(a: Agreement): "active" | "expired" | "upcoming" | "archived" {
     const today = new Date().toISOString().split("T")[0]
-
     if (a.archived) return "archived"
     if (a.end_date < today) return "expired"
     if (a.start_date > today) return "upcoming"
     return "active"
   }
 
-  const filtered = agreements.filter((a) => {
+  function applyFilter(f: Filter) {
+    setFilter(f)
+    router.push(f === "all" ? "/agreements" : `/agreements?filter=${f}`)
+  }
+
+  function toggleSort(key: "title" | "customer") {
+    if (sortKey === key) {
+      setSortDir(d => d === "asc" ? "desc" : "asc")
+    } else {
+      setSortKey(key)
+      setSortDir("asc")
+    }
+  }
+
+  const filtered = agreements
+    .filter((a) => {
+      if (filter !== "all") {
+        if (filter === "expiresSoon") {
+          const days = daysUntil(a.end_date)
+          if (!(!a.archived && days >= 0 && days <= 30)) return false
+        } else if (getStatus(a) !== filter) {
+          return false
+        }
+      }
+      if (search) {
+        const q = search.toLowerCase()
+        return (
+          a.title.toLowerCase().includes(q) ||
+          (a.customers?.name ?? "").toLowerCase().includes(q) ||
+          (a.agreement_categories?.name ?? "").toLowerCase().includes(q)
+        )
+      }
+      return true
+    })
+    .sort((a, b) => {
+      if (!sortKey) return 0
+      const valA = sortKey === "title" ? a.title : (a.customers?.name ?? "")
+      const valB = sortKey === "title" ? b.title : (b.customers?.name ?? "")
+      return sortDir === "asc" ? valA.localeCompare(valB) : valB.localeCompare(valA)
+    })
+
+  const dateLocale = locale === "en" ? "en-GB" : "no-NO"
+
+  function formatDate(dateStr: string) {
+    return new Date(dateStr).toLocaleDateString(dateLocale, { day: "2-digit", month: "short", year: "numeric" })
+  }
+
+  function StatusBadge({ a }: { a: Agreement }) {
     const status = getStatus(a)
+    const days = daysUntil(a.end_date)
 
-    if (filter === "all") return true
-    if (filter === "expiresSoon") return daysUntil(a.end_date) <= 30 && !a.archived
-
-    return status === filter
-  })
+    if (status === "archived")
+      return <span className="text-xs font-medium px-2.5 py-0.5 rounded-full bg-gray-100 text-gray-500 ring-1 ring-gray-200">{t("statusArchived")}</span>
+    if (status === "expired")
+      return <span className="text-xs font-medium px-2.5 py-0.5 rounded-full bg-red-50 text-red-600 ring-1 ring-red-200">{t("statusExpired")}</span>
+    if (status === "upcoming")
+      return <span className="text-xs font-medium px-2.5 py-0.5 rounded-full bg-blue-50 text-blue-600 ring-1 ring-blue-200">{t("statusUpcoming")}</span>
+    if (days <= 7)
+      return <span className="text-xs font-medium px-2.5 py-0.5 rounded-full bg-red-50 text-red-600 ring-1 ring-red-200">{t("statusExpiresDays", { days })}</span>
+    if (days <= 30)
+      return <span className="text-xs font-medium px-2.5 py-0.5 rounded-full bg-amber-50 text-amber-700 ring-1 ring-amber-200">{t("statusExpiresDays", { days })}</span>
+    return <span className="text-xs font-medium px-2.5 py-0.5 rounded-full bg-green-50 text-green-700 ring-1 ring-green-200">{t("statusActive")}</span>
+  }
 
   return (
-    <div className="p-8 space-y-6">
+    <div className="p-8 max-w-6xl space-y-6">
+
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">Avtaler</h1>
-        <Link
-          href="/agreements/new"
-          className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
-        >
-          Ny avtale
-        </Link>
-      </div>
-
-      <div className="flex flex-wrap gap-3 items-center bg-white p-4 rounded shadow">
-        <span className="font-medium">Vis:</span>
-
+        <h1 className="text-2xl font-bold text-gray-900">{t("title")}</h1>
         <button
-          onClick={() => applyFilter("all")}
-          className={`px-3 py-1 rounded border ${
-            filter === "all" ? "bg-blue-600 text-white" : "bg-white"
-          }`}
+          onClick={openQuickModal}
+          className="bg-slate-800 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-slate-700 transition-colors"
         >
-          Alle
-        </button>
-
-        <button
-          onClick={() => applyFilter("active")}
-          className={`px-3 py-1 rounded border ${
-            filter === "active" ? "bg-blue-600 text-white" : "bg-white"
-          }`}
-        >
-          Aktive
-        </button>
-
-        <button
-          onClick={() => applyFilter("expired")}
-          className={`px-3 py-1 rounded border ${
-            filter === "expired" ? "bg-blue-600 text-white" : "bg-white"
-          }`}
-        >
-          Utløpte
-        </button>
-
-        <button
-          onClick={() => applyFilter("upcoming")}
-          className={`px-3 py-1 rounded border ${
-            filter === "upcoming" ? "bg-blue-600 text-white" : "bg-white"
-          }`}
-        >
-          Kommende
-        </button>
-
-        <button
-          onClick={() => applyFilter("expiresSoon")}
-          className={`px-3 py-1 rounded border ${
-            filter === "expiresSoon" ? "bg-blue-600 text-white" : "bg-white"
-          }`}
-        >
-          Utløper snart
-        </button>
-
-        <button
-          onClick={() => applyFilter("archived")}
-          className={`px-3 py-1 rounded border ${
-            filter === "archived" ? "bg-blue-600 text-white" : "bg-white"
-          }`}
-        >
-          Arkiverte
+          {t("newAgreement")}
         </button>
       </div>
 
-      {loading && <p>Laster avtaler...</p>}
+      <div className="flex flex-wrap gap-2 items-center">
+        <div className="relative">
+          <input
+            type="text"
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            placeholder={t("searchPlaceholder")}
+            className="pl-3 pr-8 py-1.5 rounded-full text-sm border border-gray-200 focus:outline-none focus:ring-2 focus:ring-slate-300 w-64"
+          />
+          {search && (
+            <button onClick={() => setSearch("")} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 text-xs">✕</button>
+          )}
+        </div>
+        {filterOptions.map((f) => (
+          <button
+            key={f.id}
+            onClick={() => applyFilter(f.id)}
+            className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
+              filter === f.id
+                ? "bg-slate-800 text-white"
+                : "bg-white border border-gray-200 text-gray-600 hover:border-gray-300 hover:text-gray-900"
+            }`}
+          >
+            {f.label}
+          </button>
+        ))}
+      </div>
 
-      {!loading && filtered.length === 0 && (
-        <p className="text-gray-500">Ingen avtaler funnet.</p>
+      {loading ? (
+        <p className="text-sm text-gray-400">{tc("loading")}</p>
+      ) : filtered.length === 0 ? (
+        <p className="text-sm text-gray-400">{t("noResults")}</p>
+      ) : (
+        <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b border-gray-200 bg-gray-50">
+                <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wide">
+                  <button onClick={() => toggleSort("title")} className="flex items-center gap-1 hover:text-gray-800 transition-colors">
+                    {t("columnTitle")}
+                    <span className="text-gray-300">{sortKey === "title" ? (sortDir === "asc" ? "↑" : "↓") : "↕"}</span>
+                  </button>
+                </th>
+                <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wide">
+                  <button onClick={() => toggleSort("customer")} className="flex items-center gap-1 hover:text-gray-800 transition-colors">
+                    {t("columnCustomer")}
+                    <span className="text-gray-300">{sortKey === "customer" ? (sortDir === "asc" ? "↑" : "↓") : "↕"}</span>
+                  </button>
+                </th>
+                <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wide">Kategori</th>
+                <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wide">{t("columnPeriod")}</th>
+                <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wide">{t("columnStatus")}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filtered.map((a) => (
+                <tr
+                  key={a.id}
+                  onClick={() => router.push(`/agreements/${a.id}`)}
+                  className="border-t border-gray-100 hover:bg-gray-50 cursor-pointer transition-colors"
+                >
+                  <td className="px-4 py-3 font-medium text-gray-900">{a.title}</td>
+                  <td className="px-4 py-3 text-gray-500">{a.customers?.name}</td>
+                  <td className="px-4 py-3">
+                    {a.agreement_categories?.name ? (
+                      <span className="text-xs px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 border border-slate-200">
+                        {a.agreement_categories.name}
+                      </span>
+                    ) : (
+                      <span className="text-gray-300">—</span>
+                    )}
+                  </td>
+                  <td className="px-4 py-3 text-gray-500 whitespace-nowrap">
+                    {formatDate(a.start_date)} – {formatDate(a.end_date)}
+                  </td>
+                  <td className="px-4 py-3">
+                    <StatusBadge a={a} />
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       )}
 
       {!loading && filtered.length > 0 && (
-        <ul className="space-y-3">
-          {filtered.map((a) => {
-            const days = daysUntil(a.end_date)
-            const badge =
-              days < 0
-                ? { text: "Utløpt", color: "bg-red-100 text-red-700 border-red-300" }
-                : days <= 7
-                ? { text: `Utløper om ${days} dager`, color: "bg-red-100 text-red-700 border-red-300" }
-                : days <= 30
-                ? { text: `Utløper om ${days} dager`, color: "bg-yellow-100 text-yellow-700 border-yellow-300" }
-                : null
+        <p className="text-xs text-gray-400">{t("count", { count: filtered.length })}</p>
+      )}
 
-            return (
-              <Link key={a.id} href={`/customers/${a.customer_id}?agreementId=${a.id}`}>
-                <li className="border rounded p-4 hover:bg-gray-50 cursor-pointer transition">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <span className="font-medium">{a.title}</span>
-                      {a.agreement_categories?.name && (
-                        <span className="text-xs px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 border border-slate-200">
-                          {a.agreement_categories.name}
-                        </span>
-                      )}
-                    </div>
-
-                    <div className="flex items-center gap-2">
-                      {badge && (
-                        <span className={`text-xs px-2 py-1 rounded border ${badge.color}`}>
-                          {badge.text}
-                        </span>
-                      )}
-
-                      <div className="text-sm text-gray-500">{a.customers?.name}</div>
-                    </div>
-                  </div>
-
-                  <div className="text-sm text-gray-600 mt-1">
-                    {a.start_date} – {a.end_date}
-                  </div>
-                </li>
-              </Link>
-            )
-          })}
-        </ul>
+      {quickModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
+          <div className="bg-white rounded-xl shadow-xl border border-gray-200 w-full max-w-md p-6 space-y-4">
+            <h2 className="text-base font-semibold text-gray-900">{t("newAgreement")}</h2>
+            <div className="space-y-3">
+              <div>
+                <label className="block text-xs font-medium text-gray-500 mb-1">{tad("labelCustomer")}</label>
+                <select
+                  value={quickCustomerId}
+                  onChange={e => setQuickCustomerId(e.target.value)}
+                  className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-400"
+                  autoFocus
+                >
+                  <option value="">{tad("customerPlaceholder")}</option>
+                  {customers.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                </select>
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-gray-500 mb-1">{tad("quickTitleLabel")}</label>
+                <input
+                  className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-400"
+                  value={quickTitle}
+                  onChange={e => setQuickTitle(e.target.value)}
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-gray-500 mb-1">Kategori</label>
+                <select
+                  value={quickCategoryId}
+                  onChange={e => setQuickCategoryId(e.target.value)}
+                  className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-400"
+                >
+                  <option value="">Ingen kategori</option>
+                  {categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                </select>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-medium text-gray-500 mb-1">{tad("quickStartLabel")}</label>
+                  <input type="date" className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-400" value={quickStart} onChange={e => setQuickStart(e.target.value)} />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-gray-500 mb-1">{tad("quickEndLabel")}</label>
+                  <input type="date" className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-400" value={quickEnd} onChange={e => setQuickEnd(e.target.value)} />
+                </div>
+              </div>
+            </div>
+            <div className="flex justify-between pt-1">
+              <button onClick={() => setQuickModalOpen(false)} className="text-sm text-gray-500 hover:text-gray-800 transition-colors">{tc("cancel")}</button>
+              <button
+                onClick={handleCreateQuickAgreement}
+                disabled={quickSaving || !quickCustomerId || !quickTitle || !quickStart || !quickEnd}
+                className="bg-slate-800 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-slate-700 disabled:opacity-50 transition-colors"
+              >
+                {quickSaving ? tad("creating") : tad("createButton")}
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   )
