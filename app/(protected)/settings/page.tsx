@@ -47,12 +47,13 @@ export default function SettingsPage() {
   const tc = useTranslations("common")
 
   const sections = [
-    { id: "profil",      label: t("tabProfile") },
-    { id: "firma",       label: t("tabCompany") },
-    { id: "brukere",     label: t("tabUsers") },
-    { id: "varsler",     label: t("tabNotifications") },
-    { id: "ai",          label: t("tabAI") },
-    { id: "abonnement",  label: t("tabSubscription") },
+    { id: "profil",         label: t("tabProfile") },
+    { id: "firma",          label: t("tabCompany") },
+    { id: "brukere",        label: t("tabUsers") },
+    { id: "varsler",        label: t("tabNotifications") },
+    { id: "ai",             label: t("tabAI") },
+    { id: "kategorier",     label: t("tabCategories") },
+    { id: "abonnement",     label: t("tabSubscription") },
   ]
 
   const [activeSection, setActiveSection] = useState("profil")
@@ -94,9 +95,15 @@ export default function SettingsPage() {
   })
   const [savingUserNotif, setSavingUserNotif] = useState(false)
 
+  type Category = { id: string; name: string; is_predefined: boolean }
+  const [categories, setCategories] = useState<Category[]>([])
+  const [newCategoryName, setNewCategoryName] = useState("")
+  const [addingCategory, setAddingCategory] = useState(false)
+
   useEffect(() => {
     fetchUsers()
     fetchCompanyProfile()
+    loadCategories()
   }, [])
 
   useEffect(() => {
@@ -148,6 +155,37 @@ export default function SettingsPage() {
       })
       setAiEnabled(data.ai_assistant_enabled ?? false)
       setAiDashboardWidget(data.ai_dashboard_widget_enabled ?? false)
+    }
+  }
+
+  async function loadCategories() {
+    const res = await fetch("/api/account/agreement-categories")
+    if (res.ok) {
+      const data = await res.json()
+      setCategories(data.categories ?? [])
+    }
+  }
+
+  async function addCategory() {
+    if (!newCategoryName.trim()) return
+    setAddingCategory(true)
+    const res = await fetch("/api/account/agreement-categories", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name: newCategoryName.trim() }),
+    })
+    if (res.ok) {
+      const data = await res.json()
+      setCategories((prev) => [...prev, data.category])
+      setNewCategoryName("")
+    }
+    setAddingCategory(false)
+  }
+
+  async function deleteCategory(id: string) {
+    const res = await fetch(`/api/account/agreement-categories/${id}`, { method: "DELETE" })
+    if (res.ok) {
+      setCategories((prev) => prev.filter((c) => c.id !== id))
     }
   }
 
@@ -807,6 +845,59 @@ export default function SettingsPage() {
               </div>
             )}
             {savingAI && <p className="text-xs text-gray-400 mt-2">{tc("saving")}</p>}
+          </section>
+
+          <Divider />
+
+          {/* Avtalekategorier */}
+          <section id="kategorier" className="scroll-mt-8">
+            <div>
+              <h2 className="text-base font-semibold text-gray-900">{t("tabCategories")}</h2>
+              <p className="text-sm text-gray-500 mt-0.5">
+                {currentUserRole !== "admin"
+                  ? t("adminOnly")
+                  : "Administrer kategorier for avtalene dine. Forhåndsdefinerte kan slettes om du ikke trenger dem."}
+              </p>
+            </div>
+            {currentUserRole === "admin" && (
+              <div className="mt-4 space-y-2">
+                {categories.map((cat) => (
+                  <div key={cat.id} className="flex items-center justify-between px-4 py-2.5 border border-gray-200 rounded-lg bg-white">
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm text-gray-800">{cat.name}</span>
+                      {cat.is_predefined && (
+                        <span className="text-xs text-gray-400 bg-gray-100 px-1.5 py-0.5 rounded">Forhåndsdefinert</span>
+                      )}
+                    </div>
+                    <button
+                      onClick={() => deleteCategory(cat.id)}
+                      className="text-gray-300 hover:text-red-500 transition-colors text-sm"
+                      title="Slett kategori"
+                    >
+                      ✕
+                    </button>
+                  </div>
+                ))}
+
+                <div className="flex gap-2 mt-3">
+                  <input
+                    type="text"
+                    value={newCategoryName}
+                    onChange={(e) => setNewCategoryName(e.target.value)}
+                    onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); addCategory() } }}
+                    placeholder="Ny kategori..."
+                    className="flex-1 border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-400 bg-white"
+                  />
+                  <button
+                    onClick={addCategory}
+                    disabled={addingCategory || !newCategoryName.trim()}
+                    className="bg-slate-800 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-slate-700 disabled:opacity-50 transition-colors"
+                  >
+                    {addingCategory ? "Legger til..." : "Legg til"}
+                  </button>
+                </div>
+              </div>
+            )}
           </section>
 
           <Divider />

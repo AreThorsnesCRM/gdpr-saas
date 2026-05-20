@@ -43,12 +43,12 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
   if (!accountUser) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   const { id } = await params
 
-  const { name, duration_months, content } = await req.json()
+  const { name, duration_months, content, category_id } = await req.json()
   if (!name?.trim()) return NextResponse.json({ error: "Navn er påkrevd" }, { status: 400 })
 
   const { error } = await supabaseAdmin
     .from("agreement_templates")
-    .update({ name: name.trim(), duration_months, content })
+    .update({ name: name.trim(), duration_months, content, category_id: category_id ?? null })
     .eq("id", id)
     .eq("account_id", accountUser.account_id)
 

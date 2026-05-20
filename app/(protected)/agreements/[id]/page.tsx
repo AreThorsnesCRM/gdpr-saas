@@ -36,10 +36,12 @@ type AgreementDetail = {
   template_id: string | null
   content: string | null
   customer_id: string
+  category_id: string | null
   customers: { id: string; name: string; org_nummer: string | null }
 }
 
 type Template = { id: string; name: string; duration_months: number; content: string }
+type Category = { id: string; name: string }
 
 
 function formatDateNO(dateStr: string) {
@@ -73,6 +75,9 @@ export default function AgreementDetailPage({ params }: { params: Promise<{ id: 
   const [previewContent, setPreviewContent] = useState("")
   const [generating, setGenerating] = useState(false)
 
+  const [categoryId, setCategoryId] = useState<string>("")
+  const [categories, setCategories] = useState<Category[]>([])
+
   const [signers, setSigners] = useState<{ name: string; email: string }[]>([{ name: "", email: "" }])
   const [signerManuallySet, setSignerManuallySet] = useState(false)
   const [signingLoading, setSigningLoading] = useState(false)
@@ -84,6 +89,9 @@ export default function AgreementDetailPage({ params }: { params: Promise<{ id: 
     if (!user || !id) return
     fetchAgreement()
     fetchTemplates()
+    fetch("/api/account/agreement-categories")
+      .then((r) => r.json())
+      .then((d) => setCategories(d.categories ?? []))
     fetch("/api/account/profile")
       .then((r) => r.json())
       .then((d) => setBranding({
@@ -114,6 +122,7 @@ export default function AgreementDetailPage({ params }: { params: Promise<{ id: 
       setContactEmail(a.contact_email ?? "")
       setContactPhone(a.contact_phone ?? "")
       setSigned(a.signed ?? false)
+      setCategoryId(a.category_id ?? "")
       if (!a.signing_status) {
         setSigners([{ name: a.signer_name ?? a.contact_name ?? "", email: a.signer_email ?? a.contact_email ?? "" }])
       }
@@ -146,6 +155,7 @@ export default function AgreementDetailPage({ params }: { params: Promise<{ id: 
       contact_name: contactName || null,
       contact_email: contactEmail || null,
       contact_phone: contactPhone || null,
+      category_id: categoryId || null,
     }).eq("id", id)
     setAgreement(prev => prev ? { ...prev, title, start_date: startDate, end_date: endDate, contact_name: contactName, contact_email: contactEmail, contact_phone: contactPhone } : prev)
     setSaved(true)
@@ -366,6 +376,15 @@ export default function AgreementDetailPage({ params }: { params: Promise<{ id: 
               <label className="block text-xs font-medium text-gray-500 mb-1">{t("labelPhone")}</label>
               <input className={inputClass} value={contactPhone} onChange={e => setContactPhone(e.target.value)} />
             </div>
+          </div>
+          <div>
+            <label className="block text-xs font-medium text-gray-500 mb-1">Kategori</label>
+            <select className={inputClass} value={categoryId} onChange={e => setCategoryId(e.target.value)}>
+              <option value="">Ingen kategori</option>
+              {categories.map((cat) => (
+                <option key={cat.id} value={cat.id}>{cat.name}</option>
+              ))}
+            </select>
           </div>
         </div>
         <button

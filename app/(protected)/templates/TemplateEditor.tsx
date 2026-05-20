@@ -12,6 +12,8 @@ type Props = {
   templateId?: string
 }
 
+type Category = { id: string; name: string }
+
 export default function TemplateEditor({ templateId }: Props) {
   const router = useRouter()
   const isEditing = !!templateId
@@ -19,9 +21,17 @@ export default function TemplateEditor({ templateId }: Props) {
   const [name, setName] = useState("")
   const [durationMonths, setDurationMonths] = useState(12)
   const [content, setContent] = useState("")
+  const [categoryId, setCategoryId] = useState("")
+  const [categories, setCategories] = useState<Category[]>([])
   const [loading, setLoading] = useState(isEditing)
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
+
+  useEffect(() => {
+    fetch("/api/account/agreement-categories")
+      .then((r) => r.json())
+      .then((d) => setCategories(d.categories ?? []))
+  }, [])
 
   useEffect(() => {
     if (!templateId) return
@@ -32,6 +42,7 @@ export default function TemplateEditor({ templateId }: Props) {
         setName(template.name)
         setDurationMonths(template.duration_months)
         setContent(template.content ?? "")
+        setCategoryId(template.category_id ?? "")
         setLoading(false)
       })
   }, [templateId])
@@ -46,7 +57,7 @@ export default function TemplateEditor({ templateId }: Props) {
     const res = await fetch(url, {
       method,
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name, duration_months: durationMonths, content }),
+      body: JSON.stringify({ name, duration_months: durationMonths, content, category_id: categoryId || null }),
     })
 
     setSaving(false)
@@ -100,6 +111,16 @@ export default function TemplateEditor({ templateId }: Props) {
               className={inputCls}
             />
           </div>
+        </div>
+
+        <div>
+          <label className="block text-xs font-medium text-gray-500 mb-1">Kategori</label>
+          <select value={categoryId} onChange={(e) => setCategoryId(e.target.value)} className={inputCls}>
+            <option value="">Ingen kategori</option>
+            {categories.map((cat) => (
+              <option key={cat.id} value={cat.id}>{cat.name}</option>
+            ))}
+          </select>
         </div>
 
         <div>
