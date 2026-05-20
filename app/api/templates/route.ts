@@ -27,9 +27,9 @@ export async function GET() {
 
   const { data } = await supabaseAdmin
     .from("agreement_templates")
-    .select("id, name, duration_months, content, created_at")
+    .select("id, name, duration_months, content, created_at, category_id, agreement_categories(id, name)")
     .eq("account_id", accountUser.account_id)
-    .order("created_at", { ascending: false })
+    .order("name", { ascending: true })
 
   return NextResponse.json({ templates: data ?? [] })
 }

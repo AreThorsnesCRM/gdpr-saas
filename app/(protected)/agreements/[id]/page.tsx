@@ -40,7 +40,14 @@ type AgreementDetail = {
   customers: { id: string; name: string; org_nummer: string | null }
 }
 
-type Template = { id: string; name: string; duration_months: number; content: string }
+type Template = {
+  id: string
+  name: string
+  duration_months: number
+  content: string
+  category_id: string | null
+  agreement_categories: { id: string; name: string } | null
+}
 type Category = { id: string; name: string }
 
 
@@ -191,6 +198,30 @@ export default function AgreementDetailPage({ params }: { params: Promise<{ id: 
     } finally {
       setUploading(false)
     }
+  }
+
+  function groupedTemplateOptions() {
+    const map = new Map<string, { label: string; items: Template[] }>()
+    for (const tmpl of templates) {
+      const key = tmpl.category_id ?? "__none__"
+      const label = tmpl.agreement_categories?.name ?? "Uten kategori"
+      if (!map.has(key)) map.set(key, { label, items: [] })
+      map.get(key)!.items.push(tmpl)
+    }
+    const withCat = [...map.entries()].filter(([k]) => k !== "__none__").sort((a, b) => a[1].label.localeCompare(b[1].label))
+    const none = map.get("__none__")
+    const groups = [...withCat.map(([, v]) => v), ...(none ? [none] : [])]
+    const hasCats = withCat.length > 0
+
+    return groups.map((g) =>
+      hasCats ? (
+        <optgroup key={g.label} label={g.label}>
+          {g.items.map((tmpl) => <option key={tmpl.id} value={tmpl.id}>{tmpl.name}</option>)}
+        </optgroup>
+      ) : (
+        g.items.map((tmpl) => <option key={tmpl.id} value={tmpl.id}>{tmpl.name}</option>)
+      )
+    )
   }
 
   function getPreviewHtml() {
@@ -441,9 +472,7 @@ export default function AgreementDetailPage({ params }: { params: Promise<{ id: 
                 <p className="text-xs font-medium text-gray-500">{t("pdfFromTemplateLabel")}</p>
                 <select value={selectedTemplateId} onChange={e => setSelectedTemplateId(e.target.value)} className={inputClass}>
                   <option value="">{t("pdfSelectTemplate")}</option>
-                  {templates.map(tmpl => (
-                    <option key={tmpl.id} value={tmpl.id}>{tmpl.name}</option>
-                  ))}
+                  {groupedTemplateOptions()}
                 </select>
                 {selectedTemplateId && (
                   <button onClick={() => { setPreviewContent(getPreviewHtml()); setPreviewMode(true) }} className="bg-slate-800 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-slate-700 transition-colors">
