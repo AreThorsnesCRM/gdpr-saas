@@ -16,7 +16,7 @@ import { useAuth } from "@/lib/AuthContext"
 
 export default function Sidebar({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
   const pathname = usePathname()
-  const { profile, loading } = useAuth()
+  const { profile, account, loading } = useAuth()
 
   const navItems = [
     { href: "/dashboard", label: "Dashboard", icon: <HomeIcon className="h-5 w-5" /> },
@@ -47,7 +47,7 @@ export default function Sidebar({ isOpen, onClose }: { isOpen: boolean; onClose:
   const status = loading ? "loading" : profile?.subscription_status ?? "unknown"
   const fullName = profile?.full_name ?? "Bruker"
   const email = profile?.user_id ? "" : "" // Will be populated via context if needed
-  const companyName = profile?.company_name ?? ""
+  const companyName = account?.name ?? ""
 
   useEffect(() => { onClose() }, [pathname])
 
