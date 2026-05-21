@@ -123,6 +123,29 @@ export default function TemplateEditor({ templateId }: Props) {
           </select>
         </div>
 
+        <div className="bg-gray-50 border border-gray-200 rounded-xl p-4 space-y-2">
+          <div className="flex items-center gap-2">
+            <span className="text-sm font-medium text-gray-700">Flettefelt</span>
+            <span className="text-xs text-gray-400">— settes automatisk inn ved PDF-generering</span>
+          </div>
+          <p className="text-xs text-gray-500 leading-relaxed">
+            Skriv flettefeltene direkte i teksten, eller klikk på en knapp i verktøylinjen over innholdsfeltet. Når du genererer PDF fra en avtale, erstattes feltene automatisk med riktige verdier fra kunden og avtalen.
+          </p>
+          <div className="flex flex-wrap gap-1.5 pt-1">
+            {[
+              { label: "{{kunde_navn}}", desc: "Kundens navn" },
+              { label: "{{org_nummer}}", desc: "Org.nr." },
+              { label: "{{startdato}}", desc: "Avtalens startdato" },
+              { label: "{{sluttdato}}", desc: "Avtalens sluttdato" },
+              { label: "{{firma_navn}}", desc: "Ditt firmanavn" },
+            ].map((f) => (
+              <span key={f.label} title={f.desc} className="inline-flex items-center gap-1 text-xs font-mono bg-white text-slate-700 px-2 py-1 rounded-lg border border-gray-200 shadow-sm cursor-default">
+                {f.label}
+              </span>
+            ))}
+          </div>
+        </div>
+
         <div>
           <label className="block text-xs font-medium text-gray-500 mb-1">Avtaleinnhold</label>
           <RichTextEditor

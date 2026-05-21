@@ -117,19 +117,6 @@ export default function TemplatesPage() {
         </Link>
       </div>
 
-      {/* Flettefelt-forklaring */}
-      <div className="bg-amber-50 border border-amber-200 rounded-xl px-4 py-3">
-        <p className="text-sm text-amber-800 font-medium mb-1">{t("mergeFieldsTitle")}</p>
-        <div className="flex flex-wrap gap-2">
-          {["{{kunde_navn}}", "{{org_nummer}}", "{{startdato}}", "{{sluttdato}}", "{{firma_navn}}"].map((f) => (
-            <code key={f} className="text-xs bg-amber-100 text-amber-700 px-2 py-0.5 rounded border border-amber-200">
-              {f}
-            </code>
-          ))}
-        </div>
-        <p className="text-xs text-amber-600 mt-2">{t("mergeFieldsDesc")}</p>
-      </div>
-
       {loading ? (
         <p className="text-sm text-gray-400">{tc("loading")}</p>
       ) : templates.length === 0 ? (
@@ -148,7 +135,13 @@ export default function TemplatesPage() {
       ) : grouped.length === 1 && grouped[0].label === "Uten kategori" ? (
         // Ingen kategorier i bruk — vis flat tabell uten headers
         <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-          <table className="w-full text-sm">
+          <table className="w-full text-sm table-fixed">
+            <colgroup>
+              <col className="w-auto" />
+              <col style={{ width: "140px" }} />
+              <col style={{ width: "150px" }} />
+              <col style={{ width: "48px" }} />
+            </colgroup>
             <thead>
               <tr className="border-b border-gray-200 bg-gray-50">
                 <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wide">{t("columnName")}</th>
@@ -171,7 +164,13 @@ export default function TemplatesPage() {
                 {group.label}
               </h2>
               <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-                <table className="w-full text-sm">
+                <table className="w-full text-sm table-fixed">
+                  <colgroup>
+                    <col className="w-auto" />
+                    <col style={{ width: "140px" }} />
+                    <col style={{ width: "150px" }} />
+                    <col style={{ width: "48px" }} />
+                  </colgroup>
                   <thead>
                     <tr className="border-b border-gray-200 bg-gray-50">
                       <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wide">{t("columnName")}</th>

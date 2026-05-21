@@ -131,7 +131,7 @@ export default function RichTextEditor({ content, onChange, placeholder }: Props
             key={f.value}
             type="button"
             onClick={() => insertMergeField(f.value)}
-            className="px-2 py-1 rounded text-xs font-mono bg-amber-50 text-amber-700 hover:bg-amber-100 transition-colors border border-amber-200"
+            className="px-2 py-1 rounded text-xs font-mono bg-slate-100 text-slate-700 hover:bg-slate-200 transition-colors border border-slate-200"
           >
             {f.label}
           </button>

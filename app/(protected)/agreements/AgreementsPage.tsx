@@ -43,7 +43,7 @@ export default function AgreementsPage() {
 
   const [filter, setFilter] = useState<Filter>("all")
   const [search, setSearch] = useState("")
-  const [sortKey, setSortKey] = useState<"title" | "customer" | null>(null)
+  const [sortKey, setSortKey] = useState<"title" | "customer" | "category" | null>(null)
   const [sortDir, setSortDir] = useState<"asc" | "desc">("asc")
   const [agreements, setAgreements] = useState<Agreement[]>([])
   const [customers, setCustomers] = useState<Customer[]>([])
@@ -151,7 +151,7 @@ export default function AgreementsPage() {
     router.push(f === "all" ? "/agreements" : `/agreements?filter=${f}`)
   }
 
-  function toggleSort(key: "title" | "customer") {
+  function toggleSort(key: "title" | "customer" | "category") {
     if (sortKey === key) {
       setSortDir(d => d === "asc" ? "desc" : "asc")
     } else {
@@ -182,8 +182,8 @@ export default function AgreementsPage() {
     })
     .sort((a, b) => {
       if (!sortKey) return 0
-      const valA = sortKey === "title" ? a.title : (a.customers?.name ?? "")
-      const valB = sortKey === "title" ? b.title : (b.customers?.name ?? "")
+      const valA = sortKey === "title" ? a.title : sortKey === "customer" ? (a.customers?.name ?? "") : (a.agreement_categories?.name ?? "")
+      const valB = sortKey === "title" ? b.title : sortKey === "customer" ? (b.customers?.name ?? "") : (b.agreement_categories?.name ?? "")
       return sortDir === "asc" ? valA.localeCompare(valB) : valB.localeCompare(valA)
     })
 
@@ -272,7 +272,12 @@ export default function AgreementsPage() {
                     <span className="text-gray-300">{sortKey === "customer" ? (sortDir === "asc" ? "↑" : "↓") : "↕"}</span>
                   </button>
                 </th>
-                <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wide">Kategori</th>
+                <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wide">
+                  <button onClick={() => toggleSort("category")} className="flex items-center gap-1 hover:text-gray-800 transition-colors">
+                    Kategori
+                    <span className="text-gray-300">{sortKey === "category" ? (sortDir === "asc" ? "↑" : "↓") : "↕"}</span>
+                  </button>
+                </th>
                 <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wide">{t("columnPeriod")}</th>
                 <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wide">{t("columnStatus")}</th>
               </tr>
@@ -286,14 +291,8 @@ export default function AgreementsPage() {
                 >
                   <td className="px-4 py-3 font-medium text-gray-900">{a.title}</td>
                   <td className="px-4 py-3 text-gray-500">{a.customers?.name}</td>
-                  <td className="px-4 py-3">
-                    {a.agreement_categories?.name ? (
-                      <span className="text-xs px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 border border-slate-200">
-                        {a.agreement_categories.name}
-                      </span>
-                    ) : (
-                      <span className="text-gray-300">—</span>
-                    )}
+                  <td className="px-4 py-3 text-gray-500">
+                    {a.agreement_categories?.name ?? <span className="text-gray-300">—</span>}
                   </td>
                   <td className="px-4 py-3 text-gray-500 whitespace-nowrap">
                     {formatDate(a.start_date)} – {formatDate(a.end_date)}

@@ -837,8 +837,9 @@ export default function SettingsPage() {
                         <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform shadow ${aiDashboardWidget ? "translate-x-6" : "translate-x-1"}`} />
                       </button>
                     </div>
-                    <div className="px-4 py-3 bg-amber-50 rounded-b-xl">
-                      <p className="text-xs text-amber-700">{t("aiDataWarning")}</p>
+                    <div className="px-4 py-3 bg-amber-50 rounded-b-xl flex items-start gap-2.5 border-t border-amber-100">
+                      <span className="text-amber-500 text-sm mt-0.5 shrink-0">⚠</span>
+                      <p className="text-xs text-amber-700 leading-relaxed">{t("aiDataWarning")}</p>
                     </div>
                   </>
                 )}
