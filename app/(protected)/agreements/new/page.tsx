@@ -7,6 +7,8 @@ import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { supabase } from "@/lib/supabaseClient"
 import Link from "next/link"
+import { useTranslations } from "next-intl"
+import { getCategoryDisplayName } from "@/lib/categoryUtils"
 
 type Customer = {
   id: string
@@ -16,10 +18,13 @@ type Customer = {
 type Category = {
   id: string
   name: string
+  is_predefined?: boolean
 }
 
 export default function NewAgreementPage() {
   const router = useRouter()
+  const tad = useTranslations("agreementDetail")
+  const tc = useTranslations("common")
 
   const [sessionReady, setSessionReady] = useState(false)
   const [customers, setCustomers] = useState<Customer[]>([])
@@ -223,15 +228,15 @@ export default function NewAgreementPage() {
         </div>
 
         <div>
-          <label className="block text-sm font-medium mb-1">Kategori</label>
+          <label className="block text-sm font-medium mb-1">{tad("labelCategory")}</label>
           <select
             value={categoryId}
             onChange={(e) => setCategoryId(e.target.value)}
             className="w-full border rounded px-3 py-2"
           >
-            <option value="">Ingen kategori</option>
+            <option value="">{tad("labelNoCategory")}</option>
             {categories.map((cat) => (
-              <option key={cat.id} value={cat.id}>{cat.name}</option>
+              <option key={cat.id} value={cat.id}>{getCategoryDisplayName(cat, tc)}</option>
             ))}
           </select>
         </div>

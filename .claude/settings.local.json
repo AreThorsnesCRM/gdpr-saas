@@ -14,7 +14,8 @@
       "Bash(git show *)",
       "Read(//tmp/**)",
       "Bash(mkdir -p \"c:/MVP/gdpr-saas/app/api/account/agreement-categories/[id]\")",
-      "Bash(git -C /c/MVP/gdpr-saas show a292f19:app/\\\\\\(protected\\\\\\)/customers/new/page.tsx)"
+      "Bash(git -C /c/MVP/gdpr-saas show a292f19:app/\\\\\\(protected\\\\\\)/customers/new/page.tsx)",
+      "Bash(xargs grep -l \"Personvernerklæring\\\\|privacy\")"
     ],
     "additionalDirectories": [
       "c:\\MVP\\gdpr-saas\\app\\api\\account\\agreement-categories"

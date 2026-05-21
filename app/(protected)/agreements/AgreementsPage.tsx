@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation"
 import { supabase } from "@/lib/supabaseClient"
 import { useAuth } from "@/lib/AuthContext"
 import { useTranslations, useLocale } from "next-intl"
+import { getCategoryDisplayName } from "@/lib/categoryUtils"
 
 type Agreement = {
   id: string
@@ -20,7 +21,7 @@ type Agreement = {
 }
 
 type Customer = { id: string; name: string }
-type Category = { id: string; name: string }
+type Category = { id: string; name: string; is_predefined?: boolean }
 type Filter = "all" | "active" | "expired" | "upcoming" | "expiresSoon" | "archived"
 
 export default function AgreementsPage() {
@@ -274,7 +275,7 @@ export default function AgreementsPage() {
                 </th>
                 <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wide">
                   <button onClick={() => toggleSort("category")} className="flex items-center gap-1 hover:text-gray-800 transition-colors">
-                    Kategori
+                    {t("columnCategory")}
                     <span className="text-gray-300">{sortKey === "category" ? (sortDir === "asc" ? "↑" : "↓") : "↕"}</span>
                   </button>
                 </th>
@@ -337,14 +338,14 @@ export default function AgreementsPage() {
                 />
               </div>
               <div>
-                <label className="block text-xs font-medium text-gray-500 mb-1">Kategori</label>
+                <label className="block text-xs font-medium text-gray-500 mb-1">{tad("labelCategory")}</label>
                 <select
                   value={quickCategoryId}
                   onChange={e => setQuickCategoryId(e.target.value)}
                   className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-400"
                 >
-                  <option value="">Ingen kategori</option>
-                  {categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                  <option value="">{tad("labelNoCategory")}</option>
+                  {categories.map(c => <option key={c.id} value={c.id}>{getCategoryDisplayName(c, tc)}</option>)}
                 </select>
               </div>
               <div className="grid grid-cols-2 gap-3">

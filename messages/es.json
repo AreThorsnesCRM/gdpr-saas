@@ -11,7 +11,24 @@
     "loading": "Cargando...",
     "error": "Algo salió mal",
     "restore": "Restaurar",
-    "archive": "Archivar"
+    "archive": "Archivar",
+    "catDatabehandleravtale": "Acuerdo de procesamiento de datos",
+    "catHusleieavtale": "Contrato de arrendamiento",
+    "catSamarbeidsavtale": "Acuerdo de colaboración",
+    "catTjenesteavtale": "Acuerdo de servicios",
+    "catKonfidensialitetsavtale": "Acuerdo de confidencialidad (NDA)",
+    "catArbeidsavtale": "Contrato laboral"
+  },
+  "login": {
+    "title": "Iniciar sesión",
+    "emailPlaceholder": "Correo electrónico",
+    "passwordPlaceholder": "Contraseña",
+    "error": "Correo electrónico o contraseña incorrectos",
+    "loginButton": "Iniciar sesión",
+    "forgotPassword": "¿Olvidaste tu contraseña?",
+    "noAccount": "¿No tienes cuenta?",
+    "createOne": "Créala aquí",
+    "privacyLink": "Política de privacidad"
   },
   "nav": {
     "dashboard": "Panel",
@@ -212,6 +229,7 @@
     "searchPlaceholder": "Buscar por título o cliente...",
     "columnTitle": "Título",
     "columnCustomer": "Cliente",
+    "columnCategory": "Categoría",
     "columnPeriod": "Período",
     "columnStatus": "Estado",
     "noResults": "Ningún contrato coincide con el filtro seleccionado.",
@@ -355,7 +373,18 @@
     "subStatusTrialing": "Prueba",
     "subStatusPastDue": "Pago fallido",
     "subStatusCanceled": "Cancelado",
-    "subStatusIncomplete": "Incompleto"
+    "subStatusIncomplete": "Incompleto",
+    "predefinedBadge": "Predefinido",
+    "categoryDesc": "Administra las categorías de tus contratos. Los predefinidos pueden eliminarse si no los necesitas.",
+    "categoryAddPlaceholder": "Nueva categoría...",
+    "categoryAddButton": "Añadir",
+    "categoryAdding": "Añadiendo...",
+    "categoryDeleteTitle": "Eliminar categoría",
+    "privacyTitle": "Privacidad",
+    "privacyDesc": "Lee sobre cómo AreCRM procesa los datos personales.",
+    "privacyLink": "Política de privacidad →",
+    "fileChoose": "Elegir archivo",
+    "fileNone": "Ningún archivo seleccionado"
   },
   "slideOver": {
     "backToForm": "← Volver al formulario",

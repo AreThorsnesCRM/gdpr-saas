@@ -8,12 +8,13 @@ import Link from "next/link"
 import { ChevronLeftIcon } from "@heroicons/react/24/outline"
 import RichTextEditor from "@/app/components/RichTextEditor"
 import { useTranslations } from "next-intl"
+import { getCategoryDisplayName } from "@/lib/categoryUtils"
 
 type Props = {
   templateId?: string
 }
 
-type Category = { id: string; name: string }
+type Category = { id: string; name: string; is_predefined?: boolean }
 
 export default function TemplateEditor({ templateId }: Props) {
   const router = useRouter()
@@ -129,7 +130,7 @@ export default function TemplateEditor({ templateId }: Props) {
           <select value={categoryId} onChange={(e) => setCategoryId(e.target.value)} className={inputCls}>
             <option value="">{t("editorNoCategoryOption")}</option>
             {categories.map((cat) => (
-              <option key={cat.id} value={cat.id}>{cat.name}</option>
+              <option key={cat.id} value={cat.id}>{getCategoryDisplayName(cat, tc)}</option>
             ))}
           </select>
         </div>

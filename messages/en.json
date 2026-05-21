@@ -11,7 +11,24 @@
     "loading": "Loading...",
     "error": "Something went wrong",
     "restore": "Restore",
-    "archive": "Archive"
+    "archive": "Archive",
+    "catDatabehandleravtale": "Data Processing Agreement",
+    "catHusleieavtale": "Lease Agreement",
+    "catSamarbeidsavtale": "Collaboration Agreement",
+    "catTjenesteavtale": "Service Agreement",
+    "catKonfidensialitetsavtale": "Confidentiality Agreement (NDA)",
+    "catArbeidsavtale": "Employment Agreement"
+  },
+  "login": {
+    "title": "Log in",
+    "emailPlaceholder": "Email",
+    "passwordPlaceholder": "Password",
+    "error": "Incorrect email or password",
+    "loginButton": "Log in",
+    "forgotPassword": "Forgot password?",
+    "noAccount": "Don't have an account?",
+    "createOne": "Create one here",
+    "privacyLink": "Privacy policy"
   },
   "nav": {
     "dashboard": "Dashboard",
@@ -212,6 +229,7 @@
     "searchPlaceholder": "Search by title or customer...",
     "columnTitle": "Title",
     "columnCustomer": "Customer",
+    "columnCategory": "Category",
     "columnPeriod": "Period",
     "columnStatus": "Status",
     "noResults": "No agreements match the selected filter.",
@@ -355,7 +373,18 @@
     "subStatusTrialing": "Trial",
     "subStatusPastDue": "Payment failed",
     "subStatusCanceled": "Canceled",
-    "subStatusIncomplete": "Incomplete"
+    "subStatusIncomplete": "Incomplete",
+    "predefinedBadge": "Predefined",
+    "categoryDesc": "Manage categories for your agreements. Predefined ones can be deleted if not needed.",
+    "categoryAddPlaceholder": "New category...",
+    "categoryAddButton": "Add",
+    "categoryAdding": "Adding...",
+    "categoryDeleteTitle": "Delete category",
+    "privacyTitle": "Privacy",
+    "privacyDesc": "Read about how AreCRM processes personal data.",
+    "privacyLink": "Privacy policy →",
+    "fileChoose": "Choose file",
+    "fileNone": "No file selected"
   },
   "slideOver": {
     "backToForm": "← Back to form",

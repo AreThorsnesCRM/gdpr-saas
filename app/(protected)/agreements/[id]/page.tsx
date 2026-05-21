@@ -13,6 +13,7 @@ import RichTextEditor from "@/app/components/RichTextEditor"
 import { substituteMergeFields } from "@/lib/mergeFields"
 import { useTranslations, useLocale } from "next-intl"
 import { generateBrandedPDF, type PDFBranding } from "@/lib/generateBrandedPDF"
+import { getCategoryDisplayName } from "@/lib/categoryUtils"
 
 type DbSigner = { name: string; email: string; sessionId: string; url: string; signed: boolean }
 
@@ -48,7 +49,7 @@ type Template = {
   category_id: string | null
   agreement_categories: { id: string; name: string } | null
 }
-type Category = { id: string; name: string }
+type Category = { id: string; name: string; is_predefined?: boolean }
 
 
 function formatDateNO(dateStr: string) {
@@ -413,7 +414,7 @@ export default function AgreementDetailPage({ params }: { params: Promise<{ id: 
             <select className={inputClass} value={categoryId} onChange={e => setCategoryId(e.target.value)}>
               <option value="">{t("labelNoCategory")}</option>
               {categories.map((cat) => (
-                <option key={cat.id} value={cat.id}>{cat.name}</option>
+                <option key={cat.id} value={cat.id}>{getCategoryDisplayName(cat, tc)}</option>
               ))}
             </select>
           </div>
@@ -460,7 +461,13 @@ export default function AgreementDetailPage({ params }: { params: Promise<{ id: 
             </div>
             <div className="border-t border-gray-100 pt-4 space-y-3">
               <p className="text-xs font-medium text-gray-500">{t("pdfReplace")}</p>
-              <input type="file" accept="application/pdf" onChange={e => setNewFile(e.target.files?.[0] ?? null)} className="block w-full text-sm text-gray-600 file:mr-3 file:rounded-lg file:border-0 file:bg-slate-800 file:px-3 file:py-1.5 file:text-sm file:font-medium file:text-white hover:file:bg-slate-700" />
+              <div className="flex items-center gap-3">
+                <label className="cursor-pointer bg-slate-800 text-white px-3 py-1.5 rounded-lg text-sm font-medium hover:bg-slate-700 transition-colors">
+                  {tc("fileChoose")}
+                  <input type="file" accept="application/pdf" onChange={e => setNewFile(e.target.files?.[0] ?? null)} className="sr-only" />
+                </label>
+                <span className="text-sm text-gray-500 truncate max-w-xs">{newFile ? newFile.name : tc("fileNone")}</span>
+              </div>
               {newFile && (
                 <button onClick={handleUploadPDF} disabled={uploading} className="bg-slate-800 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-slate-700 disabled:opacity-50 transition-colors">
                   {uploading ? t("pdfUploading") : t("pdfUploadButton")}
@@ -486,7 +493,13 @@ export default function AgreementDetailPage({ params }: { params: Promise<{ id: 
           <div className="space-y-4">
             <div className="space-y-2">
               <p className="text-xs font-medium text-gray-500">{t("pdfUploadLabel")}</p>
-              <input type="file" accept="application/pdf" onChange={e => setNewFile(e.target.files?.[0] ?? null)} className="block w-full text-sm text-gray-600 file:mr-3 file:rounded-lg file:border-0 file:bg-slate-800 file:px-3 file:py-1.5 file:text-sm file:font-medium file:text-white hover:file:bg-slate-700" />
+              <div className="flex items-center gap-3">
+                <label className="cursor-pointer bg-slate-800 text-white px-3 py-1.5 rounded-lg text-sm font-medium hover:bg-slate-700 transition-colors">
+                  {tc("fileChoose")}
+                  <input type="file" accept="application/pdf" onChange={e => setNewFile(e.target.files?.[0] ?? null)} className="sr-only" />
+                </label>
+                <span className="text-sm text-gray-500 truncate max-w-xs">{newFile ? newFile.name : tc("fileNone")}</span>
+              </div>
               {newFile && (
                 <button onClick={handleUploadPDF} disabled={uploading} className="bg-slate-800 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-slate-700 disabled:opacity-50 transition-colors">
                   {uploading ? t("pdfUploading") : t("pdfUploadButton")}

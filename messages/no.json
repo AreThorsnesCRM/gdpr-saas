@@ -11,7 +11,24 @@
     "loading": "Laster...",
     "error": "Noe gikk galt",
     "restore": "Gjenopprett",
-    "archive": "Arkiver"
+    "archive": "Arkiver",
+    "catDatabehandleravtale": "Databehandleravtale",
+    "catHusleieavtale": "Husleieavtale",
+    "catSamarbeidsavtale": "Samarbeidsavtale",
+    "catTjenesteavtale": "Tjenesteavtale",
+    "catKonfidensialitetsavtale": "Konfidensialitetsavtale (NDA)",
+    "catArbeidsavtale": "Arbeidsavtale"
+  },
+  "login": {
+    "title": "Logg inn",
+    "emailPlaceholder": "E-post",
+    "passwordPlaceholder": "Passord",
+    "error": "Feil e-post eller passord",
+    "loginButton": "Logg inn",
+    "forgotPassword": "Glemt passord?",
+    "noAccount": "Har du ikke konto?",
+    "createOne": "Opprett en her",
+    "privacyLink": "Personvernerklæring"
   },
   "nav": {
     "dashboard": "Dashboard",
@@ -212,6 +229,7 @@
     "searchPlaceholder": "Søk på tittel eller kunde...",
     "columnTitle": "Tittel",
     "columnCustomer": "Kunde",
+    "columnCategory": "Kategori",
     "columnPeriod": "Periode",
     "columnStatus": "Status",
     "noResults": "Ingen avtaler matcher valgt filter.",
@@ -355,7 +373,18 @@
     "subStatusTrialing": "Prøveperiode",
     "subStatusPastDue": "Betaling feilet",
     "subStatusCanceled": "Avsluttet",
-    "subStatusIncomplete": "Ikke fullført"
+    "subStatusIncomplete": "Ikke fullført",
+    "predefinedBadge": "Forhåndsdefinert",
+    "categoryDesc": "Administrer kategorier for avtalene dine. Forhåndsdefinerte kan slettes om du ikke trenger dem.",
+    "categoryAddPlaceholder": "Ny kategori...",
+    "categoryAddButton": "Legg til",
+    "categoryAdding": "Legger til...",
+    "categoryDeleteTitle": "Slett kategori",
+    "privacyTitle": "Personvern",
+    "privacyDesc": "Les om hvordan AreCRM behandler personopplysninger.",
+    "privacyLink": "Personvernerklæring →",
+    "fileChoose": "Velg fil",
+    "fileNone": "Ingen fil valgt"
   },
   "slideOver": {
     "backToForm": "← Tilbake til skjema",

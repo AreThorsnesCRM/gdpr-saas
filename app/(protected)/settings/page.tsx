@@ -6,6 +6,7 @@ import { useEffect, useState } from "react"
 import { useAuth } from "@/lib/AuthContext"
 import { supabase } from "@/lib/supabaseClient"
 import { useTranslations } from "next-intl"
+import { getCategoryDisplayName } from "@/lib/categoryUtils"
 
 type Member = {
   user_id: string
@@ -857,7 +858,7 @@ export default function SettingsPage() {
               <p className="text-sm text-gray-500 mt-0.5">
                 {currentUserRole !== "admin"
                   ? t("adminOnly")
-                  : "Administrer kategorier for avtalene dine. Forhåndsdefinerte kan slettes om du ikke trenger dem."}
+                  : t("categoryDesc")}
               </p>
             </div>
             {currentUserRole === "admin" && (
@@ -865,15 +866,15 @@ export default function SettingsPage() {
                 {categories.map((cat) => (
                   <div key={cat.id} className="flex items-center justify-between px-4 py-2.5 border border-gray-200 rounded-lg bg-white">
                     <div className="flex items-center gap-2">
-                      <span className="text-sm text-gray-800">{cat.name}</span>
+                      <span className="text-sm text-gray-800">{getCategoryDisplayName(cat, tc)}</span>
                       {cat.is_predefined && (
-                        <span className="text-xs text-gray-400 bg-gray-100 px-1.5 py-0.5 rounded">Forhåndsdefinert</span>
+                        <span className="text-xs text-gray-400 bg-gray-100 px-1.5 py-0.5 rounded">{t("predefinedBadge")}</span>
                       )}
                     </div>
                     <button
                       onClick={() => deleteCategory(cat.id)}
                       className="text-gray-300 hover:text-red-500 transition-colors text-sm"
-                      title="Slett kategori"
+                      title={t("categoryDeleteTitle")}
                     >
                       ✕
                     </button>
@@ -886,7 +887,7 @@ export default function SettingsPage() {
                     value={newCategoryName}
                     onChange={(e) => setNewCategoryName(e.target.value)}
                     onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); addCategory() } }}
-                    placeholder="Ny kategori..."
+                    placeholder={t("categoryAddPlaceholder")}
                     className="flex-1 border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-400 bg-white"
                   />
                   <button
@@ -894,7 +895,7 @@ export default function SettingsPage() {
                     disabled={addingCategory || !newCategoryName.trim()}
                     className="bg-slate-800 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-slate-700 disabled:opacity-50 transition-colors"
                   >
-                    {addingCategory ? "Legger til..." : "Legg til"}
+                    {addingCategory ? t("categoryAdding") : t("categoryAddButton")}
                   </button>
                 </div>
               </div>
@@ -903,12 +904,12 @@ export default function SettingsPage() {
 
           <Divider />
 
-          {/* Personvern */}
+          {/* Privacy */}
           <section className="scroll-mt-8">
             <div>
-              <h2 className="text-base font-semibold text-gray-900">Personvern</h2>
+              <h2 className="text-base font-semibold text-gray-900">{t("privacyTitle")}</h2>
               <p className="text-sm text-gray-500 mt-0.5">
-                Les om hvordan AreCRM behandler personopplysninger.
+                {t("privacyDesc")}
               </p>
             </div>
             <a
@@ -917,7 +918,7 @@ export default function SettingsPage() {
               rel="noopener noreferrer"
               className="inline-block mt-4 text-sm text-slate-700 underline hover:text-slate-900 transition-colors"
             >
-              Personvernerklæring →
+              {t("privacyLink")}
             </a>
           </section>
 
