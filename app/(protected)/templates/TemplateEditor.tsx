@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { ChevronLeftIcon } from "@heroicons/react/24/outline"
 import RichTextEditor from "@/app/components/RichTextEditor"
+import { useTranslations } from "next-intl"
 
 type Props = {
   templateId?: string
@@ -16,6 +17,8 @@ type Category = { id: string; name: string }
 
 export default function TemplateEditor({ templateId }: Props) {
   const router = useRouter()
+  const t = useTranslations("templates")
+  const tc = useTranslations("common")
   const isEditing = !!templateId
 
   const [name, setName] = useState("")
@@ -73,35 +76,43 @@ export default function TemplateEditor({ templateId }: Props) {
 
   const inputCls = "w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-400 bg-white"
 
-  if (loading) return <div className="p-8 text-sm text-gray-400">Laster...</div>
+  const mergeFieldDefs = [
+    { label: "{{kunde_navn}}",  desc: t("mergeFieldKundeName") },
+    { label: "{{org_nummer}}",  desc: t("mergeFieldOrgNr") },
+    { label: "{{startdato}}",   desc: t("mergeFieldStartDate") },
+    { label: "{{sluttdato}}",   desc: t("mergeFieldEndDate") },
+    { label: "{{firma_navn}}",  desc: t("mergeFieldCompanyName") },
+  ]
+
+  if (loading) return <div className="p-8 text-sm text-gray-400">{tc("loading")}</div>
 
   return (
     <div className="p-8 max-w-4xl space-y-6">
 
       <Link href="/templates" className="inline-flex items-center gap-1 text-sm text-gray-500 hover:text-gray-900 transition-colors">
         <ChevronLeftIcon className="h-4 w-4" />
-        Avtalemaler
+        {t("editorBackLink")}
       </Link>
 
       <h1 className="text-2xl font-bold text-gray-900">
-        {isEditing ? "Rediger mal" : "Ny avtalemal"}
+        {isEditing ? t("editorTitleEdit") : t("editorTitle")}
       </h1>
 
       <div className="bg-white rounded-xl border border-gray-200 p-6 space-y-5">
 
         <div className="grid grid-cols-3 gap-4">
           <div className="col-span-2">
-            <label className="block text-xs font-medium text-gray-500 mb-1">Navn på mal *</label>
+            <label className="block text-xs font-medium text-gray-500 mb-1">{t("editorNameLabel")}</label>
             <input
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder="F.eks. Serviceavtale Standard"
+              placeholder={t("editorNamePlaceholder")}
               className={inputCls}
             />
           </div>
           <div>
-            <label className="block text-xs font-medium text-gray-500 mb-1">Standard varighet (måneder)</label>
+            <label className="block text-xs font-medium text-gray-500 mb-1">{t("editorDurationLabel")}</label>
             <input
               type="number"
               value={durationMonths}
@@ -114,9 +125,9 @@ export default function TemplateEditor({ templateId }: Props) {
         </div>
 
         <div>
-          <label className="block text-xs font-medium text-gray-500 mb-1">Kategori</label>
+          <label className="block text-xs font-medium text-gray-500 mb-1">{t("editorCategoryLabel")}</label>
           <select value={categoryId} onChange={(e) => setCategoryId(e.target.value)} className={inputCls}>
-            <option value="">Ingen kategori</option>
+            <option value="">{t("editorNoCategoryOption")}</option>
             {categories.map((cat) => (
               <option key={cat.id} value={cat.id}>{cat.name}</option>
             ))}
@@ -125,20 +136,12 @@ export default function TemplateEditor({ templateId }: Props) {
 
         <div className="bg-gray-50 border border-gray-200 rounded-xl p-4 space-y-2">
           <div className="flex items-center gap-2">
-            <span className="text-sm font-medium text-gray-700">Flettefelt</span>
-            <span className="text-xs text-gray-400">— settes automatisk inn ved PDF-generering</span>
+            <span className="text-sm font-medium text-gray-700">{t("mergeFieldsBoxLabel")}</span>
+            <span className="text-xs text-gray-400">{t("mergeFieldsBoxSubtitle")}</span>
           </div>
-          <p className="text-xs text-gray-500 leading-relaxed">
-            Skriv flettefeltene direkte i teksten, eller klikk på en knapp i verktøylinjen over innholdsfeltet. Når du genererer PDF fra en avtale, erstattes feltene automatisk med riktige verdier fra kunden og avtalen.
-          </p>
+          <p className="text-xs text-gray-500 leading-relaxed">{t("mergeFieldsBoxDesc")}</p>
           <div className="flex flex-wrap gap-1.5 pt-1">
-            {[
-              { label: "{{kunde_navn}}", desc: "Kundens navn" },
-              { label: "{{org_nummer}}", desc: "Org.nr." },
-              { label: "{{startdato}}", desc: "Avtalens startdato" },
-              { label: "{{sluttdato}}", desc: "Avtalens sluttdato" },
-              { label: "{{firma_navn}}", desc: "Ditt firmanavn" },
-            ].map((f) => (
+            {mergeFieldDefs.map((f) => (
               <span key={f.label} title={f.desc} className="inline-flex items-center gap-1 text-xs font-mono bg-white text-slate-700 px-2 py-1 rounded-lg border border-gray-200 shadow-sm cursor-default">
                 {f.label}
               </span>
@@ -147,11 +150,11 @@ export default function TemplateEditor({ templateId }: Props) {
         </div>
 
         <div>
-          <label className="block text-xs font-medium text-gray-500 mb-1">Avtaleinnhold</label>
+          <label className="block text-xs font-medium text-gray-500 mb-1">{t("editorContentLabel")}</label>
           <RichTextEditor
             content={content}
             onChange={setContent}
-            placeholder="Skriv avtaleinnholdet her. Bruk flettefelt i toolbar for å sette inn dynamiske verdier..."
+            placeholder={t("editorContentPlaceholder")}
           />
         </div>
 
@@ -165,10 +168,10 @@ export default function TemplateEditor({ templateId }: Props) {
                 : "bg-slate-800 text-white hover:bg-slate-700"
             }`}
           >
-            {saving ? "Lagrer..." : saved ? "Lagret ✓" : isEditing ? "Lagre endringer" : "Opprett mal"}
+            {saving ? tc("saving") : saved ? tc("saved") : isEditing ? tc("saveChanges") : t("editorCreateButton")}
           </button>
           <Link href="/templates" className="text-sm text-gray-400 hover:text-gray-700 transition-colors">
-            Avbryt
+            {tc("cancel")}
           </Link>
         </div>
       </div>
