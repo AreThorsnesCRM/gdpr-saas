@@ -5,9 +5,9 @@ export const dynamic = "force-dynamic"
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { supabase } from "@/lib/supabaseClient"
-import { useAuth } from "@/lib/AuthContext"
 import Link from "next/link"
 import { ChevronLeftIcon } from "@heroicons/react/24/outline"
+import { useTranslations } from "next-intl"
 
 interface TeamMember {
   user_id: string
@@ -16,7 +16,8 @@ interface TeamMember {
 
 export default function NewCustomerPage() {
   const router = useRouter()
-  const { user } = useAuth()
+  const t = useTranslations("customers")
+  const tc = useTranslations("common")
 
   const [name, setName] = useState("")
   const [email, setEmail] = useState("")
@@ -36,7 +37,11 @@ export default function NewCustomerPage() {
   }, [])
 
   async function createCustomer() {
-    if (!name.trim() || !supabase) return
+    if (!name.trim()) {
+      alert(t("newNameRequired"))
+      return
+    }
+    if (!supabase) return
     setLoading(true)
 
     const { data: { session } } = await supabase.auth.getSession()
@@ -71,59 +76,59 @@ export default function NewCustomerPage() {
 
       <Link href="/customers" className="inline-flex items-center gap-1 text-sm text-gray-500 hover:text-gray-900 transition-colors">
         <ChevronLeftIcon className="h-4 w-4" />
-        Kunder
+        {t("newBackLink")}
       </Link>
 
-      <h1 className="text-2xl font-bold text-gray-900">Ny kunde</h1>
+      <h1 className="text-2xl font-bold text-gray-900">{t("newTitle")}</h1>
 
       <div className="bg-white rounded-xl border border-gray-200 p-6 space-y-4">
 
         <div>
-          <label className="block text-xs font-medium text-gray-500 mb-1">Navn *</label>
-          <input className={inputClass} placeholder="Kundenavn" value={name} onChange={(e) => setName(e.target.value)} />
+          <label className="block text-xs font-medium text-gray-500 mb-1">{t("newNameLabel")}</label>
+          <input className={inputClass} placeholder={t("newNamePlaceholder")} value={name} onChange={(e) => setName(e.target.value)} />
         </div>
 
         <div className="grid grid-cols-2 gap-3">
           <div>
-            <label className="block text-xs font-medium text-gray-500 mb-1">E-post</label>
-            <input className={inputClass} placeholder="e-post@eksempel.no" value={email} onChange={(e) => setEmail(e.target.value)} />
+            <label className="block text-xs font-medium text-gray-500 mb-1">{t("newEmailLabel")}</label>
+            <input className={inputClass} placeholder={t("newEmailPlaceholder")} value={email} onChange={(e) => setEmail(e.target.value)} />
           </div>
           <div>
-            <label className="block text-xs font-medium text-gray-500 mb-1">Telefon</label>
-            <input className={inputClass} placeholder="+47 000 00 000" value={phone} onChange={(e) => setPhone(e.target.value)} />
+            <label className="block text-xs font-medium text-gray-500 mb-1">{t("newPhoneLabel")}</label>
+            <input className={inputClass} placeholder={t("newPhonePlaceholder")} value={phone} onChange={(e) => setPhone(e.target.value)} />
           </div>
         </div>
 
         <div>
-          <label className="block text-xs font-medium text-gray-500 mb-1">Org.nummer</label>
-          <input className={inputClass} placeholder="F.eks. 123456789 eller GB123456" value={orgNummer} onChange={(e) => setOrgNummer(e.target.value)} />
+          <label className="block text-xs font-medium text-gray-500 mb-1">{t("newOrgLabel")}</label>
+          <input className={inputClass} placeholder={t("newOrgPlaceholder")} value={orgNummer} onChange={(e) => setOrgNummer(e.target.value)} />
         </div>
 
         <div>
-          <label className="block text-xs font-medium text-gray-500 mb-1">Adresse</label>
-          <input className={inputClass} placeholder="Gateadresse" value={address} onChange={(e) => setAddress(e.target.value)} />
+          <label className="block text-xs font-medium text-gray-500 mb-1">{t("newAddressLabel")}</label>
+          <input className={inputClass} placeholder={t("newAddressPlaceholder")} value={address} onChange={(e) => setAddress(e.target.value)} />
         </div>
 
         <div className="grid grid-cols-2 gap-3">
           <div>
-            <label className="block text-xs font-medium text-gray-500 mb-1">Postnummer</label>
-            <input className={inputClass} placeholder="0000" value={postalCode} onChange={(e) => setPostalCode(e.target.value)} />
+            <label className="block text-xs font-medium text-gray-500 mb-1">{t("newPostalLabel")}</label>
+            <input className={inputClass} placeholder={t("newPostalPlaceholder")} value={postalCode} onChange={(e) => setPostalCode(e.target.value)} />
           </div>
           <div>
-            <label className="block text-xs font-medium text-gray-500 mb-1">Sted</label>
-            <input className={inputClass} placeholder="By" value={city} onChange={(e) => setCity(e.target.value)} />
+            <label className="block text-xs font-medium text-gray-500 mb-1">{t("newCityLabel")}</label>
+            <input className={inputClass} placeholder={t("newCityPlaceholder")} value={city} onChange={(e) => setCity(e.target.value)} />
           </div>
         </div>
 
         {teamMembers.length > 0 && (
           <div>
-            <label className="block text-xs font-medium text-gray-500 mb-1">Kundeansvarlig</label>
+            <label className="block text-xs font-medium text-gray-500 mb-1">{t("newManagerLabel")}</label>
             <select
               className={inputClass}
               value={accountManagerId}
               onChange={(e) => setAccountManagerId(e.target.value)}
             >
-              <option value="">Ingen ansvarlig valgt</option>
+              <option value="">{t("newManagerNone")}</option>
               {teamMembers.map((m) => (
                 <option key={m.user_id} value={m.user_id}>{m.full_name}</option>
               ))}
@@ -136,7 +141,7 @@ export default function NewCustomerPage() {
           disabled={loading || !name.trim()}
           className="w-full bg-slate-800 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-slate-700 transition-colors disabled:opacity-50"
         >
-          {loading ? "Lagrer..." : "Opprett kunde"}
+          {loading ? tc("saving") : t("newCreateButton")}
         </button>
 
       </div>

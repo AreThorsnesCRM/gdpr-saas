@@ -409,9 +409,9 @@ export default function AgreementDetailPage({ params }: { params: Promise<{ id: 
             </div>
           </div>
           <div>
-            <label className="block text-xs font-medium text-gray-500 mb-1">Kategori</label>
+            <label className="block text-xs font-medium text-gray-500 mb-1">{t("labelCategory")}</label>
             <select className={inputClass} value={categoryId} onChange={e => setCategoryId(e.target.value)}>
-              <option value="">Ingen kategori</option>
+              <option value="">{t("labelNoCategory")}</option>
               {categories.map((cat) => (
                 <option key={cat.id} value={cat.id}>{cat.name}</option>
               ))}

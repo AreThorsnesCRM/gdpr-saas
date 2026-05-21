@@ -79,7 +79,8 @@
     "startSubscription": "Start subscription",
     "updatePayment": "Update payment",
     "restart": "Start over",
-    "completePurchase": "Complete payment"
+    "completePurchase": "Complete payment",
+    "aiWidgetTitle": "What should you do today?"
   },
   "customers": {
     "title": "Customers",
@@ -107,7 +108,27 @@
     "badgeExpired": "Expired {days}d",
     "deleteConfirm": "Are you sure you want to delete this customer?",
     "deleteTooltip": "Delete customer",
-    "count": "{count, plural, one {# customer} other {# customers}}"
+    "count": "{count, plural, one {# customer} other {# customers}}",
+    "newTitle": "New customer",
+    "newBackLink": "Customers",
+    "newNameLabel": "Name *",
+    "newNamePlaceholder": "Customer name",
+    "newEmailLabel": "Email",
+    "newEmailPlaceholder": "email@example.com",
+    "newPhoneLabel": "Phone",
+    "newPhonePlaceholder": "+44 000 0000 000",
+    "newOrgLabel": "Org. number",
+    "newOrgPlaceholder": "E.g. 123456789 or GB123456",
+    "newAddressLabel": "Address",
+    "newAddressPlaceholder": "Street address",
+    "newPostalLabel": "Postal code",
+    "newPostalPlaceholder": "0000",
+    "newCityLabel": "City",
+    "newCityPlaceholder": "City",
+    "newManagerLabel": "Account manager",
+    "newManagerNone": "No manager selected",
+    "newCreateButton": "Create customer",
+    "newNameRequired": "Name is required"
   },
   "customerDetail": {
     "backToCustomers": "Customers",
@@ -235,7 +256,12 @@
     "mergeFieldOrgNr": "Org. no.",
     "mergeFieldStartDate": "Agreement start date",
     "mergeFieldEndDate": "Agreement end date",
-    "mergeFieldCompanyName": "Your company name"
+    "mergeFieldCompanyName": "Your company name",
+    "mergeFieldLabelKunde": "Customer name",
+    "mergeFieldLabelOrg": "Org. no.",
+    "mergeFieldLabelStart": "Start date",
+    "mergeFieldLabelEnd": "End date",
+    "mergeFieldLabelFirma": "Company name"
   },
   "settings": {
     "title": "Settings",
@@ -489,6 +515,8 @@
     "statusArchived": "Archived",
     "statusExpiresDays": "Expires in {days} days",
     "signingPending": "Awaiting signature",
-    "signingSigned": "Signed ↗"
+    "signingSigned": "Signed ↗",
+    "labelCategory": "Category",
+    "labelNoCategory": "No category"
   }
 }

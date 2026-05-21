@@ -72,7 +72,7 @@ export default function DashboardPage() {
   useEffect(() => {
     if (!account?.ai_assistant_enabled || !account?.ai_dashboard_widget_enabled) return
     setAiLoading(true)
-    fetch("/api/ai/dashboard-suggestions")
+    fetch(`/api/ai/dashboard-suggestions?locale=${locale}`)
       .then((r) => r.json())
       .then((data) => { if (data.suggestions) setAiSuggestions(data.suggestions) })
       .finally(() => setAiLoading(false))
@@ -292,7 +292,7 @@ export default function DashboardPage() {
         <div className="bg-gradient-to-r from-slate-800 to-slate-700 rounded-xl p-5 text-white">
           <div className="flex items-center gap-2 mb-3">
             <span className="text-amber-400 text-base">✦</span>
-            <p className="text-sm font-semibold">Hva bør du gjøre i dag?</p>
+            <p className="text-sm font-semibold">{t("aiWidgetTitle")}</p>
           </div>
           {aiLoading ? (
             <div className="flex gap-1.5 items-center">

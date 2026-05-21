@@ -13,7 +13,8 @@
       "PowerShell(cd \"c:\\\\MVP\\\\gdpr-saas\"; git add app/api/assistant/ app/components/OnboardingModal.tsx app/\\(protected\\)/layout.tsx app/\\(protected\\)/dashboard/page.tsx app/api/agreements/ lib/signicat.ts lib/AuthContext.tsx app/api/account/ messages/ package.json package-lock.json; git status)",
       "Bash(git show *)",
       "Read(//tmp/**)",
-      "Bash(mkdir -p \"c:/MVP/gdpr-saas/app/api/account/agreement-categories/[id]\")"
+      "Bash(mkdir -p \"c:/MVP/gdpr-saas/app/api/account/agreement-categories/[id]\")",
+      "Bash(git -C /c/MVP/gdpr-saas show a292f19:app/\\\\\\(protected\\\\\\)/customers/new/page.tsx)"
     ],
     "additionalDirectories": [
       "c:\\MVP\\gdpr-saas\\app\\api\\account\\agreement-categories"

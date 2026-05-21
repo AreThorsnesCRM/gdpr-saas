@@ -6,14 +6,7 @@ import Placeholder from "@tiptap/extension-placeholder"
 import Underline from "@tiptap/extension-underline"
 import TextAlign from "@tiptap/extension-text-align"
 import { useEffect } from "react"
-
-const mergeFields = [
-  { label: "Kundenavn",  value: "{{kunde_navn}}" },
-  { label: "Org.nr",     value: "{{org_nummer}}" },
-  { label: "Startdato",  value: "{{startdato}}" },
-  { label: "Sluttdato",  value: "{{sluttdato}}" },
-  { label: "Firmanavn",  value: "{{firma_navn}}" },
-]
+import { useTranslations } from "next-intl"
 
 type Props = {
   content: string
@@ -22,6 +15,16 @@ type Props = {
 }
 
 export default function RichTextEditor({ content, onChange, placeholder }: Props) {
+  const t = useTranslations("templates")
+
+  const mergeFields = [
+    { label: t("mergeFieldLabelKunde"),  value: "{{kunde_navn}}" },
+    { label: t("mergeFieldLabelOrg"),    value: "{{org_nummer}}" },
+    { label: t("mergeFieldLabelStart"),  value: "{{startdato}}" },
+    { label: t("mergeFieldLabelEnd"),    value: "{{sluttdato}}" },
+    { label: t("mergeFieldLabelFirma"),  value: "{{firma_navn}}" },
+  ]
+
   const editor = useEditor({
     extensions: [
       StarterKit,
@@ -64,7 +67,6 @@ export default function RichTextEditor({ content, onChange, placeholder }: Props
       {/* Toolbar */}
       <div className="flex flex-wrap items-center gap-1 px-3 py-2 border-b border-gray-100 bg-gray-50">
 
-        {/* Overskrifter */}
         <button type="button" onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()}
           className={btn(editor.isActive("heading", { level: 1 }))}>H1</button>
         <button type="button" onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
@@ -74,11 +76,10 @@ export default function RichTextEditor({ content, onChange, placeholder }: Props
 
         <div className="w-px h-4 bg-gray-200 mx-1" />
 
-        {/* Tekstformatering */}
         <button type="button" onClick={() => editor.chain().focus().toggleBold().run()}
-          className={btn(editor.isActive("bold"))}><strong>F</strong></button>
+          className={btn(editor.isActive("bold"))}><strong>B</strong></button>
         <button type="button" onClick={() => editor.chain().focus().toggleItalic().run()}
-          className={btn(editor.isActive("italic"))}><em>K</em></button>
+          className={btn(editor.isActive("italic"))}><em>I</em></button>
         <button type="button" onClick={() => editor.chain().focus().toggleUnderline().run()}
           className={btn(editor.isActive("underline"))}><span className="underline">U</span></button>
         <button type="button" onClick={() => editor.chain().focus().toggleStrike().run()}
@@ -86,46 +87,42 @@ export default function RichTextEditor({ content, onChange, placeholder }: Props
 
         <div className="w-px h-4 bg-gray-200 mx-1" />
 
-        {/* Lister */}
         <button type="button" onClick={() => editor.chain().focus().toggleBulletList().run()}
-          className={btn(editor.isActive("bulletList"))}>• Liste</button>
+          className={btn(editor.isActive("bulletList"))}>• List</button>
         <button type="button" onClick={() => editor.chain().focus().toggleOrderedList().run()}
-          className={btn(editor.isActive("orderedList"))}>1. Liste</button>
+          className={btn(editor.isActive("orderedList"))}>1. List</button>
         <button type="button" onClick={() => editor.chain().focus().toggleBlockquote().run()}
           className={btn(editor.isActive("blockquote"))}>❝</button>
 
         <div className="w-px h-4 bg-gray-200 mx-1" />
 
-        {/* Tekstjustering */}
         <button type="button" onClick={() => editor.chain().focus().setTextAlign("left").run()}
-          className={btn(editor.isActive({ textAlign: "left" }))} title="Venstrejustert">⬅</button>
+          className={btn(editor.isActive({ textAlign: "left" }))}>⬅</button>
         <button type="button" onClick={() => editor.chain().focus().setTextAlign("center").run()}
-          className={btn(editor.isActive({ textAlign: "center" }))} title="Midtstilt">⬛</button>
+          className={btn(editor.isActive({ textAlign: "center" }))}>⬛</button>
         <button type="button" onClick={() => editor.chain().focus().setTextAlign("right").run()}
-          className={btn(editor.isActive({ textAlign: "right" }))} title="Høyrejustert">➡</button>
+          className={btn(editor.isActive({ textAlign: "right" }))}>➡</button>
         <button type="button" onClick={() => editor.chain().focus().setTextAlign("justify").run()}
-          className={btn(editor.isActive({ textAlign: "justify" }))} title="Blokkjustert">≡</button>
+          className={btn(editor.isActive({ textAlign: "justify" }))}>≡</button>
 
         <div className="w-px h-4 bg-gray-200 mx-1" />
 
-        {/* Skillelinje */}
         <button type="button" onClick={() => editor.chain().focus().setHorizontalRule().run()}
-          className={btn(false)} title="Sett inn skillelinje">— linje</button>
+          className={btn(false)}>—</button>
 
         <div className="w-px h-4 bg-gray-200 mx-1" />
 
-        {/* Angre / Gjør om */}
         <button type="button" onClick={() => editor.chain().focus().undo().run()}
           disabled={!editor.can().undo()}
-          className={btn(false) + " disabled:opacity-30"} title="Angre">↩</button>
+          className={btn(false) + " disabled:opacity-30"}>↩</button>
         <button type="button" onClick={() => editor.chain().focus().redo().run()}
           disabled={!editor.can().redo()}
-          className={btn(false) + " disabled:opacity-30"} title="Gjør om">↪</button>
+          className={btn(false) + " disabled:opacity-30"}>↪</button>
 
         <div className="w-px h-4 bg-gray-200 mx-1" />
 
-        {/* Flettefelt */}
-        <span className="text-xs text-gray-400 mr-1">Flettefelt:</span>
+        {/* Merge fields */}
+        <span className="text-xs text-gray-400 mr-1">{t("mergeFieldsBoxLabel")}:</span>
         {mergeFields.map((f) => (
           <button
             key={f.value}

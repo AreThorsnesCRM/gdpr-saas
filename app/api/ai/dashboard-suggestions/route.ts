@@ -6,7 +6,9 @@ import { createServerClient } from "@supabase/ssr"
 
 const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
 
-export async function GET() {
+export async function GET(req: Request) {
+  const { searchParams } = new URL(req.url)
+  const locale = searchParams.get("locale") ?? "no"
   if (!supabaseAdmin) return NextResponse.json({ error: "Not configured" }, { status: 500 })
   if (!process.env.ANTHROPIC_API_KEY) return NextResponse.json({ error: "AI not configured" }, { status: 500 })
 
@@ -66,21 +68,27 @@ export async function GET() {
     return new Date(c.last_activity_at) < thirtyDaysAgo
   }) ?? []
 
+  const none = locale === "en" ? "none" : locale === "es" ? "ninguno" : "ingen"
   const context = `
-Dato i dag: ${today}
-Totalt kunder: ${customers?.length ?? 0}
-Kunder uten aktiv avtale: ${noActiveAgreement.map((c: any) => c.name).slice(0, 5).join(", ") || "ingen"}
-Avtaler som utløper de neste 30 dagene: ${expiring?.map((a: any) => `${a.title} (${a.end_date})`).join(", ") || "ingen"}
-Kunder ikke kontaktet siste 30 dager: ${notContactedRecently.map((c: any) => c.name).slice(0, 5).join(", ") || "ingen"}
-Siste aktiviteter: ${recentNotes?.slice(0, 5).map((n: any) => n.content?.substring(0, 60)).join(" | ") || "ingen"}
+Today: ${today}
+Total customers: ${customers?.length ?? 0}
+Customers without active agreement: ${noActiveAgreement.map((c: any) => c.name).slice(0, 5).join(", ") || none}
+Agreements expiring in the next 30 days: ${expiring?.map((a: any) => `${a.title} (${a.end_date})`).join(", ") || none}
+Customers not contacted in the last 30 days: ${notContactedRecently.map((c: any) => c.name).slice(0, 5).join(", ") || none}
+Recent activity: ${recentNotes?.slice(0, 5).map((n: any) => n.content?.substring(0, 60)).join(" | ") || none}
 `
+
+  const langInstruction =
+    locale === "en" ? "Respond in English." :
+    locale === "es" ? "Responde en español." :
+    "Svar på norsk."
 
   const message = await anthropic.messages.create({
     model: "claude-haiku-4-5-20251001",
     max_tokens: 400,
     messages: [{
       role: "user",
-      content: `Du er en CRM-assistent. Basert på denne oversikten, gi 3 konkrete og korte handlingsforslag for hva brukeren bør gjøre i dag. Svar med kun en JSON-array med 3 strenger. Hvert forslag skal være maks 80 tegn og starte med et verb. Eksempel: ["Ring Ola Nordmann — avtalen utløper om 5 dager", "Opprett ny avtale for Kari Hansen — ingen aktiv avtale", "Følg opp Bedrift AS — ikke kontaktet på 45 dager"]\n\nOversikt:\n${context}`,
+      content: `You are a CRM assistant. Based on this overview, give 3 concrete and short action suggestions for what the user should do today. Reply with only a JSON array of 3 strings. Each suggestion must be max 80 characters and start with a verb. ${langInstruction} Example format: ["Call John Smith — agreement expires in 5 days", "Create new agreement for Jane Doe — no active agreement", "Follow up Company X — not contacted in 45 days"]\n\nOverview:\n${context}`,
     }],
   })
 

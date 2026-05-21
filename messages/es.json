@@ -79,7 +79,8 @@
     "startSubscription": "Iniciar suscripción",
     "updatePayment": "Actualizar pago",
     "restart": "Empezar de nuevo",
-    "completePurchase": "Completar pago"
+    "completePurchase": "Completar pago",
+    "aiWidgetTitle": "¿Qué deberías hacer hoy?"
   },
   "customers": {
     "title": "Clientes",
@@ -107,7 +108,27 @@
     "badgeExpired": "Vencido {days}d",
     "deleteConfirm": "¿Estás seguro de que deseas eliminar este cliente?",
     "deleteTooltip": "Eliminar cliente",
-    "count": "{count, plural, one {# cliente} other {# clientes}}"
+    "count": "{count, plural, one {# cliente} other {# clientes}}",
+    "newTitle": "Nuevo cliente",
+    "newBackLink": "Clientes",
+    "newNameLabel": "Nombre *",
+    "newNamePlaceholder": "Nombre del cliente",
+    "newEmailLabel": "Correo electrónico",
+    "newEmailPlaceholder": "correo@ejemplo.es",
+    "newPhoneLabel": "Teléfono",
+    "newPhonePlaceholder": "+34 000 000 000",
+    "newOrgLabel": "Nº de organización",
+    "newOrgPlaceholder": "Ej. 123456789 o ES12345678",
+    "newAddressLabel": "Dirección",
+    "newAddressPlaceholder": "Dirección de calle",
+    "newPostalLabel": "Código postal",
+    "newPostalPlaceholder": "00000",
+    "newCityLabel": "Ciudad",
+    "newCityPlaceholder": "Ciudad",
+    "newManagerLabel": "Gestor de cuenta",
+    "newManagerNone": "Sin gestor seleccionado",
+    "newCreateButton": "Crear cliente",
+    "newNameRequired": "El nombre es obligatorio"
   },
   "customerDetail": {
     "backToCustomers": "Clientes",
@@ -235,7 +256,12 @@
     "mergeFieldOrgNr": "Nº org.",
     "mergeFieldStartDate": "Fecha de inicio del contrato",
     "mergeFieldEndDate": "Fecha de fin del contrato",
-    "mergeFieldCompanyName": "Nombre de tu empresa"
+    "mergeFieldCompanyName": "Nombre de tu empresa",
+    "mergeFieldLabelKunde": "Nombre cliente",
+    "mergeFieldLabelOrg": "Nº org.",
+    "mergeFieldLabelStart": "Fecha inicio",
+    "mergeFieldLabelEnd": "Fecha fin",
+    "mergeFieldLabelFirma": "Nombre empresa"
   },
   "settings": {
     "title": "Configuración",
@@ -489,6 +515,8 @@
     "statusArchived": "Archivado",
     "statusExpiresDays": "Vence en {days} días",
     "signingPending": "Esperando firma",
-    "signingSigned": "Firmado ↗"
+    "signingSigned": "Firmado ↗",
+    "labelCategory": "Categoría",
+    "labelNoCategory": "Sin categoría"
   }
 }
