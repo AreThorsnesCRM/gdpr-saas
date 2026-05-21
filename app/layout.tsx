@@ -8,6 +8,11 @@ export const metadata = {
   description: "Customer and agreement management",
 }
 
+export const viewport = {
+  width: "device-width",
+  initialScale: 1,
+}
+
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const locale = await getLocale()
   const messages = await getMessages()
