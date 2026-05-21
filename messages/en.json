@@ -19,7 +19,9 @@
     "catSamarbeidsavtale": "Collaboration Agreement",
     "catTjenesteavtale": "Service Agreement",
     "catKonfidensialitetsavtale": "Confidentiality Agreement (NDA)",
-    "catArbeidsavtale": "Employment Agreement"
+    "catArbeidsavtale": "Employment Agreement",
+    "fileChoose": "Choose file",
+    "fileNone": "No file selected"
   },
   "login": {
     "title": "Log in",

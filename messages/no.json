@@ -19,7 +19,9 @@
     "catSamarbeidsavtale": "Samarbeidsavtale",
     "catTjenesteavtale": "Tjenesteavtale",
     "catKonfidensialitetsavtale": "Konfidensialitetsavtale (NDA)",
-    "catArbeidsavtale": "Arbeidsavtale"
+    "catArbeidsavtale": "Arbeidsavtale",
+    "fileChoose": "Velg fil",
+    "fileNone": "Ingen fil valgt"
   },
   "login": {
     "title": "Logg inn",
