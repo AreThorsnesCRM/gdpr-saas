@@ -61,7 +61,8 @@
     "loggingIn": "Iniciando sesión...",
     "forgotPassword": "¿Olvidaste tu contraseña?",
     "createAccount": "Crear cuenta →",
-    "wrongCredentials": "Correo o contraseña incorrectos"
+    "wrongCredentials": "Correo o contraseña incorrectos",
+    "privacyLink": "Política de privacidad"
   },
   "dashboard": {
     "title": "Panel",

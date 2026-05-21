@@ -19,7 +19,9 @@
       "Bash(git -C /c/MVP/gdpr-saas show 1a5b550:\"app/\\(auth\\)/login/page.tsx\")",
       "Bash(git -C /c/MVP/gdpr-saas show 1a5b550:\"messages/no.json\")",
       "Bash(git -C /c/MVP/gdpr-saas show 1a5b550:\"messages/en.json\")",
-      "Bash(git -C /c/MVP/gdpr-saas diff HEAD -- \"app/\\(auth\\)/login/LoginForm.tsx\")"
+      "Bash(git -C /c/MVP/gdpr-saas diff HEAD -- \"app/\\(auth\\)/login/LoginForm.tsx\")",
+      "Bash(git -C /c/MVP/gdpr-saas log --oneline -15)",
+      "Bash(git -C /c/MVP/gdpr-saas show 877b17e:\"app/\\(auth\\)/login/LoginForm.tsx\")"
     ],
     "additionalDirectories": [
       "c:\\MVP\\gdpr-saas\\app\\api\\account\\agreement-categories"

@@ -61,7 +61,8 @@
     "loggingIn": "Logging in...",
     "forgotPassword": "Forgot password?",
     "createAccount": "Create account →",
-    "wrongCredentials": "Wrong email or password"
+    "wrongCredentials": "Wrong email or password",
+    "privacyLink": "Privacy policy"
   },
   "dashboard": {
     "title": "Overview",

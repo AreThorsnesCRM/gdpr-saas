@@ -61,7 +61,8 @@
     "loggingIn": "Logger inn...",
     "forgotPassword": "Glemt passord?",
     "createAccount": "Opprett konto →",
-    "wrongCredentials": "Feil e-post eller passord"
+    "wrongCredentials": "Feil e-post eller passord",
+    "privacyLink": "Personvernerklæring"
   },
   "dashboard": {
     "title": "Oversikt",
