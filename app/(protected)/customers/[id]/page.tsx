@@ -316,16 +316,16 @@ export default function CustomerPage(props: CustomerPageProps) {
   const inputClass = "w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-400 bg-white"
 
   return (
-    <div className="p-8 max-w-5xl space-y-6">
+    <div className="p-4 md:p-8 max-w-5xl space-y-6">
 
       <Link href="/customers" className="inline-flex items-center gap-1 text-sm text-gray-500 hover:text-gray-900 transition-colors">
         <ChevronLeftIcon className="h-4 w-4" />
         {t("backToCustomers")}
       </Link>
 
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <h1 className="text-2xl font-bold text-gray-900">{customer?.name ?? ""}</h1>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 flex-wrap">
           {account?.ai_assistant_enabled && (
             <button
               onClick={handleFetchSummary}
@@ -381,7 +381,7 @@ export default function CustomerPage(props: CustomerPageProps) {
                 <input className={inputClass} placeholder={t("labelName")} value={name} onChange={(e) => setName(e.target.value)} />
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <label className="block text-xs font-medium text-gray-500 mb-1">{t("labelEmail")}</label>
                   <input className={inputClass} placeholder={t("labelEmail")} value={email} onChange={(e) => setEmail(e.target.value)} />
@@ -392,7 +392,7 @@ export default function CustomerPage(props: CustomerPageProps) {
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <label className="block text-xs font-medium text-gray-500 mb-1">{t("labelOrgNr")}</label>
                   <input className={inputClass} placeholder={t("placeholderOrgNr")} value={orgNummer} onChange={(e) => setOrgNummer(e.target.value)} />
@@ -408,7 +408,7 @@ export default function CustomerPage(props: CustomerPageProps) {
                 <input className={inputClass} placeholder={t("placeholderAddress")} value={address} onChange={(e) => setAddress(e.target.value)} />
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <label className="block text-xs font-medium text-gray-500 mb-1">{t("labelPostalCode")}</label>
                   <input className={inputClass} placeholder={t("placeholderPostalCode")} value={postalCode} onChange={(e) => setPostalCode(e.target.value)} />

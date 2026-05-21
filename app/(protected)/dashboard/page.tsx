@@ -239,10 +239,10 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="p-8 space-y-8 max-w-6xl">
+    <div className="p-4 md:p-8 space-y-8 max-w-6xl">
 
       {showBanner && (
-        <div className={`rounded-xl border px-6 py-4 flex items-center justify-between ${
+        <div className={`rounded-xl border px-6 py-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 ${
           status === "trialing" ? "bg-blue-50 border-blue-200" :
           status === "past_due" ? "bg-red-50 border-red-200" :
           "bg-gray-50 border-gray-200"
@@ -261,7 +261,7 @@ export default function DashboardPage() {
               {status === "incomplete" && t("incompleteDesc")}
             </p>
           </div>
-          <div className="shrink-0 ml-6">
+          <div className="shrink-0 sm:ml-6">
             {status === "trialing" && <SubscribeButton label={t("startSubscription")} mode="checkout" />}
             {status === "past_due" && <SubscribeButton label={t("updatePayment")} mode="portal" />}
             {status === "canceled" && <SubscribeButton label={t("restart")} mode="checkout" />}
@@ -270,12 +270,12 @@ export default function DashboardPage() {
         </div>
       )}
 
-      <div className="flex items-start justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">{t("title")}</h1>
           <p className="text-gray-500 mt-1">{t("subtitle")}</p>
         </div>
-        <div className="flex gap-3">
+        <div className="flex gap-3 flex-wrap">
           <Link href="/customers/new"
             className="bg-slate-800 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-slate-700 transition-colors">
             {t("newCustomer")}

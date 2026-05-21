@@ -404,21 +404,21 @@ export default function SettingsPage() {
   }
 
   return (
-    <div className="p-8 max-w-5xl">
+    <div className="p-4 md:p-8 max-w-5xl">
       <div className="mb-8">
         <h1 className="text-2xl font-bold text-gray-900">{t("title")}</h1>
         {account && <p className="text-gray-500 mt-1">{account.name}</p>}
       </div>
 
-      <div className="flex gap-10 items-start">
+      <div className="flex flex-col md:flex-row md:gap-10 md:items-start">
         {/* Sticky venstremeny */}
-        <nav className="w-44 shrink-0 sticky top-8">
-          <ul className="flex flex-col gap-1">
+        <nav className="w-full md:w-44 md:shrink-0 md:sticky md:top-8">
+          <ul className="flex flex-row overflow-x-auto gap-1 pb-2 md:flex-col md:overflow-visible md:pb-0">
             {sections.map((s) => (
               <li key={s.id}>
                 <button
                   onClick={() => scrollTo(s.id)}
-                  className={`w-full text-left px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                  className={`w-full text-left px-3 py-2 rounded-lg text-sm font-medium transition-colors whitespace-nowrap ${
                     activeSection === s.id
                       ? "bg-slate-100 text-slate-900"
                       : "text-slate-500 hover:text-slate-900 hover:bg-slate-50"
@@ -533,7 +533,7 @@ export default function SettingsPage() {
                   )}
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <Field label={t("companyNameLabel")} colSpan={2}>
                     <input type="text" value={company.name}
                       onChange={(e) => setCompany((c) => ({ ...c, name: e.target.value }))}
@@ -599,7 +599,7 @@ export default function SettingsPage() {
             {loading ? (
               <p className="text-sm text-gray-400 mt-4">{tc("loading")}</p>
             ) : (
-              <div className="mt-4 border border-gray-200 rounded-xl overflow-hidden">
+              <div className="mt-4 overflow-x-auto rounded-xl border border-gray-200">
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="border-b border-gray-200 bg-gray-50">
@@ -720,7 +720,7 @@ export default function SettingsPage() {
               <div className="mt-6">
                 <p className="text-sm font-medium text-gray-700 mb-2">{t("inviteTitle")}</p>
                 <form onSubmit={handleInvite} className="space-y-3">
-                  <div className="flex gap-3">
+                  <div className="flex flex-col sm:flex-row gap-3">
                     <input
                       type="email"
                       value={inviteEmail}

@@ -313,7 +313,7 @@ export default function AgreementDetailPage({ params }: { params: Promise<{ id: 
 
   if (previewMode) {
     return (
-      <div className="fixed top-0 right-0 bottom-0 left-64 z-50 bg-gray-50 overflow-y-auto">
+      <div className="fixed inset-0 z-50 bg-gray-50 overflow-y-auto">
         <div className="max-w-4xl mx-auto px-8 py-8 space-y-6">
           <div className="flex items-center justify-between">
             <button onClick={() => setPreviewMode(false)} className="inline-flex items-center gap-1 text-sm text-gray-500 hover:text-gray-900 transition-colors">
@@ -349,14 +349,14 @@ export default function AgreementDetailPage({ params }: { params: Promise<{ id: 
   const badge = getExpiryBadge()
 
   return (
-    <div className="p-8 max-w-3xl space-y-6">
+    <div className="p-4 md:p-8 max-w-3xl space-y-6">
 
       <Link href={`/customers/${agreement?.customer_id ?? ""}`} className="inline-flex items-center gap-1 text-sm text-gray-500 hover:text-gray-900 transition-colors">
         <ChevronLeftIcon className="h-4 w-4" />
         {agreement?.customers?.name ?? "..."}
       </Link>
 
-      <div className="flex items-start justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
         <div className="flex items-center gap-3 flex-wrap min-w-0">
           <h1 className="text-2xl font-bold text-gray-900 truncate">{agreement?.title ?? ""}</h1>
           {agreement?.archived ? (
@@ -385,7 +385,7 @@ export default function AgreementDetailPage({ params }: { params: Promise<{ id: 
             <label className="block text-xs font-medium text-gray-500 mb-1">{t("labelTitle")}</label>
             <input className={inputClass} value={title} onChange={e => setTitle(e.target.value)} />
           </div>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <label className="block text-xs font-medium text-gray-500 mb-1">{t("labelStartDate")}</label>
               <input type="date" className={inputClass} value={startDate} onChange={e => setStartDate(e.target.value)} />
@@ -399,7 +399,7 @@ export default function AgreementDetailPage({ params }: { params: Promise<{ id: 
             <label className="block text-xs font-medium text-gray-500 mb-1">{t("labelContact")}</label>
             <input className={inputClass} value={contactName} onChange={e => setContactName(e.target.value)} />
           </div>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <label className="block text-xs font-medium text-gray-500 mb-1">{t("labelEmail")}</label>
               <input type="email" className={inputClass} value={contactEmail} onChange={e => setContactEmail(e.target.value)} />

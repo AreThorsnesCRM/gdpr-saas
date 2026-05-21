@@ -181,12 +181,12 @@ export default function CustomersPage() {
   }
 
   return (
-    <div className="p-8 max-w-6xl space-y-6">
+    <div className="p-4 md:p-8 max-w-6xl space-y-6">
 
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <h1 className="text-2xl font-bold text-gray-900">{t("title")}</h1>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
           <a
             href="/api/customers/export"
             className="border border-gray-200 text-gray-600 px-3 py-2 rounded-lg text-sm font-medium hover:bg-gray-50 hover:border-gray-300 transition-colors"
@@ -256,7 +256,7 @@ export default function CustomersPage() {
       ) : filtered.length === 0 ? (
         <p className="text-sm text-gray-400">{t("noResults")}</p>
       ) : (
-        <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+        <div className="overflow-x-auto rounded-xl border border-gray-200 bg-white">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-gray-200 bg-gray-50">
@@ -266,19 +266,19 @@ export default function CustomersPage() {
                     <span className="text-gray-300">{sortKey === "name" ? (sortDir === "asc" ? "↑" : "↓") : "↕"}</span>
                   </button>
                 </th>
-                <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wide">{t("columnOrg")}</th>
-                <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wide">{t("columnCity")}</th>
+                <th className="hidden sm:table-cell text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wide">{t("columnOrg")}</th>
+                <th className="hidden sm:table-cell text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wide">{t("columnCity")}</th>
                 {teamMembers.length > 0 && (
-                  <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wide">{t("columnManager")}</th>
+                  <th className="hidden md:table-cell text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wide">{t("columnManager")}</th>
                 )}
                 <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wide">{t("columnAgreement")}</th>
-                <th className="text-left px-4 py-3">
+                <th className="hidden md:table-cell text-left px-4 py-3">
                   <button onClick={() => toggleSort("lastActivity")} className="flex items-center gap-1 text-xs font-medium text-gray-500 hover:text-gray-900 transition-colors uppercase tracking-wide">
                     {t("columnLastActivity")}
                     <span className="text-gray-300">{sortKey === "lastActivity" ? (sortDir === "asc" ? "↑" : "↓") : "↕"}</span>
                   </button>
                 </th>
-                <th className="px-4 py-3" />
+                <th className="hidden sm:table-cell px-4 py-3" />
               </tr>
             </thead>
             <tbody>
@@ -296,18 +296,18 @@ export default function CustomersPage() {
                       <p className="font-medium text-gray-900">{c.name}</p>
                       <p className="text-xs text-gray-400">{c.email ?? "—"}</p>
                     </td>
-                    <td className="px-4 py-3 text-gray-500 text-sm">{c.org_nummer ?? "—"}</td>
-                    <td className="px-4 py-3 text-gray-500 text-sm">{c.city ?? "—"}</td>
+                    <td className="hidden sm:table-cell px-4 py-3 text-gray-500 text-sm">{c.org_nummer ?? "—"}</td>
+                    <td className="hidden sm:table-cell px-4 py-3 text-gray-500 text-sm">{c.city ?? "—"}</td>
                     {teamMembers.length > 0 && (
-                      <td className="px-4 py-3 text-gray-500 text-sm">{managerName}</td>
+                      <td className="hidden md:table-cell px-4 py-3 text-gray-500 text-sm">{managerName}</td>
                     )}
                     <td className="px-4 py-3"><Badge c={c} /></td>
-                    <td className="px-4 py-3 text-sm">
+                    <td className="hidden md:table-cell px-4 py-3 text-sm">
                       <span className={c.lastActivity ? "text-gray-500" : "text-gray-300"}>
                         {relativeActivity(c.lastActivity ?? null)}
                       </span>
                     </td>
-                    <td className="px-4 py-3 text-right">
+                    <td className="hidden sm:table-cell px-4 py-3 text-right">
                       <button
                         onClick={(e) => deleteCustomer(e, c.id)}
                         className="text-gray-300 hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100"

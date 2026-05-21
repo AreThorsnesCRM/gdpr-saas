@@ -212,11 +212,11 @@ export default function AgreementsPage() {
   }
 
   return (
-    <div className="p-8 max-w-6xl space-y-6">
+    <div className="p-4 md:p-8 max-w-6xl space-y-6">
 
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <h1 className="text-2xl font-bold text-gray-900">{t("title")}</h1>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
           <a
             href={`/api/agreements/export?locale=${locale}`}
             className="border border-gray-200 text-gray-600 px-3 py-2 rounded-lg text-sm font-medium hover:bg-gray-50 transition-colors"
@@ -265,7 +265,7 @@ export default function AgreementsPage() {
       ) : filtered.length === 0 ? (
         <p className="text-sm text-gray-400">{t("noResults")}</p>
       ) : (
-        <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+        <div className="overflow-x-auto rounded-xl border border-gray-200 bg-white">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-gray-200 bg-gray-50">
@@ -281,13 +281,13 @@ export default function AgreementsPage() {
                     <span className="text-gray-300">{sortKey === "customer" ? (sortDir === "asc" ? "↑" : "↓") : "↕"}</span>
                   </button>
                 </th>
-                <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wide">
+                <th className="hidden sm:table-cell text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wide">
                   <button onClick={() => toggleSort("category")} className="flex items-center gap-1 hover:text-gray-800 transition-colors">
                     {t("columnCategory")}
                     <span className="text-gray-300">{sortKey === "category" ? (sortDir === "asc" ? "↑" : "↓") : "↕"}</span>
                   </button>
                 </th>
-                <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wide">{t("columnPeriod")}</th>
+                <th className="hidden md:table-cell text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wide">{t("columnPeriod")}</th>
                 <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wide">{t("columnStatus")}</th>
               </tr>
             </thead>
@@ -300,10 +300,10 @@ export default function AgreementsPage() {
                 >
                   <td className="px-4 py-3 font-medium text-gray-900">{a.title}</td>
                   <td className="px-4 py-3 text-gray-500">{a.customers?.name}</td>
-                  <td className="px-4 py-3 text-gray-500">
+                  <td className="hidden sm:table-cell px-4 py-3 text-gray-500">
                     {a.agreement_categories?.name ?? <span className="text-gray-300">—</span>}
                   </td>
-                  <td className="px-4 py-3 text-gray-500 whitespace-nowrap">
+                  <td className="hidden md:table-cell px-4 py-3 text-gray-500 whitespace-nowrap">
                     {formatDate(a.start_date)} – {formatDate(a.end_date)}
                   </td>
                   <td className="px-4 py-3">
