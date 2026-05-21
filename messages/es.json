@@ -12,6 +12,8 @@
     "error": "Algo salió mal",
     "restore": "Restaurar",
     "archive": "Archivar",
+    "export": "Exportar",
+    "exporting": "Exportando...",
     "catDatabehandleravtale": "Acuerdo de procesamiento de datos",
     "catHusleieavtale": "Contrato de arrendamiento",
     "catSamarbeidsavtale": "Acuerdo de colaboración",

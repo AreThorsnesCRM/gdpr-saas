@@ -12,6 +12,8 @@
     "error": "Something went wrong",
     "restore": "Restore",
     "archive": "Archive",
+    "export": "Export",
+    "exporting": "Exporting...",
     "catDatabehandleravtale": "Data Processing Agreement",
     "catHusleieavtale": "Lease Agreement",
     "catSamarbeidsavtale": "Collaboration Agreement",

@@ -12,6 +12,8 @@
     "error": "Noe gikk galt",
     "restore": "Gjenopprett",
     "archive": "Arkiver",
+    "export": "Eksporter",
+    "exporting": "Eksporterer...",
     "catDatabehandleravtale": "Databehandleravtale",
     "catHusleieavtale": "Husleieavtale",
     "catSamarbeidsavtale": "Samarbeidsavtale",

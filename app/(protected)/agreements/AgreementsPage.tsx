@@ -216,12 +216,20 @@ export default function AgreementsPage() {
 
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold text-gray-900">{t("title")}</h1>
-        <button
-          onClick={openQuickModal}
-          className="bg-slate-800 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-slate-700 transition-colors"
-        >
-          {t("newAgreement")}
-        </button>
+        <div className="flex items-center gap-2">
+          <a
+            href={`/api/agreements/export?locale=${locale}`}
+            className="border border-gray-200 text-gray-600 px-3 py-2 rounded-lg text-sm font-medium hover:bg-gray-50 transition-colors"
+          >
+            ↓ {tc("export")}
+          </a>
+          <button
+            onClick={openQuickModal}
+            className="bg-slate-800 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-slate-700 transition-colors"
+          >
+            {t("newAgreement")}
+          </button>
+        </div>
       </div>
 
       <div className="flex flex-wrap gap-2 items-center">
