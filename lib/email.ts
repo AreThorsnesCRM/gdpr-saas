@@ -1,7 +1,7 @@
 import { Resend } from "resend"
 
 const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null
-const FROM = "AreCRM <onboarding@resend.dev>"
+const FROM = "Pactiva <onboarding@resend.dev>"
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL
 
 export async function sendTrialEndingEmail(to: string, name: string, daysLeft: number) {
@@ -13,10 +13,10 @@ export async function sendTrialEndingEmail(to: string, name: string, daysLeft: n
     subject: `Prøveperioden din utløper om ${timeLeft}`,
     html: `
       <p>Hei ${name},</p>
-      <p>Prøveperioden din i AreCRM utløper om <strong>${timeLeft}</strong>.</p>
+      <p>Prøveperioden din i Pactiva utløper om <strong>${timeLeft}</strong>.</p>
       <p>For å fortsette uten avbrudd, start et abonnement nå.</p>
       <p><a href="${APP_URL}/settings" style="${btnStyle("#2563eb")}">Start abonnement</a></p>
-      <p style="${footerStyle}">Du kan slå av disse varslene under Innstillinger i AreCRM.</p>
+      <p style="${footerStyle}">Du kan slå av disse varslene under Innstillinger i Pactiva.</p>
     `,
   })
 }
@@ -29,10 +29,10 @@ export async function sendPaymentFailedEmail(to: string, name: string) {
     subject: "Betalingen din feilet — handling kreves",
     html: `
       <p>Hei ${name},</p>
-      <p>Vi klarte dessverre ikke å trekke betalingen for abonnementet ditt i AreCRM.</p>
+      <p>Vi klarte dessverre ikke å trekke betalingen for abonnementet ditt i Pactiva.</p>
       <p>Vennligst oppdater betalingsinformasjonen for å unngå avbrudd.</p>
       <p><a href="${APP_URL}/settings" style="${btnStyle("#dc2626")}">Oppdater betalingsinfo</a></p>
-      <p style="${footerStyle}">Du kan slå av disse varslene under Innstillinger i AreCRM.</p>
+      <p style="${footerStyle}">Du kan slå av disse varslene under Innstillinger i Pactiva.</p>
     `,
   })
 }
@@ -54,7 +54,7 @@ export async function sendExpiringAgreementEmail(
       <p>Hei ${name},</p>
       <p>Avtalen <strong>${agreementTitle}</strong> med <strong>${customerName}</strong> utløper om <strong>${daysText}</strong>.</p>
       <p>Gå inn på kunden for å fornye eller arkivere avtalen.</p>
-      <p><a href="${APP_URL}/customers" style="${btnStyle("#1e293b")}">Åpne AreCRM</a></p>
+      <p><a href="${APP_URL}/customers" style="${btnStyle("#1e293b")}">Åpne Pactiva</a></p>
       <p style="${footerStyle}">Du kan slå av disse varslene under Innstillinger → Varsler.</p>
     `,
   })
@@ -75,7 +75,7 @@ export async function sendAgreementExpiredEmail(
       <p>Hei ${name},</p>
       <p>Avtalen <strong>${agreementTitle}</strong> med <strong>${customerName}</strong> utløp i går, og kunden har nå ingen aktive avtaler.</p>
       <p>Vurder om det er behov for å opprette en ny avtale.</p>
-      <p><a href="${APP_URL}/customers" style="${btnStyle("#1e293b")}">Åpne AreCRM</a></p>
+      <p><a href="${APP_URL}/customers" style="${btnStyle("#1e293b")}">Åpne Pactiva</a></p>
       <p style="${footerStyle}">Du kan slå av disse varslene under Innstillinger → Varsler.</p>
     `,
   })
@@ -100,7 +100,7 @@ export async function sendSigningLinkEmail(
       <p><a href="${signatureUrl}" style="${btnStyle("#1e293b")}">Signer avtalen</a></p>
       <p>Eller kopier denne lenken direkte i nettleseren:<br>
       <span style="color:#4b5563;font-size:13px">${signatureUrl}</span></p>
-      <p style="${footerStyle}">Denne signeringslenken er sendt via AreCRM.</p>
+      <p style="${footerStyle}">Denne signeringslenken er sendt via Pactiva.</p>
     `,
   })
 }

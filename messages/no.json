@@ -386,7 +386,7 @@
     "categoryAdding": "Legger til...",
     "categoryDeleteTitle": "Slett kategori",
     "privacyTitle": "Personvern",
-    "privacyDesc": "Les om hvordan AreCRM behandler personopplysninger.",
+    "privacyDesc": "Les om hvordan Pactiva behandler personopplysninger.",
     "privacyLink": "Personvernerklæring →",
     "fileChoose": "Velg fil",
     "fileNone": "Ingen fil valgt"
@@ -454,7 +454,7 @@
     "columnWebsite": "Nettside"
   },
   "assistant": {
-    "title": "AreCRM Assistent",
+    "title": "Pactiva Assistent",
     "contextLimited": "Begrenset kontekst",
     "contextFull": "Full kontekst",
     "contextLimitedInfo": "Begrenset kontekst — kun statistikk, ingen persondata",
@@ -480,7 +480,7 @@
     "pageHintAgreement": "Avtaleside"
   },
   "onboarding": {
-    "title": "Kom i gang med AreCRM",
+    "title": "Kom i gang med Pactiva",
     "subtitle": "Velg landet ditt for å sette opp riktig signaturmetode (BankID, MitID, osv.).",
     "countryLabel": "Land",
     "countryHint": "Bestemmer hvilken e-ID som brukes ved digital signering.",

@@ -1,8 +1,8 @@
 import Link from "next/link"
 
 export const metadata = {
-  title: "Personvernerklæring — AreCRM",
-  description: "Hvordan AreCRM behandler dine personopplysninger.",
+  title: "Personvernerklæring — Pactiva",
+  description: "Hvordan Pactiva behandler dine personopplysninger.",
 }
 
 export default function PrivacyPage() {
@@ -25,7 +25,7 @@ export default function PrivacyPage() {
 
           <Section title="1. Behandlingsansvarlig">
             <p>
-              AreCRM er utviklet og driftet av Are Thorsnes (heretter «vi», «oss» eller «AreCRM»).
+              Pactiva er utviklet og driftet av Are Thorsnes (heretter «vi», «oss» eller «Pactiva»).
               Vi er behandlingsansvarlig for personopplysningene som behandles i tjenesten.
             </p>
             <p className="mt-3">
@@ -142,7 +142,7 @@ export default function PrivacyPage() {
 
           <Section title="7. Informasjonskapsler (cookies)">
             <p>
-              AreCRM bruker kun funksjonelle informasjonskapsler for å holde deg innlogget (sesjonstoken).
+              Pactiva bruker kun funksjonelle informasjonskapsler for å holde deg innlogget (sesjonstoken).
               Vi bruker ingen sporings- eller reklamecookies.
             </p>
           </Section>
@@ -156,7 +156,7 @@ export default function PrivacyPage() {
 
           <div className="border-t border-gray-100 pt-6">
             <p className="text-xs text-gray-400">
-              © {new Date().getFullYear()} AreCRM · <a href="mailto:are.thorsnes@gmail.com" className="underline">are.thorsnes@gmail.com</a>
+              © {new Date().getFullYear()} Pactiva · <a href="mailto:are.thorsnes@gmail.com" className="underline">are.thorsnes@gmail.com</a>
             </p>
           </div>
 

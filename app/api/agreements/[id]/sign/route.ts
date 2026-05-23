@@ -96,7 +96,7 @@ export async function POST(
   let emailSent = false
   for (const s of signersJsonb) {
     if (s.email) {
-      await sendSigningLinkEmail(s.email, s.name, agreement.title, s.url, account?.name ?? "AreCRM")
+      await sendSigningLinkEmail(s.email, s.name, agreement.title, s.url, account?.name ?? "Pactiva")
       emailSent = true
     }
   }

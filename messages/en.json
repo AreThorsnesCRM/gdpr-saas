@@ -386,7 +386,7 @@
     "categoryAdding": "Adding...",
     "categoryDeleteTitle": "Delete category",
     "privacyTitle": "Privacy",
-    "privacyDesc": "Read about how AreCRM processes personal data.",
+    "privacyDesc": "Read about how Pactiva processes personal data.",
     "privacyLink": "Privacy policy →",
     "fileChoose": "Choose file",
     "fileNone": "No file selected"
@@ -454,7 +454,7 @@
     "columnWebsite": "Website"
   },
   "assistant": {
-    "title": "AreCRM Assistant",
+    "title": "Pactiva Assistant",
     "contextLimited": "Limited context",
     "contextFull": "Full context",
     "contextLimitedInfo": "Limited context — statistics only, no personal data",
@@ -480,7 +480,7 @@
     "pageHintAgreement": "Agreement page"
   },
   "onboarding": {
-    "title": "Get started with AreCRM",
+    "title": "Get started with Pactiva",
     "subtitle": "Select your country to set up the correct signature method (BankID, MitID, etc.).",
     "countryLabel": "Country",
     "countryHint": "Determines which e-ID is used for digital signing.",

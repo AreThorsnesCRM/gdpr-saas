@@ -52,7 +52,7 @@ export default function Sidebar({ isOpen, onClose }: { isOpen: boolean; onClose:
 
   const status = loading ? "loading" : account?.subscription_status ?? "unknown"
   const fullName = profile?.full_name ?? ""
-  const companyName = account?.name ?? "AreCRM"
+  const companyName = account?.name ?? "Pactiva"
   const isAdmin = role === "admin"
 
   useEffect(() => { onClose() }, [pathname])
@@ -62,7 +62,7 @@ export default function Sidebar({ isOpen, onClose }: { isOpen: boolean; onClose:
 
       {/* Logo + lukk-knapp (mobil) */}
       <div className="px-6 py-5 border-b border-slate-700/50 flex items-center justify-between">
-        <span className="text-xl font-bold text-white tracking-tight">AreCRM</span>
+        <span className="text-xl font-bold text-white tracking-tight">Pactiva</span>
         <button onClick={onClose} className="md:hidden text-slate-400 hover:text-white transition-colors">
           <XMarkIcon className="h-5 w-5" />
         </button>
@@ -119,7 +119,7 @@ export default function Sidebar({ isOpen, onClose }: { isOpen: boolean; onClose:
           <LanguageSwitcher />
         </div>
         <div className="text-xs text-slate-600 mt-2 px-3">
-          © {new Date().getFullYear()} AreCRM
+          © {new Date().getFullYear()} Pactiva
         </div>
       </div>
     </aside>

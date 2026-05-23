@@ -4,7 +4,7 @@ import { NextIntlClientProvider } from "next-intl"
 import { getLocale, getMessages } from "next-intl/server"
 
 export const metadata = {
-  title: "AreCRM",
+  title: "Pactiva",
   description: "Customer and agreement management",
 }
 

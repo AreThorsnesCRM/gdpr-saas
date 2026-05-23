@@ -7,9 +7,9 @@ import { createServerClient } from "@supabase/ssr"
 const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
 
 function buildSystemPrompt(contextBlock: string, contextLevel: string): string {
-  return `Du er en hjelpsom AI-assistent innebygd i AreCRM — et CRM-system for bedrifter som administrerer kunder og avtaler med fokus på GDPR-samsvar.
+  return `Du er en hjelpsom AI-assistent innebygd i Pactiva — et CRM-system for bedrifter som administrerer kunder og avtaler med fokus på GDPR-samsvar.
 
-== Om AreCRM ==
+== Om Pactiva ==
 - Kunder: legg til, rediger, søk og filtrer kunder. Logg aktivitet (notater, samtaler, møter, e-post) per kunde.
 - Avtaler: opprett avtaler med start/sluttdato, last opp PDF-dokument, send til digital signering via BankID (NO), BankID SE (SE), MitID (DK) eller FTN (FI) basert på kontoens land.
 - Maler: lag gjenbrukbare avtalemaler med flettefelt: {{customer.name}}, {{customer.org_number}}, {{customer.address}}, {{agreement.start_date}}, {{agreement.end_date}}, {{company.name}}, {{company.org_number}}.

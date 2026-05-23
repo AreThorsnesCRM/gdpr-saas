@@ -386,7 +386,7 @@
     "categoryAdding": "Añadiendo...",
     "categoryDeleteTitle": "Eliminar categoría",
     "privacyTitle": "Privacidad",
-    "privacyDesc": "Lee sobre cómo AreCRM procesa los datos personales.",
+    "privacyDesc": "Lee sobre cómo Pactiva procesa los datos personales.",
     "privacyLink": "Política de privacidad →",
     "fileChoose": "Elegir archivo",
     "fileNone": "Ningún archivo seleccionado"
@@ -454,7 +454,7 @@
     "columnWebsite": "Sitio web"
   },
   "assistant": {
-    "title": "Asistente AreCRM",
+    "title": "Asistente Pactiva",
     "contextLimited": "Contexto limitado",
     "contextFull": "Contexto completo",
     "contextLimitedInfo": "Contexto limitado — solo estadísticas, sin datos personales",
@@ -480,7 +480,7 @@
     "pageHintAgreement": "Página de contrato"
   },
   "onboarding": {
-    "title": "Empezar con AreCRM",
+    "title": "Empezar con Pactiva",
     "subtitle": "Selecciona tu país para configurar el método de firma correcto (BankID, MitID, etc.).",
     "countryLabel": "País",
     "countryHint": "Determina qué e-ID se usa para la firma digital.",
