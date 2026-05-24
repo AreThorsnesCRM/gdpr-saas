@@ -62,10 +62,10 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="h-screen flex overflow-hidden">
+    <div className="min-h-screen flex">
 
       {/* Venstre — branding */}
-      <div className="hidden lg:flex lg:w-1/2 bg-slate-900 flex-col justify-between p-12 overflow-y-auto">
+      <div className="hidden lg:flex lg:w-1/2 bg-slate-900 flex-col justify-between p-12">
         <img src="/pactiva-logo-light.svg" alt="Pactiva" className="h-16" />
         <div className="space-y-4">
           <h2 className="text-white text-3xl font-bold leading-snug">
@@ -79,7 +79,7 @@ export default function RegisterPage() {
       </div>
 
       {/* Høyre — skjema */}
-      <div className="flex-1 flex items-center justify-center bg-gray-50 px-8 py-12 overflow-y-auto">
+      <div className="flex-1 flex items-center justify-center bg-gray-50 px-8 py-12">
         <div className="w-full max-w-sm">
 
           <img src="/pactiva-logo-dark.svg" alt="Pactiva" className="lg:hidden h-10 mb-8" />

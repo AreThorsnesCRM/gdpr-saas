@@ -32,28 +32,61 @@ export default function ResetPasswordPage() {
   }
 
   return (
-    <div className="w-full max-w-sm bg-white p-6 rounded shadow space-y-4">
-      <h1 className="text-xl font-semibold">Nytt passord</h1>
+    <div className="min-h-screen flex">
 
-      {message && <p className="text-green-600">{message}</p>}
-      {error && <p className="text-red-600">{error}</p>}
+      {/* Venstre — branding */}
+      <div className="hidden lg:flex lg:w-1/2 bg-slate-900 flex-col justify-between p-12">
+        <img src="/pactiva-logo-light.svg" alt="Pactiva" className="h-16" />
+        <div className="space-y-4">
+          <h2 className="text-white text-3xl font-bold leading-snug">
+            Velg et nytt<br />passord
+          </h2>
+          <p className="text-slate-400 text-base leading-relaxed">
+            Passordet må være minst 8 tegn langt.
+          </p>
+        </div>
+        <p className="text-slate-600 text-xs">© {new Date().getFullYear()} Pactiva</p>
+      </div>
 
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <input
-          type="password"
-          placeholder="Nytt passord"
-          className="border p-2 rounded w-full"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-        />
+      {/* Høyre — skjema */}
+      <div className="flex-1 flex items-center justify-center bg-gray-50 px-8 py-12">
+        <div className="w-full max-w-sm">
 
-        <button
-          type="submit"
-          className="bg-blue-600 text-white w-full py-2 rounded"
-        >
-          Oppdater passord
-        </button>
-      </form>
+          <img src="/pactiva-logo-dark.svg" alt="Pactiva" className="lg:hidden h-10 mb-8" />
+
+          <h1 className="text-2xl font-bold text-gray-900">Nytt passord</h1>
+          <p className="text-gray-500 text-sm mt-1 mb-8">Skriv inn et nytt passord for kontoen din.</p>
+
+          {message && (
+            <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-lg text-green-700 text-sm">
+              {message}
+            </div>
+          )}
+
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div>
+              <label className="block text-xs font-medium text-gray-500 mb-1">Nytt passord</label>
+              <input
+                type="password"
+                className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-slate-400 bg-white"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+              />
+            </div>
+
+            {error && <p className="text-red-600 text-sm">{error}</p>}
+
+            <button
+              type="submit"
+              className="w-full bg-slate-800 text-white py-2.5 rounded-lg text-sm font-medium hover:bg-slate-700 transition-colors"
+            >
+              Oppdater passord
+            </button>
+          </form>
+
+        </div>
+      </div>
     </div>
   )
 }
