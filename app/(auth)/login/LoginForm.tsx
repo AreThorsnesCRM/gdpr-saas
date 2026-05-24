@@ -53,7 +53,7 @@ export default function LoginForm() {
 
       {/* Left — branding */}
       <div className="hidden lg:flex lg:w-1/2 bg-slate-900 flex-col justify-between p-12">
-        <img src="/pactiva-logo-light.svg" alt="Pactiva" className="h-14" />
+        <img src="/pactiva-logo-light.svg" alt="Pactiva" className="h-16" />
 
         <div className="space-y-8">
           <div>

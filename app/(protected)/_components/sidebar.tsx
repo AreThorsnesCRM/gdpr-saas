@@ -62,7 +62,7 @@ export default function Sidebar({ isOpen, onClose }: { isOpen: boolean; onClose:
 
       {/* Logo + lukk-knapp (mobil) */}
       <div className="px-6 py-5 border-b border-slate-700/50 flex items-center justify-between">
-        <img src="/pactiva-logo-light.svg" alt="Pactiva" className="h-10" />
+        <img src="/pactiva-logo-light.svg" alt="Pactiva" className="h-14" />
         <button onClick={onClose} className="md:hidden text-slate-400 hover:text-white transition-colors">
           <XMarkIcon className="h-5 w-5" />
         </button>
