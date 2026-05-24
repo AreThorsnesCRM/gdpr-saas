@@ -33,7 +33,7 @@ export default function ProtectedLayout({ children }: { children: React.ReactNod
           >
             <Bars3Icon className="h-6 w-6" />
           </button>
-          <img src="/pactiva-logo-dark.svg" alt="Pactiva" className="h-6" />
+          <img src="/pactiva-logo-dark.svg" alt="Pactiva" className="h-8" />
         </div>
 
         <AuthGuard />

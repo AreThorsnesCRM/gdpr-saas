@@ -65,9 +65,12 @@ export default function RegisterPage() {
     <div className="flex min-h-screen items-center justify-center bg-gray-50">
       <form
         onSubmit={handleRegister}
-        className="w-full max-w-md space-y-4 rounded-lg bg-white p-6 shadow"
+        className="w-full max-w-md space-y-4 rounded-lg bg-white p-8 shadow"
       >
-        <h1 className="text-2xl font-semibold">Opprett konto</h1>
+        <div className="flex flex-col items-center mb-2">
+          <img src="/pactiva-logo-dark.svg" alt="Pactiva" className="h-10 mb-4" />
+          <h1 className="text-2xl font-semibold">Opprett konto</h1>
+        </div>
 
         <div>
           <label className="block text-sm font-medium">Firmanavn</label>
