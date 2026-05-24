@@ -1,0 +1,13 @@
+<svg width="220" height="54" viewBox="0 0 220 54" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Icon -->
+  <rect x="2" y="2" width="38" height="50" rx="4" stroke="#7A4010" stroke-width="2.2" fill="none"/>
+  <line x1="2" y1="19" x2="40" y2="19" stroke="#7A4010" stroke-width="0.8" opacity="0.3"/>
+  <line x1="2" y1="36" x2="40" y2="36" stroke="#7A4010" stroke-width="0.8" opacity="0.3"/>
+  <rect x="14" y="8.5" width="14" height="3.5" rx="1.75" fill="#C4831A"/>
+  <rect x="14" y="25.5" width="14" height="3.5" rx="1.75" fill="#C4831A"/>
+  <rect x="14" y="42" width="14" height="3.5" rx="1.75" fill="#C4831A"/>
+  <!-- Text: pactiva -->
+  <text x="54" y="33" font-family="'Syne', Arial, sans-serif" font-size="28" font-weight="700" fill="#2C1008" letter-spacing="-0.3">pactiva</text>
+  <!-- Tagline -->
+  <text x="55" y="47" font-family="'DM Sans', Arial, sans-serif" font-size="8" font-weight="500" fill="#C4831A" letter-spacing="1.6">AGREEMENT PLATFORM</text>
+</svg>

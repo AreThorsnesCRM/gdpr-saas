@@ -53,7 +53,7 @@ export default function LoginForm() {
 
       {/* Left — branding */}
       <div className="hidden lg:flex lg:w-1/2 bg-slate-900 flex-col justify-between p-12">
-        <p className="text-white text-xl font-bold tracking-tight">Pactiva</p>
+        <img src="/pactiva-logo-light.svg" alt="Pactiva" className="h-8" />
 
         <div className="space-y-8">
           <div>
@@ -87,7 +87,7 @@ export default function LoginForm() {
         <div className="w-full max-w-sm">
 
           {/* Logo on mobile */}
-          <p className="lg:hidden text-slate-900 text-xl font-bold mb-8 tracking-tight">Pactiva</p>
+          <img src="/pactiva-logo-dark.svg" alt="Pactiva" className="lg:hidden h-7 mb-8" />
 
           <h1 className="text-2xl font-bold text-gray-900">{t("loginTitle")}</h1>
           <p className="text-gray-500 text-sm mt-1 mb-8">{t("welcome")}</p>
