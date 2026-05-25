@@ -68,6 +68,10 @@ export default function SettingsPage() {
   const [inviting, setInviting] = useState(false)
   const [inviteMessage, setInviteMessage] = useState<{ type: "success" | "error"; text: string } | null>(null)
 
+  const MAX_USERS = 5
+  const totalUsers = members.length + pendingInvites.length
+  const atUserLimit = totalUsers >= MAX_USERS
+
   const [prefs, setPrefs] = useState<NotificationPrefs>({
     notify_trial_ending: true,
     notify_payment_failed: true,
@@ -251,7 +255,10 @@ export default function SettingsPage() {
       setInviteRestrictToOwn(false)
       fetchUsers()
     } else {
-      setInviteMessage({ type: "error", text: data.error ?? tc("error") })
+      const errorText = data.error === "userLimitReached"
+        ? t("userLimitReachedApi")
+        : data.error ?? tc("error")
+      setInviteMessage({ type: "error", text: errorText })
     }
     setInviting(false)
   }
@@ -592,9 +599,20 @@ export default function SettingsPage() {
 
           {/* Brukere */}
           <section id="brukere" className="scroll-mt-8">
-            <div>
-              <h2 className="text-base font-semibold text-gray-900">{t("usersTitle")}</h2>
-              <p className="text-sm text-gray-500 mt-0.5">{t("usersDesc")}</p>
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <h2 className="text-base font-semibold text-gray-900">{t("usersTitle")}</h2>
+                <p className="text-sm text-gray-500 mt-0.5">{t("usersDesc")}</p>
+              </div>
+              {!loading && (
+                <span className={`shrink-0 text-xs font-medium px-2.5 py-1 rounded-full ${
+                  atUserLimit
+                    ? "bg-red-50 text-red-600 ring-1 ring-red-200"
+                    : "bg-gray-100 text-gray-500"
+                }`}>
+                  {t("usersCounter", { current: totalUsers, max: MAX_USERS })}
+                </span>
+              )}
             </div>
             {loading ? (
               <p className="text-sm text-gray-400 mt-4">{tc("loading")}</p>
@@ -719,33 +737,39 @@ export default function SettingsPage() {
             {currentUserRole === "admin" && (
               <div className="mt-6">
                 <p className="text-sm font-medium text-gray-700 mb-2">{t("inviteTitle")}</p>
-                <form onSubmit={handleInvite} className="space-y-3">
-                  <div className="flex flex-col sm:flex-row gap-3">
-                    <input
-                      type="email"
-                      value={inviteEmail}
-                      onChange={(e) => setInviteEmail(e.target.value)}
-                      placeholder={t("inviteEmailPlaceholder")}
-                      required
-                      className={`flex-1 ${inputCls}`}
-                    />
-                    <button type="submit" disabled={inviting} className={btnPrimary}>
-                      {inviting ? t("inviteSending") : t("inviteSendButton")}
-                    </button>
-                  </div>
-                  <div className="flex items-center justify-between py-1">
-                    <span className="text-sm text-gray-600">{t("inviteRestrict")}</span>
-                    <button
-                      type="button"
-                      role="switch"
-                      aria-checked={inviteRestrictToOwn}
-                      onClick={() => setInviteRestrictToOwn((v) => !v)}
-                      className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${inviteRestrictToOwn ? "bg-slate-800" : "bg-gray-200"}`}
-                    >
-                      <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform shadow ${inviteRestrictToOwn ? "translate-x-6" : "translate-x-1"}`} />
-                    </button>
-                  </div>
-                </form>
+                {atUserLimit ? (
+                  <p className="text-sm text-red-600 bg-red-50 border border-red-100 rounded-lg px-4 py-3">
+                    {t("userLimitReached", { max: MAX_USERS })}
+                  </p>
+                ) : (
+                  <form onSubmit={handleInvite} className="space-y-3">
+                    <div className="flex flex-col sm:flex-row gap-3">
+                      <input
+                        type="email"
+                        value={inviteEmail}
+                        onChange={(e) => setInviteEmail(e.target.value)}
+                        placeholder={t("inviteEmailPlaceholder")}
+                        required
+                        className={`flex-1 ${inputCls}`}
+                      />
+                      <button type="submit" disabled={inviting} className={btnPrimary}>
+                        {inviting ? t("inviteSending") : t("inviteSendButton")}
+                      </button>
+                    </div>
+                    <div className="flex items-center justify-between py-1">
+                      <span className="text-sm text-gray-600">{t("inviteRestrict")}</span>
+                      <button
+                        type="button"
+                        role="switch"
+                        aria-checked={inviteRestrictToOwn}
+                        onClick={() => setInviteRestrictToOwn((v) => !v)}
+                        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${inviteRestrictToOwn ? "bg-slate-800" : "bg-gray-200"}`}
+                      >
+                        <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform shadow ${inviteRestrictToOwn ? "translate-x-6" : "translate-x-1"}`} />
+                      </button>
+                    </div>
+                  </form>
+                )}
                 {inviteMessage && (
                   <p className={`mt-2 text-sm ${inviteMessage.type === "success" ? "text-green-600" : "text-red-600"}`}>
                     {inviteMessage.text}

@@ -33,6 +33,22 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Kun admin kan invitere brukere" }, { status: 403 })
   }
 
+  // Sjekk brukergrense (maks 5: 1 admin + 4 medlemmer)
+  const MAX_USERS = 5
+  const { count: currentUsers } = await supabaseAdmin
+    .from("account_users")
+    .select("*", { count: "exact", head: true })
+    .eq("account_id", accountUser.account_id)
+
+  const { count: pendingCount } = await supabaseAdmin
+    .from("pending_invites")
+    .select("*", { count: "exact", head: true })
+    .eq("account_id", accountUser.account_id)
+
+  if ((currentUsers ?? 0) + (pendingCount ?? 0) >= MAX_USERS) {
+    return NextResponse.json({ error: "userLimitReached" }, { status: 400 })
+  }
+
   // Sjekk at e-posten ikke allerede er i kontoen
   const { data: authUsers } = await supabaseAdmin.auth.admin.listUsers()
   const existingUser = authUsers?.users?.find((u) => u.email === email)
