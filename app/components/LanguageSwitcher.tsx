@@ -77,7 +77,7 @@ export default function LanguageSwitcher({ variant = "dark" }: { variant?: "dark
       </button>
 
       {open && (
-        <div className={`absolute z-50 mt-1 right-0 rounded-xl overflow-hidden w-44 ${dropdownCls}`}>
+        <div className={`absolute z-50 bottom-full mb-1 right-0 rounded-xl overflow-hidden w-44 ${dropdownCls}`}>
           {LANGUAGES.map(lang => (
             <button
               key={lang.code}
