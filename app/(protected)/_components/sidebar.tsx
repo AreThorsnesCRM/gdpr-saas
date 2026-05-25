@@ -63,14 +63,14 @@ export default function Sidebar({ isOpen, onClose }: { isOpen: boolean; onClose:
       {/* Logo + lukk-knapp (mobil) */}
       <div className="px-6 py-5 border-b border-slate-700/50 flex items-center justify-between">
         <img src="/pactiva-logo-light.svg" alt="Pactiva" className="h-14" />
-        <button onClick={onClose} className="md:hidden text-slate-400 hover:text-white transition-colors">
+        <button onClick={onClose} className="md:hidden text-slate-400 hover:text-[#F0DFC0] transition-colors">
           <XMarkIcon className="h-5 w-5" />
         </button>
       </div>
 
       {/* Firma og bruker */}
       <div className="px-6 py-4 border-b border-slate-700/50">
-        <div className="text-sm font-semibold text-white truncate">{companyName}</div>
+        <div className="text-sm font-semibold text-[#F0DFC0] truncate">{companyName}</div>
         {fullName && (
           <div className="text-xs text-slate-400 mt-0.5 truncate">{fullName}</div>
         )}
@@ -95,8 +95,8 @@ export default function Sidebar({ isOpen, onClose }: { isOpen: boolean; onClose:
               href={href}
               className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
                 isActive
-                  ? "bg-slate-700 text-white"
-                  : "text-slate-400 hover:bg-slate-800 hover:text-white"
+                  ? "bg-slate-700 text-[#F0DFC0]"
+                  : "text-slate-400 hover:bg-slate-800 hover:text-[#F0DFC0]"
               }`}
             >
               <Icon className="h-4 w-4 shrink-0" />
@@ -110,7 +110,7 @@ export default function Sidebar({ isOpen, onClose }: { isOpen: boolean; onClose:
       <div className="px-3 pb-4 pt-3 border-t border-slate-700/50">
         <button
           onClick={logout}
-          className="flex items-center gap-3 w-full px-3 py-2 rounded-lg text-sm font-medium text-slate-400 hover:bg-slate-800 hover:text-white transition-colors"
+          className="flex items-center gap-3 w-full px-3 py-2 rounded-lg text-sm font-medium text-slate-400 hover:bg-slate-800 hover:text-[#F0DFC0] transition-colors"
         >
           <ArrowLeftOnRectangleIcon className="h-4 w-4 shrink-0" />
           {t("logout")}
