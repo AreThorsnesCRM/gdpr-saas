@@ -492,7 +492,29 @@
     "checklistTitle": "Getting started",
     "checklistCountry": "Select country",
     "checklistCustomer": "Add first customer",
-    "checklistAgreement": "Create first agreement"
+    "checklistAgreement": "Create first agreement",
+    "countries": {
+      "NO": "🇳🇴 Norway",
+      "SE": "🇸🇪 Sweden",
+      "DK": "🇩🇰 Denmark",
+      "FI": "🇫🇮 Finland",
+      "DE": "🇩🇪 Germany",
+      "FR": "🇫🇷 France",
+      "GB": "🇬🇧 United Kingdom",
+      "NL": "🇳🇱 Netherlands",
+      "BE": "🇧🇪 Belgium",
+      "AT": "🇦🇹 Austria",
+      "CH": "🇨🇭 Switzerland",
+      "ES": "🇪🇸 Spain",
+      "PT": "🇵🇹 Portugal",
+      "IT": "🇮🇹 Italy",
+      "PL": "🇵🇱 Poland",
+      "US": "🇺🇸 United States",
+      "CA": "🇨🇦 Canada",
+      "BR": "🇧🇷 Brazil",
+      "MX": "🇲🇽 Mexico",
+      "OTHER": "🌍 Other country"
+    }
   },
   "agreementDetail": {
     "backToCustomer": "Back to customer",

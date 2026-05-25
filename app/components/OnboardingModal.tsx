@@ -4,12 +4,11 @@ import { useState } from "react"
 import { useTranslations } from "next-intl"
 import { useAuth } from "@/lib/AuthContext"
 
-const COUNTRIES = [
-  { code: "NO", label: "Norge" },
-  { code: "SE", label: "Sverige" },
-  { code: "DK", label: "Danmark" },
-  { code: "FI", label: "Finland" },
-  { code: "OTHER", label: "Annet" },
+const COUNTRY_CODES = [
+  "NO", "SE", "DK", "FI",
+  "DE", "FR", "GB", "NL", "BE", "AT", "CH", "ES", "PT", "IT", "PL",
+  "US", "CA", "BR", "MX",
+  "OTHER",
 ]
 
 export default function OnboardingModal() {
@@ -49,8 +48,8 @@ export default function OnboardingModal() {
             className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-slate-400"
             autoFocus
           >
-            {COUNTRIES.map(c => (
-              <option key={c.code} value={c.code}>{c.label}</option>
+            {COUNTRY_CODES.map(code => (
+              <option key={code} value={code}>{t(`countries.${code}`)}</option>
             ))}
           </select>
           <p className="text-xs text-gray-400">{t("countryHint")}</p>

@@ -1,12 +1,18 @@
 import { getRequestConfig } from "next-intl/server"
 import { cookies, headers } from "next/headers"
 
-const validLocales = ["no", "en", "es"]
+const validLocales = ["no", "en", "es", "sv", "da", "fi", "de", "fr", "pt"]
 
 function detectLocaleFromAcceptLanguage(acceptLanguage: string | null): string {
   if (!acceptLanguage) return "no"
   const preferred = acceptLanguage.split(",").map((s) => s.split(";")[0].trim().toLowerCase())
   for (const lang of preferred) {
+    if (lang.startsWith("sv")) return "sv"
+    if (lang.startsWith("da")) return "da"
+    if (lang.startsWith("fi")) return "fi"
+    if (lang.startsWith("de")) return "de"
+    if (lang.startsWith("fr")) return "fr"
+    if (lang.startsWith("pt")) return "pt"
     if (lang.startsWith("es")) return "es"
     if (lang.startsWith("en")) return "en"
     if (lang.startsWith("no") || lang.startsWith("nb") || lang.startsWith("nn")) return "no"

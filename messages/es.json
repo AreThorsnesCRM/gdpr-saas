@@ -492,7 +492,29 @@
     "checklistTitle": "Primeros pasos",
     "checklistCountry": "Seleccionar país",
     "checklistCustomer": "Añadir primer cliente",
-    "checklistAgreement": "Crear primer contrato"
+    "checklistAgreement": "Crear primer contrato",
+    "countries": {
+      "NO": "🇳🇴 Noruega",
+      "SE": "🇸🇪 Suecia",
+      "DK": "🇩🇰 Dinamarca",
+      "FI": "🇫🇮 Finlandia",
+      "DE": "🇩🇪 Alemania",
+      "FR": "🇫🇷 Francia",
+      "GB": "🇬🇧 Reino Unido",
+      "NL": "🇳🇱 Países Bajos",
+      "BE": "🇧🇪 Bélgica",
+      "AT": "🇦🇹 Austria",
+      "CH": "🇨🇭 Suiza",
+      "ES": "🇪🇸 España",
+      "PT": "🇵🇹 Portugal",
+      "IT": "🇮🇹 Italia",
+      "PL": "🇵🇱 Polonia",
+      "US": "🇺🇸 Estados Unidos",
+      "CA": "🇨🇦 Canadá",
+      "BR": "🇧🇷 Brasil",
+      "MX": "🇲🇽 México",
+      "OTHER": "🌍 Otro país"
+    }
   },
   "agreementDetail": {
     "backToCustomer": "Volver al cliente",

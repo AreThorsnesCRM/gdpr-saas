@@ -492,7 +492,29 @@
     "checklistTitle": "Kom i gang",
     "checklistCountry": "Velg land",
     "checklistCustomer": "Legg til første kunde",
-    "checklistAgreement": "Opprett første avtale"
+    "checklistAgreement": "Opprett første avtale",
+    "countries": {
+      "NO": "🇳🇴 Norge",
+      "SE": "🇸🇪 Sverige",
+      "DK": "🇩🇰 Danmark",
+      "FI": "🇫🇮 Finland",
+      "DE": "🇩🇪 Tyskland",
+      "FR": "🇫🇷 Frankrike",
+      "GB": "🇬🇧 Storbritannia",
+      "NL": "🇳🇱 Nederland",
+      "BE": "🇧🇪 Belgia",
+      "AT": "🇦🇹 Østerrike",
+      "CH": "🇨🇭 Sveits",
+      "ES": "🇪🇸 Spania",
+      "PT": "🇵🇹 Portugal",
+      "IT": "🇮🇹 Italia",
+      "PL": "🇵🇱 Polen",
+      "US": "🇺🇸 USA",
+      "CA": "🇨🇦 Canada",
+      "BR": "🇧🇷 Brasil",
+      "MX": "🇲🇽 Mexico",
+      "OTHER": "🌍 Annet land"
+    }
   },
   "agreementDetail": {
     "backToCustomer": "Tilbake til kunde",
