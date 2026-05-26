@@ -74,11 +74,14 @@
     "newCustomer": "Nouveau client",
     "newAgreement": "Nouveau contrat",
     "statCustomers": "Clients",
+    "statCustomersSubtitle": "Enregistrés dans le système",
     "statWithoutActive": "Sans contrats actifs",
     "statActiveAgreements": "Contrats actifs",
+    "statActiveSubtitle": "Signés et en vigueur",
     "statExpiringSoon": "Expire bientôt",
     "statExpiringSoonSubtitle": "Contrats dans les 30 prochains jours",
     "statUnsignedAgreements": "Contrats non signés",
+    "statUnsignedSubtitle": "Nécessite un suivi",
     "pendingTitle": "Envoyé pour signature",
     "pendingEmpty": "Aucun contrat en attente de signature",
     "upcomingTitle": "Contrats à venir",
@@ -257,7 +260,8 @@
     "title": "Archives",
     "subtitle": "Contrats archivés et historiques",
     "empty": "Aucun contrat archivé",
-    "count": "{count, plural, one {# contrat archivé} other {# contrats archivés}}"
+    "count": "{count, plural, one {# contrat archivé} other {# contrats archivés}}",
+    "restoreConfirm": "Restaurer ce contrat ? Il sera replacé dans la liste des contrats."
   },
   "templates": {
     "title": "Modèles de contrats",

@@ -74,11 +74,14 @@
     "newCustomer": "Uusi asiakas",
     "newAgreement": "Uusi sopimus",
     "statCustomers": "Asiakkaat",
+    "statCustomersSubtitle": "Järjestelmässä rekisteröityneet",
     "statWithoutActive": "Ilman aktiivisia sopimuksia",
     "statActiveAgreements": "Aktiiviset sopimukset",
+    "statActiveSubtitle": "Allekirjoitetut ja voimassa olevat",
     "statExpiringSoon": "Vanhenee pian",
     "statExpiringSoonSubtitle": "Sopimukset seuraavan 30 päivän aikana",
     "statUnsignedAgreements": "Allekirjoittamattomat sopimukset",
+    "statUnsignedSubtitle": "Vaatii seurannan",
     "pendingTitle": "Lähetetty allekirjoitettavaksi",
     "pendingEmpty": "Ei sopimuksia odottaa allekirjoitusta",
     "upcomingTitle": "Tulevat sopimukset",
@@ -257,7 +260,8 @@
     "title": "Arkisto",
     "subtitle": "Arkistoidut ja historialliset sopimukset",
     "empty": "Ei arkistoituja sopimuksia",
-    "count": "{count, plural, one {# arkistoitu sopimus} other {# arkistoitua sopimusta}}"
+    "count": "{count, plural, one {# arkistoitu sopimus} other {# arkistoitua sopimusta}}",
+    "restoreConfirm": "Haluatko palauttaa tämän sopimuksen? Se siirretään takaisin sopimusluetteloon."
   },
   "templates": {
     "title": "Sopimusmallit",

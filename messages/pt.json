@@ -74,11 +74,14 @@
     "newCustomer": "Novo cliente",
     "newAgreement": "Novo contrato",
     "statCustomers": "Clientes",
+    "statCustomersSubtitle": "Registrados no sistema",
     "statWithoutActive": "Sem contratos ativos",
     "statActiveAgreements": "Contratos ativos",
+    "statActiveSubtitle": "Assinados e vigentes",
     "statExpiringSoon": "Expira em breve",
     "statExpiringSoonSubtitle": "Contratos nos próximos 30 dias",
     "statUnsignedAgreements": "Contratos não assinados",
+    "statUnsignedSubtitle": "Requer acompanhamento",
     "pendingTitle": "Enviado para assinatura",
     "pendingEmpty": "Nenhum contrato aguarda assinatura",
     "upcomingTitle": "Contratos futuros",
@@ -257,7 +260,8 @@
     "title": "Arquivo",
     "subtitle": "Contratos arquivados e históricos",
     "empty": "Nenhum contrato arquivado",
-    "count": "{count, plural, one {# contrato arquivado} other {# contratos arquivados}}"
+    "count": "{count, plural, one {# contrato arquivado} other {# contratos arquivados}}",
+    "restoreConfirm": "Restaurar este contrato? Ele será movido de volta para a lista de contratos."
   },
   "templates": {
     "title": "Modelos de contratos",

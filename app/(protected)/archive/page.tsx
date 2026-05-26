@@ -54,7 +54,7 @@ export default function ArchivePage() {
 
   async function handleRestore(id: string, e: React.MouseEvent) {
     e.stopPropagation()
-    if (!supabase) return
+    if (!supabase || !window.confirm(t("restoreConfirm"))) return
     setRestoringId(id)
     await supabase.from("agreements").update({ archived: false }).eq("id", id)
     setAgreements(prev => prev.filter(a => a.id !== id))

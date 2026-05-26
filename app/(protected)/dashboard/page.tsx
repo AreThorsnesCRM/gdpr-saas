@@ -325,16 +325,19 @@ export default function DashboardPage() {
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <Link href="/customers">
           <StatCard title={t("statCustomers")} value={stats.customers}
+            subtitle={t("statCustomersSubtitle")}
             icon={<UserGroupIcon className="h-5 w-5 text-blue-600" />}
             bg="bg-blue-50" />
         </Link>
         <Link href="/agreements?filter=unsigned">
           <StatCard title={t("statUnsignedAgreements")} value={stats.unsignedAgreements}
+            subtitle={t("statUnsignedSubtitle")}
             icon={<ExclamationTriangleIcon className="h-5 w-5 text-orange-500" />}
             bg="bg-orange-50" />
         </Link>
         <Link href="/agreements?filter=active">
           <StatCard title={t("statActiveAgreements")} value={stats.activeAgreements}
+            subtitle={t("statActiveSubtitle")}
             icon={<CheckCircleIcon className="h-5 w-5 text-green-600" />}
             bg="bg-green-50" />
         </Link>

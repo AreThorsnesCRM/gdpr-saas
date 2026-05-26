@@ -74,11 +74,14 @@
     "newCustomer": "New customer",
     "newAgreement": "New agreement",
     "statCustomers": "Customers",
+    "statCustomersSubtitle": "Registered in the system",
     "statWithoutActive": "Without active agreements",
     "statActiveAgreements": "Active agreements",
+    "statActiveSubtitle": "Signed and in effect",
     "statExpiringSoon": "Expiring soon",
     "statExpiringSoonSubtitle": "Agreements in the next 30 days",
     "statUnsignedAgreements": "Unsigned agreements",
+    "statUnsignedSubtitle": "Needs follow-up",
     "pendingTitle": "Sent for signing",
     "pendingEmpty": "No agreements awaiting signing",
     "upcomingTitle": "Upcoming agreements",
@@ -257,7 +260,8 @@
     "title": "Archive",
     "subtitle": "Archived and historical agreements",
     "empty": "No archived agreements",
-    "count": "{count, plural, one {# archived agreement} other {# archived agreements}}"
+    "count": "{count, plural, one {# archived agreement} other {# archived agreements}}",
+    "restoreConfirm": "Restore this agreement? It will be moved back to the agreements list."
   },
   "templates": {
     "title": "Agreement templates",

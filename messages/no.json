@@ -74,11 +74,14 @@
     "newCustomer": "Ny kunde",
     "newAgreement": "Ny avtale",
     "statCustomers": "Kunder",
+    "statCustomersSubtitle": "Registrerte i systemet",
     "statWithoutActive": "Uten aktive avtaler",
     "statActiveAgreements": "Aktive avtaler",
+    "statActiveSubtitle": "Signerte og gjeldende",
     "statExpiringSoon": "Utløper snart",
     "statExpiringSoonSubtitle": "Avtaler de neste 30 dagene",
     "statUnsignedAgreements": "Usignerte avtaler",
+    "statUnsignedSubtitle": "Trenger oppfølging",
     "pendingTitle": "Sendt til signering",
     "pendingEmpty": "Ingen avtaler venter på signering",
     "upcomingTitle": "Kommende avtaler",
@@ -257,7 +260,8 @@
     "title": "Arkiv",
     "subtitle": "Arkiverte og historiske avtaler",
     "empty": "Ingen arkiverte avtaler",
-    "count": "{count, plural, one {# arkivert avtale} other {# arkiverte avtaler}}"
+    "count": "{count, plural, one {# arkivert avtale} other {# arkiverte avtaler}}",
+    "restoreConfirm": "Vil du gjenopprette denne avtalen? Den vil flyttes tilbake til avtalelisten."
   },
   "templates": {
     "title": "Avtalemaler",

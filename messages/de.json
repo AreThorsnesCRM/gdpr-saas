@@ -74,11 +74,14 @@
     "newCustomer": "Neuer Kunde",
     "newAgreement": "Neuer Vertrag",
     "statCustomers": "Kunden",
+    "statCustomersSubtitle": "Im System registriert",
     "statWithoutActive": "Ohne aktive Verträge",
     "statActiveAgreements": "Aktive Verträge",
+    "statActiveSubtitle": "Unterzeichnet und gültig",
     "statExpiringSoon": "Läuft bald ab",
     "statExpiringSoonSubtitle": "Verträge in den nächsten 30 Tagen",
     "statUnsignedAgreements": "Nicht unterzeichnete Verträge",
+    "statUnsignedSubtitle": "Erfordert Nachverfolgung",
     "pendingTitle": "Zur Unterzeichnung versendet",
     "pendingEmpty": "Keine Verträge warten auf Unterzeichnung",
     "upcomingTitle": "Bevorstehende Verträge",
@@ -257,7 +260,8 @@
     "title": "Archiv",
     "subtitle": "Archivierte und historische Verträge",
     "empty": "Keine archivierten Verträge",
-    "count": "{count, plural, one {# archivierter Vertrag} other {# archivierte Verträge}}"
+    "count": "{count, plural, one {# archivierter Vertrag} other {# archivierte Verträge}}",
+    "restoreConfirm": "Diesen Vertrag wiederherstellen? Er wird zurück in die Vertragsliste verschoben."
   },
   "templates": {
     "title": "Vertragsvorlagen",

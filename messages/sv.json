@@ -74,11 +74,14 @@
     "newCustomer": "Ny kund",
     "newAgreement": "Nytt avtal",
     "statCustomers": "Kunder",
+    "statCustomersSubtitle": "Registrerade i systemet",
     "statWithoutActive": "Utan aktiva avtal",
     "statActiveAgreements": "Aktiva avtal",
+    "statActiveSubtitle": "Signerade och gällande",
     "statExpiringSoon": "Löper ut snart",
     "statExpiringSoonSubtitle": "Avtal de nästa 30 dagarna",
     "statUnsignedAgreements": "Osignerade avtal",
+    "statUnsignedSubtitle": "Behöver uppföljning",
     "pendingTitle": "Skickat för signering",
     "pendingEmpty": "Inga avtal väntar på signering",
     "upcomingTitle": "Kommande avtal",
@@ -257,7 +260,8 @@
     "title": "Arkiv",
     "subtitle": "Arkiverade och historiska avtal",
     "empty": "Inga arkiverade avtal",
-    "count": "{count, plural, one {# arkiverat avtal} other {# arkiverade avtal}}"
+    "count": "{count, plural, one {# arkiverat avtal} other {# arkiverade avtal}}",
+    "restoreConfirm": "Vill du återställa detta avtal? Det flyttas tillbaka till avtalslistan."
   },
   "templates": {
     "title": "Avtalsmallar",

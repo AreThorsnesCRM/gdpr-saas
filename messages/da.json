@@ -74,11 +74,14 @@
     "newCustomer": "Ny kunde",
     "newAgreement": "Ny aftale",
     "statCustomers": "Kunder",
+    "statCustomersSubtitle": "Registrerede i systemet",
     "statWithoutActive": "Uden aktive aftaler",
     "statActiveAgreements": "Aktive aftaler",
+    "statActiveSubtitle": "Underskrevne og gældende",
     "statExpiringSoon": "Udløber snart",
     "statExpiringSoonSubtitle": "Aftaler de næste 30 dage",
     "statUnsignedAgreements": "Usignerede aftaler",
+    "statUnsignedSubtitle": "Kræver opfølgning",
     "pendingTitle": "Sendt til underskrift",
     "pendingEmpty": "Ingen aftaler venter på underskrift",
     "upcomingTitle": "Kommende aftaler",
@@ -257,7 +260,8 @@
     "title": "Arkiv",
     "subtitle": "Arkiverede og historiske aftaler",
     "empty": "Ingen arkiverede aftaler",
-    "count": "{count, plural, one {# arkiveret aftale} other {# arkiverede aftaler}}"
+    "count": "{count, plural, one {# arkiveret aftale} other {# arkiverede aftaler}}",
+    "restoreConfirm": "Vil du gendanne denne aftale? Den flyttes tilbage til aftalelisten."
   },
   "templates": {
     "title": "Aftaleskabeloner",

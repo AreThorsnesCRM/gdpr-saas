@@ -74,11 +74,14 @@
     "newCustomer": "Nuevo cliente",
     "newAgreement": "Nuevo contrato",
     "statCustomers": "Clientes",
+    "statCustomersSubtitle": "Registrados en el sistema",
     "statWithoutActive": "Sin contratos activos",
     "statActiveAgreements": "Contratos activos",
+    "statActiveSubtitle": "Firmados y vigentes",
     "statExpiringSoon": "Por vencer",
     "statExpiringSoonSubtitle": "Contratos en los próximos 30 días",
     "statUnsignedAgreements": "Contratos sin firmar",
+    "statUnsignedSubtitle": "Requiere seguimiento",
     "pendingTitle": "Enviado para firma",
     "pendingEmpty": "No hay contratos pendientes de firma",
     "upcomingTitle": "Próximos contratos",
@@ -257,7 +260,8 @@
     "title": "Archivo",
     "subtitle": "Contratos archivados e históricos",
     "empty": "No hay contratos archivados",
-    "count": "{count, plural, one {# contrato archivado} other {# contratos archivados}}"
+    "count": "{count, plural, one {# contrato archivado} other {# contratos archivados}}",
+    "restoreConfirm": "¿Restaurar este contrato? Volverá a la lista de contratos."
   },
   "templates": {
     "title": "Plantillas de contratos",
