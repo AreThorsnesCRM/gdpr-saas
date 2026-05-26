@@ -456,7 +456,7 @@
     "dropzoneHint": "oder klicken, um Datei auszuwählen (.xlsx)",
     "columnsTitle": "Erwartete Spaltennamen:",
     "columnsDesc": "Name (erforderlich) · E-Mail · Telefon · Steuernr. · Adresse · Postleitzahl · Ort",
-    "columnsEnglish": "Spaltennamen können auch auf Englisch sein",
+    "columnsEnglish": "Spaltennamen werden auf Deutsch, Englisch und allen anderen unterstützten Sprachen erkannt",
     "noValidRows": "Keine gültigen Zeilen gefunden.",
     "changeFile": "Neue Datei auswählen",
     "readyToImport": "{count} Kunden bereit zum Import",

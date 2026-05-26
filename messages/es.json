@@ -456,7 +456,7 @@
     "dropzoneHint": "o haz clic para seleccionar archivo (.xlsx)",
     "columnsTitle": "Nombres de columnas esperados en el archivo Excel:",
     "columnsDesc": "Nombre (obligatorio) · Correo · Teléfono · NIF · Dirección · Código postal · Ciudad",
-    "columnsEnglish": "Los nombres de columna también pueden estar en inglés o noruego",
+    "columnsEnglish": "Los nombres de columnas se reconocen en español, inglés y todos los demás idiomas compatibles",
     "noValidRows": "No se encontraron filas válidas. Asegúrate de que el archivo tenga una columna Nombre.",
     "changeFile": "Elegir nuevo archivo",
     "readyToImport": "{count} clientes listos para importar",

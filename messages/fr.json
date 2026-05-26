@@ -456,7 +456,7 @@
     "dropzoneHint": "ou cliquez pour sélectionner un fichier (.xlsx)",
     "columnsTitle": "Noms de colonnes attendus :",
     "columnsDesc": "Nom (obligatoire) · E-mail · Téléphone · N° d'entreprise · Adresse · Code postal · Ville",
-    "columnsEnglish": "Les noms de colonnes peuvent aussi être en anglais",
+    "columnsEnglish": "Les noms de colonnes sont reconnus en français, anglais et toutes les autres langues prises en charge",
     "noValidRows": "Aucune ligne valide trouvée.",
     "changeFile": "Choisir un autre fichier",
     "readyToImport": "{count} clients prêts à importer",

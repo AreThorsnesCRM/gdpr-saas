@@ -456,7 +456,7 @@
     "dropzoneHint": "eller klikk for å velge fil (.xlsx)",
     "columnsTitle": "Forventede kolonnenavn i Excel-filen:",
     "columnsDesc": "Navn (påkrevd) · E-post · Telefon · Org.nr · Adresse · Postnummer · Sted",
-    "columnsEnglish": "Kolonnenavnene kan også være på engelsk (Name, Email, Phone, osv.)",
+    "columnsEnglish": "Kolonnenavnene gjenkjennes på norsk, engelsk og alle andre støttede språk",
     "noValidRows": "Ingen gyldige rader funnet. Sjekk at filen har en Navn-kolonne.",
     "changeFile": "Velg ny fil",
     "readyToImport": "{count} kunder klar til import",

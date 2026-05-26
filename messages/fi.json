@@ -456,7 +456,7 @@
     "dropzoneHint": "tai napsauta valitaksesi tiedosto (.xlsx)",
     "columnsTitle": "Odotetut sarakkeiden nimet:",
     "columnsDesc": "Nimi (pakollinen) · Sähköposti · Puhelin · Y-tunnus · Osoite · Postinumero · Paikkakunta",
-    "columnsEnglish": "Sarakkeiden nimet voivat olla myös englanniksi",
+    "columnsEnglish": "Sarakkeiden nimet tunnistetaan suomeksi, englanniksi ja kaikilla muilla tuetuilla kielillä",
     "noValidRows": "Ei kelvollisia rivejä löydetty.",
     "changeFile": "Valitse uusi tiedosto",
     "readyToImport": "{count} asiakasta valmiina tuontiin",

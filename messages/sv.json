@@ -456,7 +456,7 @@
     "dropzoneHint": "eller klicka för att välja fil (.xlsx)",
     "columnsTitle": "Förväntade kolumnnamn i Excel-filen:",
     "columnsDesc": "Namn (obligatoriskt) · E-post · Telefon · Org.nr · Adress · Postnummer · Ort",
-    "columnsEnglish": "Kolumnnamnen kan också vara på engelska (Name, Email, Phone, osv.)",
+    "columnsEnglish": "Kolumnnamnen känns igen på svenska, engelska och alla andra språk som stöds",
     "noValidRows": "Inga giltiga rader hittades. Kontrollera att filen har en Namn-kolumn.",
     "changeFile": "Välj ny fil",
     "readyToImport": "{count} kunder redo att importera",

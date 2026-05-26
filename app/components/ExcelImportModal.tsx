@@ -22,15 +22,138 @@ type Props = {
 }
 
 const COL_MAP: Record<string, keyof CustomerRow> = {
-  navn: "name", name: "name", firma: "name", company: "name", bedrift: "name",
-  epost: "email", "e-post": "email", email: "email", mail: "email", epostadresse: "email",
-  telefon: "phone", phone: "phone", tlf: "phone", mobil: "phone", mobile: "phone", telefonnummer: "phone",
+  // --- Navn / Name ---
+  // NO
+  navn: "name", firma: "name", bedrift: "name",
+  // EN
+  name: "name", company: "name",
+  // SV
+  namn: "name", företag: "name", foretag: "name", bolag: "name",
+  // DA
+  virksomhed: "name", selskab: "name",
+  // FI
+  nimi: "name", yritys: "name", yritysnimi: "name",
+  // DE
+  unternehmen: "name", gesellschaft: "name",
+  // FR
+  nom: "name", entreprise: "name", "société": "name", societe: "name", "raison sociale": "name",
+  // ES
+  nombre: "name", empresa: "name", sociedad: "name",
+  // PT
+  nome: "name", "razão social": "name", "razao social": "name",
+
+  // --- E-post / Email ---
+  // NO/SV/DA
+  epost: "email", "e-post": "email", epostadresse: "email",
+  // EN/DE/SV
+  email: "email", mail: "email", "e-mail": "email",
+  // FR
+  courriel: "email",
+  // ES
+  correo: "email",
+  // FI
+  "sähköposti": "email", sahkoposti: "email", sposti: "email",
+
+  // --- Telefon / Phone ---
+  // NO/SV/DA/DE
+  telefon: "phone", tlf: "phone", mobil: "phone", telefonnummer: "phone",
+  // EN
+  phone: "phone", mobile: "phone",
+  // FI
+  puhelin: "phone", puh: "phone", matkapuhelin: "phone",
+  // DE
+  handy: "phone",
+  // FR
+  "téléphone": "phone", telephone: "phone", portable: "phone",
+  // ES
+  "teléfono": "phone", telefono: "phone", "móvil": "phone", movil: "phone",
+  // PT
+  telefone: "phone", celular: "phone", "móvel": "phone", movel: "phone",
+
+  // --- Org.nr ---
+  // NO
   orgnr: "org_nummer", "org.nr": "org_nummer", org_nummer: "org_nummer",
   organisasjonsnummer: "org_nummer", "org nummer": "org_nummer", "org.nummer": "org_nummer",
-  adresse: "address", address: "address", gateadresse: "address",
-  postnummer: "postal_code", "postal code": "postal_code", postal_code: "postal_code", zip: "postal_code",
-  sted: "city", by: "city", city: "city", poststed: "city",
-  nettside: "website", website: "website", url: "website", hjemmeside: "website", web: "website",
+  // SV/DE
+  organisationsnummer: "org_nummer",
+  // DA
+  cvr: "org_nummer", "cvr-nr": "org_nummer", cvrnr: "org_nummer",
+  // FI
+  "y-tunnus": "org_nummer", ytunnus: "org_nummer",
+  // FR
+  siret: "org_nummer", siren: "org_nummer",
+  // ES/PT
+  nif: "org_nummer", cif: "org_nummer", cnpj: "org_nummer",
+
+  // --- Adresse / Address ---
+  // NO/DA
+  adresse: "address", gateadresse: "address",
+  // EN
+  address: "address",
+  // SV
+  adress: "address", gatuadress: "address",
+  // DE
+  "straße": "address", strasse: "address", anschrift: "address",
+  // FR
+  rue: "address",
+  // ES
+  "dirección": "address", direccion: "address", calle: "address",
+  // PT
+  "endereço": "address", endereco: "address", rua: "address",
+  // FI
+  osoite: "address", katuosoite: "address",
+
+  // --- Postnummer / Postal code ---
+  // NO/SV/DA
+  postnummer: "postal_code",
+  // EN
+  "postal code": "postal_code", postal_code: "postal_code", zip: "postal_code",
+  // DE
+  postleitzahl: "postal_code", plz: "postal_code",
+  // FR
+  "code postal": "postal_code",
+  // ES/PT
+  "código postal": "postal_code", "codigo postal": "postal_code",
+  // PT/BR
+  cep: "postal_code",
+  // FI
+  postinumero: "postal_code",
+
+  // --- Sted / City ---
+  // NO
+  sted: "city", poststed: "city",
+  // EN
+  city: "city",
+  // NO/DA
+  by: "city",
+  // SV
+  stad: "city", ort: "city", postort: "city",
+  // FR
+  ville: "city",
+  // ES
+  ciudad: "city",
+  // PT
+  cidade: "city",
+  // FI
+  kaupunki: "city", paikkakunta: "city",
+
+  // --- Nettside / Website ---
+  // NO/DA
+  nettside: "website", hjemmeside: "website",
+  // EN
+  website: "website", url: "website", web: "website",
+  // SV
+  hemsida: "website", webbplats: "website",
+  // DE
+  webseite: "website", homepage: "website",
+  // FR
+  "site web": "website",
+  // ES
+  "sitio web": "website",
+  // PT
+  site: "website",
+  // FI
+  verkkosivusto: "website", kotisivu: "website",
 }
 
 function normalizeKey(raw: string): keyof CustomerRow | null {
