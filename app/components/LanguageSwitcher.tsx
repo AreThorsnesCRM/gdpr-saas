@@ -3,17 +3,18 @@
 import { useLocale } from "next-intl"
 import { useRouter } from "next/navigation"
 import { useTransition, useState, useRef, useEffect } from "react"
+import ReactCountryFlag from "react-country-flag"
 
 const LANGUAGES = [
-  { code: "no", label: "Norsk",      flag: "🇳🇴" },
-  { code: "en", label: "English",    flag: "🇬🇧" },
-  { code: "sv", label: "Svenska",    flag: "🇸🇪" },
-  { code: "da", label: "Dansk",      flag: "🇩🇰" },
-  { code: "fi", label: "Suomi",      flag: "🇫🇮" },
-  { code: "de", label: "Deutsch",    flag: "🇩🇪" },
-  { code: "fr", label: "Français",   flag: "🇫🇷" },
-  { code: "es", label: "Español",    flag: "🇪🇸" },
-  { code: "pt", label: "Português",  flag: "🇵🇹" },
+  { code: "no", label: "Norsk",      countryCode: "NO" },
+  { code: "en", label: "English",    countryCode: "GB" },
+  { code: "sv", label: "Svenska",    countryCode: "SE" },
+  { code: "da", label: "Dansk",      countryCode: "DK" },
+  { code: "fi", label: "Suomi",      countryCode: "FI" },
+  { code: "de", label: "Deutsch",    countryCode: "DE" },
+  { code: "fr", label: "Français",   countryCode: "FR" },
+  { code: "es", label: "Español",    countryCode: "ES" },
+  { code: "pt", label: "Português",  countryCode: "PT" },
 ]
 
 export default function LanguageSwitcher({ variant = "dark" }: { variant?: "dark" | "light" }) {
@@ -70,7 +71,8 @@ export default function LanguageSwitcher({ variant = "dark" }: { variant?: "dark
           <circle cx="12" cy="12" r="10" />
           <path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
         </svg>
-        <span>{current.flag} {current.code.toUpperCase()}</span>
+        <ReactCountryFlag countryCode={current.countryCode} svg style={{ width: "1.1em", height: "1.1em" }} />
+        <span>{current.code.toUpperCase()}</span>
         <svg className={`w-3 h-3 shrink-0 transition-transform ${open ? "rotate-180" : ""}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
           <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
         </svg>
@@ -86,7 +88,7 @@ export default function LanguageSwitcher({ variant = "dark" }: { variant?: "dark
                 lang.code === locale ? activeItemCls : itemCls
               }`}
             >
-              <span>{lang.flag}</span>
+              <ReactCountryFlag countryCode={lang.countryCode} svg style={{ width: "1.2em", height: "1.2em" }} />
               <span>{lang.label}</span>
               {lang.code === locale && (
                 <svg className="ml-auto w-3.5 h-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
