@@ -253,6 +253,12 @@
     "statusExpiresDays": "Löper ut om {days}d",
     "count": "{count, plural, one {# avtal} other {# avtal}}"
   },
+  "archive": {
+    "title": "Arkiv",
+    "subtitle": "Arkiverade och historiska avtal",
+    "empty": "Inga arkiverade avtal",
+    "count": "{count, plural, one {# arkiverat avtal} other {# arkiverade avtal}}"
+  },
   "templates": {
     "title": "Avtalsmallar",
     "subtitle": "Skapa mallar med formaterad text och sammanslagningsfält som fylls i automatiskt.",

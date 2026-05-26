@@ -253,6 +253,12 @@
     "statusExpiresDays": "Vanhenee {days}pv kuluttua",
     "count": "{count, plural, one {# sopimus} other {# sopimusta}}"
   },
+  "archive": {
+    "title": "Arkisto",
+    "subtitle": "Arkistoidut ja historialliset sopimukset",
+    "empty": "Ei arkistoituja sopimuksia",
+    "count": "{count, plural, one {# arkistoitu sopimus} other {# arkistoitua sopimusta}}"
+  },
   "templates": {
     "title": "Sopimusmallit",
     "subtitle": "Luo malleja rikkaalla tekstillä ja yhdistämiskentillä, jotka täytetään automaattisesti.",

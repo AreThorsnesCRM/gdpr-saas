@@ -253,6 +253,12 @@
     "statusExpiresDays": "Läuft in {days}T ab",
     "count": "{count, plural, one {# Vertrag} other {# Verträge}}"
   },
+  "archive": {
+    "title": "Archiv",
+    "subtitle": "Archivierte und historische Verträge",
+    "empty": "Keine archivierten Verträge",
+    "count": "{count, plural, one {# archivierter Vertrag} other {# archivierte Verträge}}"
+  },
   "templates": {
     "title": "Vertragsvorlagen",
     "subtitle": "Erstellen Sie Vorlagen mit Rich-Text und Platzhaltern, die automatisch ausgefüllt werden.",

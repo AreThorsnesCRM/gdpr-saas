@@ -24,7 +24,7 @@ type Agreement = {
 
 type Customer = { id: string; name: string }
 type Category = { id: string; name: string; is_predefined?: boolean }
-type Filter = "all" | "active" | "expired" | "upcoming" | "expiresSoon" | "archived" | "unsigned" | "pending"
+type Filter = "all" | "active" | "expired" | "upcoming" | "expiresSoon" | "unsigned" | "pending"
 
 export default function AgreementsPage() {
   const router = useRouter()
@@ -42,7 +42,6 @@ export default function AgreementsPage() {
     { id: "unsigned",    label: t("filterUnsigned") },
     { id: "pending",     label: t("filterPending") },
     { id: "expired",     label: t("filterExpired") },
-    { id: "archived",    label: t("filterArchived") },
   ]
 
   const [filter, setFilter] = useState<Filter>("all")
@@ -102,6 +101,7 @@ export default function AgreementsPage() {
     let query = supabase
       .from("agreements")
       .select("*, customers!inner(name, account_manager_id), agreement_categories(id, name)")
+      .eq("archived", false)
       .order("end_date", { ascending: true })
 
     if (restrictToOwn && user) {
@@ -142,9 +142,8 @@ export default function AgreementsPage() {
     return Math.ceil((new Date(dateStr).getTime() - Date.now()) / 86400000)
   }
 
-  function getStatus(a: Agreement): "active" | "expired" | "upcoming" | "archived" | "unsigned" | "pending" {
+  function getStatus(a: Agreement): "active" | "expired" | "upcoming" | "unsigned" | "pending" {
     const today = new Date().toISOString().split("T")[0]
-    if (a.archived) return "archived"
     if (!a.signed) return a.signing_status === "pending" ? "pending" : "unsigned"
     if (a.end_date < today) return "expired"
     if (a.start_date > today) return "upcoming"
@@ -207,8 +206,6 @@ export default function AgreementsPage() {
     const status = getStatus(a)
     const days = daysUntil(a.end_date)
 
-    if (status === "archived")
-      return <span className="text-xs font-medium px-2.5 py-0.5 rounded-full bg-gray-100 text-gray-500 ring-1 ring-gray-200">{t("statusArchived")}</span>
     if (status === "pending")
       return <span className="text-xs font-medium px-2.5 py-0.5 rounded-full bg-purple-50 text-purple-700 ring-1 ring-purple-200">{t("statusPending")}</span>
     if (status === "unsigned")

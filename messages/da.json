@@ -253,6 +253,12 @@
     "statusExpiresDays": "Udløber om {days}d",
     "count": "{count, plural, one {# aftale} other {# aftaler}}"
   },
+  "archive": {
+    "title": "Arkiv",
+    "subtitle": "Arkiverede og historiske aftaler",
+    "empty": "Ingen arkiverede aftaler",
+    "count": "{count, plural, one {# arkiveret aftale} other {# arkiverede aftaler}}"
+  },
   "templates": {
     "title": "Aftaleskabeloner",
     "subtitle": "Opret skabeloner med formateret tekst og fletfelter, der udfyldes automatisk.",

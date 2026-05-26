@@ -253,6 +253,12 @@
     "statusExpiresDays": "Expire dans {days}j",
     "count": "{count, plural, one {# contrat} other {# contrats}}"
   },
+  "archive": {
+    "title": "Archives",
+    "subtitle": "Contrats archivés et historiques",
+    "empty": "Aucun contrat archivé",
+    "count": "{count, plural, one {# contrat archivé} other {# contrats archivés}}"
+  },
   "templates": {
     "title": "Modèles de contrats",
     "subtitle": "Créez des modèles avec du texte enrichi et des champs de fusion remplis automatiquement.",

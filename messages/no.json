@@ -253,6 +253,12 @@
     "statusExpiresDays": "Utløper om {days}d",
     "count": "{count, plural, one {# avtale} other {# avtaler}}"
   },
+  "archive": {
+    "title": "Arkiv",
+    "subtitle": "Arkiverte og historiske avtaler",
+    "empty": "Ingen arkiverte avtaler",
+    "count": "{count, plural, one {# arkivert avtale} other {# arkiverte avtaler}}"
+  },
   "templates": {
     "title": "Avtalemaler",
     "subtitle": "Lag maler med rik tekst og flettefelt som fylles inn automatisk.",

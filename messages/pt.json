@@ -253,6 +253,12 @@
     "statusExpiresDays": "Expira em {days}d",
     "count": "{count, plural, one {# contrato} other {# contratos}}"
   },
+  "archive": {
+    "title": "Arquivo",
+    "subtitle": "Contratos arquivados e históricos",
+    "empty": "Nenhum contrato arquivado",
+    "count": "{count, plural, one {# contrato arquivado} other {# contratos arquivados}}"
+  },
   "templates": {
     "title": "Modelos de contratos",
     "subtitle": "Crie modelos com texto formatado e campos de substituição preenchidos automaticamente.",

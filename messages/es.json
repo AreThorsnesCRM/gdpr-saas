@@ -253,6 +253,12 @@
     "statusExpiresDays": "Vence en {days}d",
     "count": "{count, plural, one {# contrato} other {# contratos}}"
   },
+  "archive": {
+    "title": "Archivo",
+    "subtitle": "Contratos archivados e históricos",
+    "empty": "No hay contratos archivados",
+    "count": "{count, plural, one {# contrato archivado} other {# contratos archivados}}"
+  },
   "templates": {
     "title": "Plantillas de contratos",
     "subtitle": "Crea plantillas con texto enriquecido y campos de combinación que se rellenan automáticamente.",

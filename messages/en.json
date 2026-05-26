@@ -253,6 +253,12 @@
     "statusExpiresDays": "Expires in {days}d",
     "count": "{count, plural, one {# agreement} other {# agreements}}"
   },
+  "archive": {
+    "title": "Archive",
+    "subtitle": "Archived and historical agreements",
+    "empty": "No archived agreements",
+    "count": "{count, plural, one {# archived agreement} other {# archived agreements}}"
+  },
   "templates": {
     "title": "Agreement templates",
     "subtitle": "Create templates with rich text and merge fields that are filled in automatically.",

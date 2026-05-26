@@ -27,7 +27,7 @@ export default function Sidebar({ isOpen, onClose }: { isOpen: boolean; onClose:
     { href: "/dashboard",              label: t("dashboard"), icon: HomeIcon },
     { href: "/customers",              label: t("customers"), icon: UserGroupIcon },
     { href: "/agreements",             label: t("agreements"), icon: DocumentTextIcon },
-    { href: "/agreements?filter=archived", label: t("archive"), icon: ArchiveBoxIcon },
+    { href: "/archive", label: t("archive"), icon: ArchiveBoxIcon },
     { href: "/templates",              label: t("templates"), icon: ClipboardDocumentListIcon },
     { href: "/settings",               label: t("settings"), icon: Cog6ToothIcon },
   ]
@@ -87,7 +87,7 @@ export default function Sidebar({ isOpen, onClose }: { isOpen: boolean; onClose:
           const basePath = href.split("?")[0]
           const isActive =
             pathname === href ||
-            (basePath !== "/dashboard" && pathname.startsWith(basePath) && !href.includes("?filter=archived"))
+            (basePath !== "/dashboard" && pathname.startsWith(basePath))
 
           return (
             <Link
