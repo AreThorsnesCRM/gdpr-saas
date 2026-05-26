@@ -22,6 +22,7 @@ type StatsState = {
   activeAgreements: number
   expiringSoon: number
   customersWithoutActive: number
+  unsignedAgreements: number
   totalAgreements: number
 }
 
@@ -38,9 +39,10 @@ export default function DashboardPage() {
     activeAgreements: 0,
     expiringSoon: 0,
     customersWithoutActive: 0,
+    unsignedAgreements: 0,
     totalAgreements: 0,
   })
-  const [upcoming, setUpcoming] = useState<any[]>([])
+  const [pendingAgreements, setPendingAgreements] = useState<any[]>([])
   const [criticalCustomers, setCriticalCustomers] = useState<any[]>([])
   const [uncontactedCustomers, setUncontactedCustomers] = useState<any[]>([])
 
@@ -58,7 +60,7 @@ export default function DashboardPage() {
   useEffect(() => {
     if (!user) return
     fetchStats()
-    fetchUpcoming()
+    fetchPending()
     fetchCriticalCustomers()
     fetchUncontacted()
   }, [user, restrictToOwn])
@@ -108,21 +110,25 @@ export default function DashboardPage() {
     let customersQuery = supabase.from("customers").select("id")
     if (restrictToOwn && user) customersQuery = customersQuery.eq("account_manager_id", user.id)
     const { data: customers } = await customersQuery
-    const { data: agreements } = await supabase.from("agreements").select("id, archived, start_date, end_date, customer_id")
+    const { data: agreements } = await supabase.from("agreements").select("id, archived, start_date, end_date, customer_id, signed, signing_status")
 
     const today = new Date().toISOString().split("T")[0]
     const in30Days = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split("T")[0]
 
     const active = agreements?.filter(
-      (a: any) => !a.archived && a.start_date <= today && a.end_date >= today
+      (a: any) => !a.archived && a.signed && a.start_date <= today && a.end_date >= today
     ).length ?? 0
 
     const soon = agreements?.filter(
-      (a: any) => !a.archived && a.end_date >= today && a.end_date <= in30Days
+      (a: any) => !a.archived && a.signed && a.end_date >= today && a.end_date <= in30Days
+    ).length ?? 0
+
+    const unsigned = agreements?.filter(
+      (a: any) => !a.archived && !a.signed
     ).length ?? 0
 
     const customersWithActive = new Set(
-      agreements?.filter((a: any) => !a.archived && (!a.end_date || a.end_date >= today))
+      agreements?.filter((a: any) => !a.archived && a.signed && a.start_date <= today && (!a.end_date || a.end_date >= today))
         .map((a: any) => a.customer_id)
     )
     const withoutActive = customers?.filter((c: any) => !customersWithActive.has(c.id)).length ?? 0
@@ -132,21 +138,22 @@ export default function DashboardPage() {
       activeAgreements: active,
       expiringSoon: soon,
       customersWithoutActive: withoutActive,
+      unsignedAgreements: unsigned,
       totalAgreements: agreements?.length ?? 0,
     })
   }
 
-  async function fetchUpcoming() {
+  async function fetchPending() {
     if (!supabase) return
-    const today = new Date().toISOString().split("T")[0]
     const { data } = await supabase
       .from("agreements")
-      .select("id, title, end_date")
+      .select("id, title, customers(name)")
       .eq("archived", false)
-      .gte("end_date", today)
-      .order("end_date", { ascending: true })
+      .eq("signed", false)
+      .eq("signing_status", "pending")
+      .order("created_at", { ascending: false })
       .limit(4)
-    setUpcoming(data ?? [])
+    setPendingAgreements(data ?? [])
   }
 
   async function fetchCriticalCustomers() {
@@ -321,17 +328,17 @@ export default function DashboardPage() {
             icon={<UserGroupIcon className="h-5 w-5 text-blue-600" />}
             bg="bg-blue-50" />
         </Link>
-        <Link href="/customers?noActive=true">
-          <StatCard title={t("statWithoutActive")} value={stats.customersWithoutActive}
-            icon={<ExclamationTriangleIcon className="h-5 w-5 text-red-500" />}
-            bg="bg-red-50" />
+        <Link href="/agreements?filter=unsigned">
+          <StatCard title={t("statUnsignedAgreements")} value={stats.unsignedAgreements}
+            icon={<ExclamationTriangleIcon className="h-5 w-5 text-orange-500" />}
+            bg="bg-orange-50" />
         </Link>
-        <Link href="/agreements?status=active">
+        <Link href="/agreements?filter=active">
           <StatCard title={t("statActiveAgreements")} value={stats.activeAgreements}
             icon={<CheckCircleIcon className="h-5 w-5 text-green-600" />}
             bg="bg-green-50" />
         </Link>
-        <Link href="/agreements?expiresSoon=true">
+        <Link href="/agreements?filter=expiresSoon">
           <StatCard title={t("statExpiringSoon")} value={stats.expiringSoon}
             subtitle={t("statExpiringSoonSubtitle")}
             icon={<ClockIcon className="h-5 w-5 text-amber-500" />}
@@ -354,17 +361,20 @@ export default function DashboardPage() {
 
         <div className="bg-white rounded-xl border border-gray-200 p-6">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-base font-semibold text-gray-900">{t("upcomingTitle")}</h2>
-            <Link href="/agreements" className="text-xs text-slate-500 hover:text-slate-800">{t("seeAll")}</Link>
+            <h2 className="text-base font-semibold text-gray-900">{t("pendingTitle")}</h2>
+            <Link href="/agreements?filter=pending" className="text-xs text-slate-500 hover:text-slate-800">{t("seeAll")}</Link>
           </div>
-          {upcoming.length === 0 ? (
-            <p className="text-sm text-gray-400">{t("upcomingEmpty")}</p>
+          {pendingAgreements.length === 0 ? (
+            <p className="text-sm text-gray-400">{t("pendingEmpty")}</p>
           ) : (
             <ul className="space-y-2">
-              {upcoming.map((a: any) => (
+              {pendingAgreements.map((a: any) => (
                 <li key={a.id} className="flex items-center justify-between py-2 border-t border-gray-100 first:border-0">
-                  <span className="text-sm font-medium text-gray-800">{a.title}</span>
-                  <span className="text-xs text-gray-400">{formatDate(a.end_date)}</span>
+                  <div>
+                    <p className="text-sm font-medium text-gray-800">{a.title}</p>
+                    <p className="text-xs text-gray-400">{a.customers?.name}</p>
+                  </div>
+                  <Link href={`/agreements/${a.id}`} className="text-xs text-slate-500 hover:text-slate-800">{t("open")}</Link>
                 </li>
               ))}
             </ul>

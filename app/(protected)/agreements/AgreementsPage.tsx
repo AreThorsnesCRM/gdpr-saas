@@ -13,6 +13,8 @@ type Agreement = {
   description: string | null
   start_date: string
   end_date: string
+  signed: boolean
+  signing_status: string | null
   archived: boolean
   customer_id: string
   category_id: string | null
@@ -22,7 +24,7 @@ type Agreement = {
 
 type Customer = { id: string; name: string }
 type Category = { id: string; name: string; is_predefined?: boolean }
-type Filter = "all" | "active" | "expired" | "upcoming" | "expiresSoon" | "archived"
+type Filter = "all" | "active" | "expired" | "upcoming" | "expiresSoon" | "archived" | "unsigned" | "pending"
 
 export default function AgreementsPage() {
   const router = useRouter()
@@ -37,14 +39,15 @@ export default function AgreementsPage() {
     { id: "all",         label: t("filterAll") },
     { id: "active",      label: t("filterActive") },
     { id: "expiresSoon", label: t("filterExpiresSoon") },
-    { id: "upcoming",    label: t("filterUpcoming") },
+    { id: "unsigned",    label: t("filterUnsigned") },
+    { id: "pending",     label: t("filterPending") },
     { id: "expired",     label: t("filterExpired") },
     { id: "archived",    label: t("filterArchived") },
   ]
 
   const [filter, setFilter] = useState<Filter>("all")
   const [search, setSearch] = useState("")
-  const [sortKey, setSortKey] = useState<"title" | "customer" | "category" | null>(null)
+  const [sortKey, setSortKey] = useState<"title" | "customer" | "category" | "signed" | null>(null)
   const [sortDir, setSortDir] = useState<"asc" | "desc">("asc")
   const [agreements, setAgreements] = useState<Agreement[]>([])
   const [customers, setCustomers] = useState<Customer[]>([])
@@ -139,9 +142,10 @@ export default function AgreementsPage() {
     return Math.ceil((new Date(dateStr).getTime() - Date.now()) / 86400000)
   }
 
-  function getStatus(a: Agreement): "active" | "expired" | "upcoming" | "archived" {
+  function getStatus(a: Agreement): "active" | "expired" | "upcoming" | "archived" | "unsigned" | "pending" {
     const today = new Date().toISOString().split("T")[0]
     if (a.archived) return "archived"
+    if (!a.signed) return a.signing_status === "pending" ? "pending" : "unsigned"
     if (a.end_date < today) return "expired"
     if (a.start_date > today) return "upcoming"
     return "active"
@@ -152,7 +156,7 @@ export default function AgreementsPage() {
     router.push(f === "all" ? "/agreements" : `/agreements?filter=${f}`)
   }
 
-  function toggleSort(key: "title" | "customer" | "category") {
+  function toggleSort(key: "title" | "customer" | "category" | "signed") {
     if (sortKey === key) {
       setSortDir(d => d === "asc" ? "desc" : "asc")
     } else {
@@ -166,7 +170,7 @@ export default function AgreementsPage() {
       if (filter !== "all") {
         if (filter === "expiresSoon") {
           const days = daysUntil(a.end_date)
-          if (!(!a.archived && days >= 0 && days <= 30)) return false
+          if (!(!a.archived && a.signed && days >= 0 && days <= 30)) return false
         } else if (getStatus(a) !== filter) {
           return false
         }
@@ -183,6 +187,11 @@ export default function AgreementsPage() {
     })
     .sort((a, b) => {
       if (!sortKey) return 0
+      if (sortKey === "signed") {
+        const valA = a.signed ? 1 : 0
+        const valB = b.signed ? 1 : 0
+        return sortDir === "asc" ? valA - valB : valB - valA
+      }
       const valA = sortKey === "title" ? a.title : sortKey === "customer" ? (a.customers?.name ?? "") : (a.agreement_categories?.name ?? "")
       const valB = sortKey === "title" ? b.title : sortKey === "customer" ? (b.customers?.name ?? "") : (b.agreement_categories?.name ?? "")
       return sortDir === "asc" ? valA.localeCompare(valB) : valB.localeCompare(valA)
@@ -200,6 +209,10 @@ export default function AgreementsPage() {
 
     if (status === "archived")
       return <span className="text-xs font-medium px-2.5 py-0.5 rounded-full bg-gray-100 text-gray-500 ring-1 ring-gray-200">{t("statusArchived")}</span>
+    if (status === "pending")
+      return <span className="text-xs font-medium px-2.5 py-0.5 rounded-full bg-purple-50 text-purple-700 ring-1 ring-purple-200">{t("statusPending")}</span>
+    if (status === "unsigned")
+      return <span className="text-xs font-medium px-2.5 py-0.5 rounded-full bg-orange-50 text-orange-700 ring-1 ring-orange-200">{t("statusUnsigned")}</span>
     if (status === "expired")
       return <span className="text-xs font-medium px-2.5 py-0.5 rounded-full bg-red-50 text-red-600 ring-1 ring-red-200">{t("statusExpired")}</span>
     if (status === "upcoming")
@@ -288,6 +301,12 @@ export default function AgreementsPage() {
                   </button>
                 </th>
                 <th className="hidden md:table-cell text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wide">{t("columnPeriod")}</th>
+                <th className="hidden sm:table-cell text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wide">
+                  <button onClick={() => toggleSort("signed")} className="flex items-center gap-1 hover:text-gray-800 transition-colors">
+                    {t("columnSigned")}
+                    <span className="text-gray-300">{sortKey === "signed" ? (sortDir === "asc" ? "↑" : "↓") : "↕"}</span>
+                  </button>
+                </th>
                 <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wide">{t("columnStatus")}</th>
               </tr>
             </thead>
@@ -305,6 +324,12 @@ export default function AgreementsPage() {
                   </td>
                   <td className="hidden md:table-cell px-4 py-3 text-gray-500 whitespace-nowrap">
                     {formatDate(a.start_date)} – {formatDate(a.end_date)}
+                  </td>
+                  <td className="hidden sm:table-cell px-4 py-3">
+                    {a.signed
+                      ? <span className="text-green-600 font-medium text-sm">✓</span>
+                      : <span className="text-gray-300 text-sm">—</span>
+                    }
                   </td>
                   <td className="px-4 py-3">
                     <StatusBadge a={a} />

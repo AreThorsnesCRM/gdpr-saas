@@ -116,7 +116,7 @@ export default function Sidebar({ isOpen, onClose }: { isOpen: boolean; onClose:
           {t("logout")}
         </button>
         <div className="mt-2">
-          <LanguageSwitcher />
+          <LanguageSwitcher direction="up" />
         </div>
         <div className="text-xs text-slate-600 mt-2 px-3">
           © {new Date().getFullYear()} Pactiva

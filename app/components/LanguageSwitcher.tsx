@@ -17,7 +17,7 @@ const LANGUAGES = [
   { code: "pt", label: "Português",  countryCode: "PT" },
 ]
 
-export default function LanguageSwitcher({ variant = "dark" }: { variant?: "dark" | "light" }) {
+export default function LanguageSwitcher({ variant = "dark", direction = "down" }: { variant?: "dark" | "light"; direction?: "up" | "down" }) {
   const locale = useLocale()
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
@@ -79,7 +79,7 @@ export default function LanguageSwitcher({ variant = "dark" }: { variant?: "dark
       </button>
 
       {open && (
-        <div className={`absolute z-50 bottom-full mb-1 right-0 rounded-xl overflow-hidden w-44 ${dropdownCls}`}>
+        <div className={`absolute z-50 right-0 rounded-xl overflow-hidden w-44 ${direction === "up" ? "bottom-full mb-1" : "top-full mt-1"} ${dropdownCls}`}>
           {LANGUAGES.map(lang => (
             <button
               key={lang.code}

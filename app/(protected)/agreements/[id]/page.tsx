@@ -301,7 +301,13 @@ export default function AgreementDetailPage({ params }: { params: Promise<{ id: 
   }
 
   function getExpiryBadge() {
-    if (!agreement?.end_date || agreement.archived) return null
+    if (!agreement || agreement.archived) return null
+    if (!agreement.signed) {
+      if (agreement.signing_status === "pending")
+        return { text: t("statusPending"), color: "bg-purple-50 text-purple-700 ring-purple-200" }
+      return { text: t("statusUnsigned"), color: "bg-orange-50 text-orange-700 ring-orange-200" }
+    }
+    if (!agreement.end_date) return null
     const days = Math.ceil((new Date(agreement.end_date).getTime() - Date.now()) / 86400000)
     if (days < 0)   return { text: t("statusExpired"),                       color: "bg-red-50 text-red-600 ring-red-200" }
     if (days <= 7)  return { text: t("statusExpiresDays", { days }),          color: "bg-red-50 text-red-600 ring-red-200" }
@@ -363,9 +369,7 @@ export default function AgreementDetailPage({ params }: { params: Promise<{ id: 
             <span className="text-xs font-medium px-2.5 py-0.5 rounded-full bg-gray-100 text-gray-500 ring-1 ring-gray-200 shrink-0">{t("archivedBanner")}</span>
           ) : badge ? (
             <span className={`text-xs font-medium px-2.5 py-0.5 rounded-full ring-1 shrink-0 ${badge.color}`}>{badge.text}</span>
-          ) : (
-            <span className="text-xs font-medium px-2.5 py-0.5 rounded-full bg-green-50 text-green-700 ring-1 ring-green-200 shrink-0">{t("statusActive")}</span>
-          )}
+          ) : null}
         </div>
         <div className="flex items-center gap-2 shrink-0">
           <button onClick={handleArchive} className="text-sm text-gray-500 hover:text-gray-800 border border-gray-200 hover:border-gray-300 px-3 py-1.5 rounded-lg transition-colors">
