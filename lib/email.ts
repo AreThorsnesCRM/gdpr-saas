@@ -1,7 +1,7 @@
 import { Resend } from "resend"
 
 const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null
-const FROM = "Pactiva <onboarding@resend.dev>"
+const FROM = "Pactiva <support@pactiva.io>"
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL
 
 export async function sendTrialEndingEmail(to: string, name: string, daysLeft: number) {
