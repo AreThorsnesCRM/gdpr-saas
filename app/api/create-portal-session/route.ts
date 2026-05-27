@@ -44,10 +44,17 @@ export async function POST() {
   const returnUrl = `${process.env.NEXT_PUBLIC_APP_URL}/dashboard`
   console.log("[create-portal-session] Return URL:", returnUrl)
 
-  const session = await stripe.billingPortal.sessions.create({
-    customer: profile.stripe_customer_id,
-    return_url: returnUrl,
-  })
+  let session
+  try {
+    session = await stripe.billingPortal.sessions.create({
+      customer: profile.stripe_customer_id,
+      return_url: returnUrl,
+    })
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : "Unknown Stripe error"
+    console.error("[create-portal-session] Stripe error:", message)
+    return NextResponse.json({ error: "stripe_error", message }, { status: 400 })
+  }
 
   return NextResponse.json({ url: session.url })
 }
