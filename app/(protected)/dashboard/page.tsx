@@ -249,19 +249,19 @@ export default function DashboardPage() {
     <div className="p-4 md:p-8 space-y-8 max-w-6xl">
 
       {showBanner && (
-        <div className={`rounded-xl border px-6 py-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 ${
-          status === "trialing" ? "bg-blue-50 border-blue-200" :
-          status === "past_due" ? "bg-red-50 border-red-200" :
-          "bg-gray-50 border-gray-200"
+        <div className={`rounded-xl px-6 py-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 ${
+          status === "past_due" ? "bg-red-900/20 border border-red-700/40" :
+          status === "canceled" ? "bg-gray-800 border border-gray-700" :
+          "bg-slate-800 border border-slate-700"
         }`}>
           <div>
-            <p className="font-semibold text-gray-900">
+            <p className="font-semibold text-white">
               {status === "trialing" && t("trialDaysLeft", { days: daysLeft(account?.trial_end ?? null) ?? 0 })}
               {status === "past_due" && t("paymentFailed")}
               {status === "canceled" && t("canceled")}
               {status === "incomplete" && t("incomplete")}
             </p>
-            <p className="text-sm text-gray-500 mt-0.5">
+            <p className="text-sm text-slate-400 mt-0.5">
               {status === "trialing" && t("trialBannerDesc")}
               {status === "past_due" && t("paymentFailedDesc")}
               {status === "canceled" && t("canceledDesc")}
