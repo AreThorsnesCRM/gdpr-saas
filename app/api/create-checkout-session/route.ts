@@ -60,12 +60,19 @@ export async function POST() {
       if (supabaseAdmin) {
         const trialEnd = new Date();
         trialEnd.setDate(trialEnd.getDate() + 7);
-        await supabaseAdmin.from("profiles").update({
+        const trialData = {
           stripe_customer_id: customer.id,
           subscription_status: "trialing",
           trial_start: new Date().toISOString(),
           trial_end: trialEnd.toISOString(),
-        }).eq("user_id", user.id);
+        };
+        await supabaseAdmin.from("profiles").update(trialData).eq("user_id", user.id);
+        if (profile.account_id) {
+          await supabaseAdmin.from("accounts").update({
+            trial_start: trialData.trial_start,
+            trial_end: trialData.trial_end,
+          }).eq("id", profile.account_id);
+        }
       }
     }
 

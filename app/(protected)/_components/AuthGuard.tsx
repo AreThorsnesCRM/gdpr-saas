@@ -23,7 +23,7 @@ export default function AuthGuard() {
 
     const status = account.subscription_status
     const trialEnd = account.trial_end ? new Date(account.trial_end) : null
-    const trialExpired = status === "trialing" && trialEnd && new Date() > trialEnd
+    const trialExpired = status === "trialing" && (!trialEnd || new Date() > trialEnd)
 
     if (trialExpired || status === "canceled" || status === "incomplete" || status === "unpaid") {
       router.replace("/billing/upgrade")
