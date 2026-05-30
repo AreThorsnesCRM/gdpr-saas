@@ -104,7 +104,7 @@ export async function POST() {
           quantity: 1,
         },
       ],
-      success_url: `${baseUrl}/dashboard?success=true`,
+      success_url: `${baseUrl}/billing/success`,
       cancel_url: `${baseUrl}/dashboard?canceled=true`,
       metadata: {
         user_id: user.id,

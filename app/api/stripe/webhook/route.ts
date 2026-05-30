@@ -12,18 +12,15 @@ const supabase = process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.SUPABASE_SE
     )
   : null;
 
-// 🔍 Hjelpefunksjon: Finn user_id basert på stripe_customer_id
 async function getUserIdFromCustomer(customerId: string | null) {
   if (!customerId) return null;
+  const { data } = await supabase!.from("profiles").select("user_id").eq("stripe_customer_id", customerId).single();
+  return data?.user_id ?? null;
+}
 
-  const { data, error } = await supabase!
-    .from("profiles")
-    .select("user_id")
-    .eq("stripe_customer_id", customerId)
-    .single();
-
-  if (error || !data) return null;
-  return data.user_id;
+async function getAccountIdFromUserId(userId: string) {
+  const { data } = await supabase!.from("account_users").select("account_id").eq("user_id", userId).single();
+  return data?.account_id ?? null;
 }
 
 export async function POST(req: Request) {
@@ -87,42 +84,50 @@ export async function POST(req: Request) {
   switch (event.type) {
     case "checkout.session.completed": {
       const session = event.data.object as Stripe.Checkout.Session;
+      const accountId = await getAccountIdFromUserId(userId);
 
-      await supabase
-        .from("profiles")
-        .update({
-          stripe_customer_id: session.customer,
-          stripe_subscription_id: session.subscription,
+      await supabase.from("profiles").update({
+        stripe_customer_id: session.customer,
+        stripe_subscription_id: session.subscription,
+        subscription_status: "active",
+      }).eq("user_id", userId);
+
+      if (accountId) {
+        await supabase.from("accounts").update({
+          stripe_customer_id: session.customer as string,
+          stripe_subscription_id: session.subscription as string,
           subscription_status: "active",
-        })
-        .eq("user_id", userId);
-
+        }).eq("id", accountId);
+      }
       break;
     }
 
     case "customer.subscription.updated":
     case "customer.subscription.created": {
       const subscription = event.data.object as Stripe.Subscription;
+      const accountId = await getAccountIdFromUserId(userId);
 
-      await supabase
-        .from("profiles")
-        .update({
+      await supabase.from("profiles").update({
+        subscription_status: subscription.status,
+        stripe_subscription_id: subscription.id,
+      }).eq("user_id", userId);
+
+      if (accountId) {
+        await supabase.from("accounts").update({
           subscription_status: subscription.status,
           stripe_subscription_id: subscription.id,
-        })
-        .eq("user_id", userId);
-
+        }).eq("id", accountId);
+      }
       break;
     }
 
     case "customer.subscription.deleted": {
-      await supabase
-        .from("profiles")
-        .update({
-          subscription_status: "canceled",
-        })
-        .eq("user_id", userId);
+      const accountId = await getAccountIdFromUserId(userId);
 
+      await supabase.from("profiles").update({ subscription_status: "canceled" }).eq("user_id", userId);
+      if (accountId) {
+        await supabase.from("accounts").update({ subscription_status: "canceled" }).eq("id", accountId);
+      }
       break;
     }
   }
