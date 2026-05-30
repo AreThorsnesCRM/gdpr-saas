@@ -1,49 +1,36 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { supabase } from "@/lib/supabaseClient"
+import { useAuth } from "@/lib/AuthContext"
 
 export default function AuthGuard() {
   const router = useRouter()
-  const [loading, setLoading] = useState(true)
+  const { account, loading: authLoading } = useAuth()
 
   useEffect(() => {
-    let isMounted = true
-
-    async function run() {
-      if (!supabase) {
-        console.error("[AuthGuard] Supabase not available")
-        router.replace("/login")
-        return
-      }
-
-      // Bare sjekk at brukeren er logget inn
-      // La middleware.ts og backend håndtere subscription-status
-      const { data: sessionData } = await supabase.auth.getSession()
-      const session = sessionData?.session
-
-      if (!isMounted) return
-
-      if (!session?.user) {
-        console.log("[AuthGuard] No session, redirecting to login")
-        router.replace("/login")
-        return
-      }
-
-      console.log("[AuthGuard] User authenticated")
-      setLoading(false)
+    async function checkSession() {
+      if (!supabase) { router.replace("/login"); return }
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session?.user) { router.replace("/login"); return }
     }
-
-    run()
-
-    return () => {
-      isMounted = false
-    }
+    checkSession()
   }, [router])
 
-  // Ikke blokker UI – bare vent stille
-  if (loading) return null
+  useEffect(() => {
+    if (authLoading || !account) return
+
+    const status = account.subscription_status
+    const trialEnd = account.trial_end ? new Date(account.trial_end) : null
+    const trialExpired = status === "trialing" && trialEnd && new Date() > trialEnd
+
+    if (trialExpired || status === "canceled" || status === "incomplete" || status === "unpaid") {
+      router.replace("/billing/upgrade")
+    } else if (status === "past_due") {
+      router.replace("/billing/payment-required")
+    }
+  }, [account, authLoading, router])
 
   return null
 }
