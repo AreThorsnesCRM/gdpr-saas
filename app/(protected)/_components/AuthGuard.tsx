@@ -25,8 +25,12 @@ export default function AuthGuard() {
     const trialEnd = account.trial_end ? new Date(account.trial_end) : null
     const trialExpired = status === "trialing" && (!trialEnd || new Date() > trialEnd)
 
-    if (trialExpired || status === "canceled" || status === "incomplete" || status === "unpaid") {
-      router.replace("/billing/upgrade")
+    if (trialExpired) {
+      router.replace("/billing/upgrade?reason=trial")
+    } else if (status === "canceled") {
+      router.replace("/billing/upgrade?reason=canceled")
+    } else if (status === "incomplete" || status === "unpaid") {
+      router.replace("/billing/upgrade?reason=incomplete")
     } else if (status === "past_due") {
       router.replace("/billing/payment-required")
     }
