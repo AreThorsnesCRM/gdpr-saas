@@ -65,71 +65,43 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   // Initialisér session på mount
   useEffect(() => {
-    let cleanup: (() => void) | undefined
-    let mounted = true
+    if (!supabase) {
+      setLoading(false)
+      return
+    }
 
-    async function initAuth() {
-      if (!supabase) {
-        setLoading(false)
-        return
-      }
-
-      // Check for temporary session cookie from callback
-      const tempSessionCookie = document.cookie.split('; ').find(row => row.startsWith('temp_session='))
-      if (tempSessionCookie) {
-        const tempSessionValue = tempSessionCookie.split('=')[1]
-        try {
-          const sessionData = JSON.parse(decodeURIComponent(tempSessionValue))
-          await supabase.auth.setSession(sessionData)
-          document.cookie = 'temp_session=; path=/; maxAge=0'
-        } catch (error) {
-          console.error("[AuthProvider] Failed to parse temp session:", error)
-        }
-      }
-
+    // Håndter temp_session-cookie fra callback (e-postbekreftelse)
+    const tempSessionCookie = document.cookie.split('; ').find(row => row.startsWith('temp_session='))
+    if (tempSessionCookie) {
+      const tempSessionValue = tempSessionCookie.split('=')[1]
       try {
-        const { data: sessionData } = await supabase.auth.getSession()
-
-        if (!mounted) return
-
-        if (sessionData?.session?.user) {
-          setUser({
-            id: sessionData.session.user.id,
-            email: sessionData.session.user.email,
-          })
-          setLoading(false)
-          return
-        }
-
-        const {
-          data: { subscription },
-        } = supabase.auth.onAuthStateChange((_event, session) => {
-          if (!mounted) return
-
-          if (session?.user) {
-            setUser({
-              id: session.user.id,
-              email: session.user.email,
-            })
-          } else {
-            setUser(null)
-          }
-          setLoading(false)
-        })
-
-        cleanup = () => subscription.unsubscribe()
+        const sessionData = JSON.parse(decodeURIComponent(tempSessionValue))
+        supabase.auth.setSession(sessionData).catch(console.error)
       } catch (error) {
-        console.error("[AuthProvider] Error during init:", error)
-        if (mounted) setLoading(false)
+        console.error("[AuthProvider] Failed to parse temp session:", error)
       }
+      document.cookie = 'temp_session=; path=/; maxAge=0'
     }
 
-    initAuth()
+    // Hent eksisterende sesjon
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session?.user) {
+        setUser({ id: session.user.id, email: session.user.email })
+      }
+      setLoading(false)
+    }).catch(() => setLoading(false))
 
-    return () => {
-      mounted = false
-      cleanup?.()
-    }
+    // Lytt alltid på auth-endringer — fanger opp login/logout uansett
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (session?.user) {
+        setUser({ id: session.user.id, email: session.user.email })
+      } else {
+        setUser(null)
+      }
+      setLoading(false)
+    })
+
+    return () => subscription.unsubscribe()
   }, [])
 
   useEffect(() => {
@@ -141,19 +113,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [user, refreshAccount])
 
   const logout = async () => {
-    if (!supabase) {
-      router.replace("/login")
-      return
-    }
     try {
       await fetch("/api/logout", { method: "POST" })
-      await supabase.auth.signOut()
-      setUser(null)
-      router.replace("/login")
+      if (supabase) await supabase.auth.signOut()
     } catch (error) {
       console.error("[AuthProvider] Logout error:", error)
-      setUser(null)
-      router.replace("/login")
+    } finally {
+      // Hard redirect sikrer at AuthProvider starter helt på nytt
+      window.location.href = "/login"
     }
   }
 
