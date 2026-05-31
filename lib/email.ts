@@ -95,7 +95,7 @@ export async function sendSigningLinkEmail(
     subject: `${agreementTitle} — klar til signering`,
     html: `
       <p>Hei${signerName ? ` ${signerName}` : ""},</p>
-      <p><strong>${senderAccountName}</strong> har sendt deg avtalen <strong>${agreementTitle}</strong> til digital signering med BankID.</p>
+      <p><strong>${senderAccountName}</strong> har sendt deg avtalen <strong>${agreementTitle}</strong> til digital signering.</p>
       <p>Klikk på knappen nedenfor for å åpne og signere avtalen:</p>
       <p><a href="${signatureUrl}" style="${btnStyle("#1e293b")}">Signer avtalen</a></p>
       <p>Eller kopier denne lenken direkte i nettleseren:<br>
