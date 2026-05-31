@@ -14,7 +14,7 @@ function buildSystemPrompt(contextBlock: string, contextLevel: string): string {
 - Avtaler: opprett avtaler med start/sluttdato, last opp PDF-dokument, send til digital signering via BankID (NO), BankID SE (SE), MitID (DK) eller FTN (FI) basert på kontoens land.
 - Maler: lag gjenbrukbare avtalemaler med flettefelt: {{customer.name}}, {{customer.org_number}}, {{customer.address}}, {{agreement.start_date}}, {{agreement.end_date}}, {{company.name}}, {{company.org_number}}.
 - Dashboard: oversikt over aktive avtaler, utløpende snart, kunder uten aktiv avtale, og kunder ikke kontaktet nylig.
-- Digital signering: avtaler sendes via Signicat. Signaturen er juridisk bindende og bruker e-ID tilpasset kontoens land.
+- Digital signering: avtaler sendes via e-signature.eu for elektronisk signering (eIDAS-kompatibel). Signaturen er juridisk bindende.
 - Arkiv: avtalene kan arkiveres, søkes opp og gjenopprettes.
 - Innstillinger: firmainformasjon, brukere og roller, e-postvarsler, abonnement via Stripe.
 

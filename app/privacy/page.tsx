@@ -107,10 +107,10 @@ export default function PrivacyPage() {
                 note="Overføring skjer på grunnlag av Standard Contractual Clauses (SCC). Aktivering krever eksplisitt samtykke. Anthropic bruker ikke API-data til trening av modeller."
               />
               <Processor
-                name="Signicat"
-                role="Digital signering med BankID / MitID / FTN"
-                location="EU (Norge)"
-                note="Behandler signeringsdata og e-ID-verifisering."
+                name="e-signature.eu"
+                role="Digital signering (eIDAS-kompatibel)"
+                location="EU (Belgia)"
+                note="Behandler signeringsdata og elektronisk signaturverifisering."
               />
             </div>
           </Section>

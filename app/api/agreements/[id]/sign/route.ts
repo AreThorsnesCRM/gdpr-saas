@@ -2,9 +2,8 @@ import { NextResponse } from "next/server"
 import { supabaseAdmin } from "@/lib/supabaseAdmin"
 import { cookies } from "next/headers"
 import { createServerClient } from "@supabase/ssr"
-import { uploadDocument, createDocumentCollection, createSigningSessions, getIdpForCountry } from "@/lib/signicat"
+import { createSignatureRequest } from "@/lib/esignature"
 import { sendSigningLinkEmail } from "@/lib/email"
-import { randomUUID } from "crypto"
 
 async function getAccountUser() {
   const cookieStore = await cookies()
@@ -50,33 +49,32 @@ export async function POST(
 
   const pdfRes = await fetch(agreement.file_url)
   if (!pdfRes.ok) return NextResponse.json({ error: "pdf_download_failed" }, { status: 500 })
-  const pdfBuffer = await pdfRes.arrayBuffer()
+  const pdfBase64 = Buffer.from(await pdfRes.arrayBuffer()).toString("base64")
 
   const { data: account } = await supabaseAdmin
     .from("accounts")
-    .select("name, country")
+    .select("name")
     .eq("id", accountUser.account_id)
     .single()
 
-  const documentId = await uploadDocument(pdfBuffer)
-  const documentCollectionId = await createDocumentCollection(documentId)
-  const externalReference = randomUUID()
+  const esignSigners = signerList.map(s => {
+    const parts = s.name.trim().split(/\s+/)
+    const firstname = parts[0] ?? s.name
+    const lastname = parts.slice(1).join(" ") || "-"
+    return { firstname, lastname, email: s.email }
+  })
 
-  const sessions = await createSigningSessions({
-    documentCollectionId,
-    documentId,
+  const { idSign, signers: esignResult } = await createSignatureRequest({
     title: agreement.title,
-    externalReference,
-    language: "nb",
-    count: signerList.length,
-    idpName: getIdpForCountry(account?.country),
+    pdfBase64,
+    signers: esignSigners,
   })
 
   const signersJsonb = signerList.map((s, i) => ({
     name: s.name,
     email: s.email,
-    sessionId: sessions[i].sessionId,
-    url: sessions[i].signatureUrl,
+    signerKey: esignResult[i]?.key ?? String(i + 1),
+    url: esignResult[i]?.url ?? "",
     signed: false,
   }))
 
@@ -84,8 +82,8 @@ export async function POST(
     .from("agreements")
     .update({
       signing_status: "pending",
-      signing_session_id: sessions[0].sessionId,
-      signing_url: sessions[0].signatureUrl,
+      signing_session_id: String(idSign),
+      signing_url: signersJsonb[0]?.url ?? null,
       signer_name: signerList[0].name || null,
       signer_email: signerList[0].email || null,
       signers: signersJsonb,
@@ -101,5 +99,5 @@ export async function POST(
     }
   }
 
-  return NextResponse.json({ signatureUrl: sessions[0].signatureUrl, emailSent })
+  return NextResponse.json({ signatureUrl: signersJsonb[0]?.url ?? null, emailSent })
 }
