@@ -513,7 +513,7 @@
     "title": "Get started with Pactiva",
     "subtitle": "Select your country to set up your account.",
     "countryLabel": "Country",
-    "countryHint": "Determines which e-ID is used for digital signing.",
+    "countryHint": "Sets the default country for your account.",
     "saveButton": "Get started",
     "saving": "Saving...",
     "checklistTitle": "Getting started",

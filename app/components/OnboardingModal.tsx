@@ -38,7 +38,7 @@ export default function OnboardingModal() {
     return () => document.removeEventListener("mousedown", handleClick)
   }, [])
 
-  if (loading || account?.country) return null
+  if (loading || !account || account?.country) return null
 
   async function handleSave() {
     setSaving(true)

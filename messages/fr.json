@@ -513,7 +513,7 @@
     "title": "Démarrer avec Pactiva",
     "subtitle": "Choisissez votre pays pour configurer la méthode de signature appropriée.",
     "countryLabel": "Pays",
-    "countryHint": "Détermine quel eID est utilisé lors de la signature numérique.",
+    "countryHint": "Définit le pays par défaut pour le compte.",
     "saveButton": "Commencer",
     "saving": "Enregistrement...",
     "checklistTitle": "Pour commencer",

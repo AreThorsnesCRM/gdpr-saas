@@ -513,7 +513,7 @@
     "title": "Kom i gang med Pactiva",
     "subtitle": "Velg landet ditt for å sette opp kontoen din.",
     "countryLabel": "Land",
-    "countryHint": "Bestemmer hvilken e-ID som brukes ved digital signering.",
+    "countryHint": "Bestemmer standard land for kontoen.",
     "saveButton": "Kom i gang",
     "saving": "Lagrer...",
     "checklistTitle": "Kom i gang",

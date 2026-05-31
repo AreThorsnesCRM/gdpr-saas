@@ -513,7 +513,7 @@
     "title": "Erste Schritte mit Pactiva",
     "subtitle": "Wählen Sie Ihr Land, um die richtige Unterzeichnungsmethode einzurichten.",
     "countryLabel": "Land",
-    "countryHint": "Bestimmt, welche eID bei der digitalen Unterzeichnung verwendet wird.",
+    "countryHint": "Legt das Standardland für das Konto fest.",
     "saveButton": "Loslegen",
     "saving": "Wird gespeichert...",
     "checklistTitle": "Erste Schritte",

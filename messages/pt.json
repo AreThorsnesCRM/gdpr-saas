@@ -513,7 +513,7 @@
     "title": "Começar com o Pactiva",
     "subtitle": "Escolha o seu país para configurar o método de assinatura correto.",
     "countryLabel": "País",
-    "countryHint": "Determina qual eID é utilizado na assinatura digital.",
+    "countryHint": "Define o país padrão para a conta.",
     "saveButton": "Começar",
     "saving": "A guardar...",
     "checklistTitle": "Primeiros passos",

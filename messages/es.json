@@ -513,7 +513,7 @@
     "title": "Empezar con Pactiva",
     "subtitle": "Selecciona tu país para configurar tu cuenta.",
     "countryLabel": "País",
-    "countryHint": "Determina qué e-ID se usa para la firma digital.",
+    "countryHint": "Establece el país predeterminado para la cuenta.",
     "saveButton": "Empezar",
     "saving": "Guardando...",
     "checklistTitle": "Primeros pasos",

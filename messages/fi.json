@@ -513,7 +513,7 @@
     "title": "Aloita Pactivan käyttö",
     "subtitle": "Valitse maasi asettaaksesi oikean allekirjoitusmenetelmän.",
     "countryLabel": "Maa",
-    "countryHint": "Määrittää, mitä sähköistä tunnistautumista käytetään digitaalisessa allekirjoituksessa.",
+    "countryHint": "Asettaa tilin oletusmaaksi.",
     "saveButton": "Aloita",
     "saving": "Tallennetaan...",
     "checklistTitle": "Aloita",
