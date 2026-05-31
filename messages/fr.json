@@ -312,6 +312,7 @@
     "tabNotifications": "Notifications",
     "tabAI": "Assistant AI",
     "tabCategories": "Catégories de contrats",
+    "tabSigning": "Signature",
     "tabSubscription": "Abonnement",
     "profileTitle": "Mon profil",
     "profileDesc": "Nom affiché aux autres utilisateurs du compte.",
@@ -410,7 +411,15 @@
     "privacyDesc": "Lisez comment Pactiva traite les données personnelles.",
     "privacyLink": "Politique de confidentialité →",
     "fileChoose": "Choisir un fichier",
-    "fileNone": "Aucun fichier sélectionné"
+    "fileNone": "Aucun fichier sélectionné",
+    "signingSettingsTitle": "Signature numérique",
+    "signingSettingsDesc": "Définissez la méthode de signature par défaut pour le compte. Peut être remplacée par contrat.",
+    "signingMethodLabel": "Méthode de signature par défaut",
+    "methodOtpEmail": "OTP e-mail (simple)",
+    "methodVeriff": "Veriff (avancé)",
+    "methodEvrotrust": "Evrotrust (qualifié)",
+    "methodItsme": "itsme® (qualifié)",
+    "signingMethodOverride": "Méthode de signature pour cet accord"
   },
   "slideOver": {
     "backToForm": "← Retour au formulaire",
@@ -596,6 +605,7 @@
     "statusArchived": "Archivé",
     "statusExpiresDays": "Expire dans {days} jours",
     "signingPending": "En attente de signature",
-    "signingSigned": "Signé ↗"
+    "signingSigned": "Signé ↗",
+    "signingMethodOverride": "Méthode de signature pour cet accord"
   }
 }

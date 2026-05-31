@@ -28,7 +28,7 @@ export async function GET() {
 
   const { data: account } = await supabaseAdmin
     .from("accounts")
-    .select("name, org_number, address, postal_code, city, phone, contact_email, ai_assistant_enabled, ai_dashboard_widget_enabled, logo_url")
+    .select("name, org_number, address, postal_code, city, phone, contact_email, ai_assistant_enabled, ai_dashboard_widget_enabled, signing_method, logo_url")
     .eq("id", accountUser.account_id)
     .single()
 
@@ -61,7 +61,7 @@ export async function PATCH(req: Request) {
   }
 
   const body = await req.json()
-  const stringFields = ["name", "org_number", "address", "postal_code", "city", "phone", "contact_email", "country"]
+  const stringFields = ["name", "org_number", "address", "postal_code", "city", "phone", "contact_email", "country", "signing_method"]
   const updates: Record<string, string | boolean> = {}
 
   for (const key of stringFields) {

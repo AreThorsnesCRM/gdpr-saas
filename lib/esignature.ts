@@ -18,11 +18,21 @@ export type CreateSignatureResult = {
   signers: { key: string; url: string }[]
 }
 
+export const SIGNING_METHODS = [
+  { value: "otp-email-non-qualified",   labelKey: "methodOtpEmail" },
+  { value: "veriff-advanced-signature", labelKey: "methodVeriff" },
+  { value: "evrotrust-signature",       labelKey: "methodEvrotrust" },
+  { value: "itsme-qes-signature",       labelKey: "methodItsme" },
+] as const
+
+export type SigningMethodValue = typeof SIGNING_METHODS[number]["value"]
+
 export async function createSignatureRequest(opts: {
   title: string
   pdfBase64: string
   signers: EsignSigner[]
   lang?: string
+  method?: string
 }): Promise<CreateSignatureResult> {
   const res = await fetch(`${BASE_URL}/request?userid=${USER_ID}`, {
     method: "POST",
@@ -34,7 +44,7 @@ export async function createSignatureRequest(opts: {
       send_email: false,
       email_notification: true,
       reminder: 7,
-      methods: ["otp-email-non-qualified"],
+      methods: [opts.method ?? "otp-email-non-qualified"],
       signers: opts.signers.map(s => ({
         firstname: s.firstname,
         lastname: s.lastname,

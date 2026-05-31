@@ -312,6 +312,7 @@
     "tabNotifications": "Aviseringar",
     "tabAI": "AI-assistent",
     "tabCategories": "Avtalskategorier",
+    "tabSigning": "Signering",
     "tabSubscription": "Prenumeration",
     "profileTitle": "Min profil",
     "profileDesc": "Namn som visas för andra användare på kontot.",
@@ -410,7 +411,15 @@
     "privacyDesc": "Läs om hur Pactiva hanterar personuppgifter.",
     "privacyLink": "Integritetspolicy →",
     "fileChoose": "Välj fil",
-    "fileNone": "Ingen fil vald"
+    "fileNone": "Ingen fil vald",
+    "signingSettingsTitle": "Digital signering",
+    "signingSettingsDesc": "Välj standardsigneringsmetod för kontot. Kan åsidosättas per avtal.",
+    "signingMethodLabel": "Standardsigneringsmetod",
+    "methodOtpEmail": "OTP e-post (enkel)",
+    "methodVeriff": "Veriff (avancerad)",
+    "methodEvrotrust": "Evrotrust (kvalificerad)",
+    "methodItsme": "itsme® (kvalificerad)",
+    "signingMethodOverride": "Signeringsmetod för detta avtal"
   },
   "slideOver": {
     "backToForm": "← Tillbaka till formulär",
@@ -596,6 +605,7 @@
     "statusArchived": "Arkiverat",
     "statusExpiresDays": "Löper ut om {days} dagar",
     "signingPending": "Inväntar signering",
-    "signingSigned": "Signerat ↗"
+    "signingSigned": "Signerat ↗",
+    "signingMethodOverride": "Signeringsmetod för detta avtal"
   }
 }

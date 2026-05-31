@@ -33,10 +33,11 @@ export async function POST(
   const { id: agreementId } = await params
   const body = await req.json()
 
-  // Support both old {signerName, signerEmail} and new {signers: [{name, email}]}
   const signerList: { name: string; email: string }[] = body.signers
     ? body.signers
     : [{ name: body.signerName ?? "", email: body.signerEmail ?? "" }]
+
+  const methodOverride: string | undefined = body.method
 
   const { data: agreement } = await supabaseAdmin
     .from("agreements")
@@ -53,7 +54,7 @@ export async function POST(
 
   const { data: account } = await supabaseAdmin
     .from("accounts")
-    .select("name")
+    .select("name, signing_method")
     .eq("id", accountUser.account_id)
     .single()
 
@@ -71,6 +72,7 @@ export async function POST(
       title: agreement.title,
       pdfBase64,
       signers: esignSigners,
+      method: methodOverride ?? account?.signing_method ?? undefined,
     })
     idSign = result.idSign
     esignResult = result.signers

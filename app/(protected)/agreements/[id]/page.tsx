@@ -63,6 +63,7 @@ export default function AgreementDetailPage({ params }: { params: Promise<{ id: 
   const { user, account } = useAuth()
   const t = useTranslations("agreementDetail")
   const tc = useTranslations("common")
+  const ts = useTranslations("settings")
   const locale = useLocale()
 
   const [agreement, setAgreement] = useState<AgreementDetail | null>(null)
@@ -90,6 +91,7 @@ export default function AgreementDetailPage({ params }: { params: Promise<{ id: 
   const [signerManuallySet, setSignerManuallySet] = useState(false)
   const [signingLoading, setSigningLoading] = useState(false)
   const [signingError, setSigningError] = useState("")
+  const [signingMethod, setSigningMethod] = useState<string>(account?.signing_method ?? "otp-email-non-qualified")
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null)
   const [branding, setBranding] = useState<PDFBranding | undefined>(undefined)
 
@@ -268,7 +270,7 @@ export default function AgreementDetailPage({ params }: { params: Promise<{ id: 
       const res = await fetch(`/api/agreements/${id}/sign`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ signers }),
+        body: JSON.stringify({ signers, method: signingMethod }),
       })
       const json = await res.json()
       if (!res.ok) throw new Error(json.error)
@@ -633,6 +635,19 @@ export default function AgreementDetailPage({ params }: { params: Promise<{ id: 
               </button>
             </div>
             {signers.length === 1 && <p className="text-xs text-gray-400">{t("signingEmailHint")}</p>}
+            <div>
+              <label className="block text-xs font-medium text-gray-500 mb-1">{t("signingMethodOverride")}</label>
+              <select
+                value={signingMethod}
+                onChange={(e) => setSigningMethod(e.target.value)}
+                className={inputClass}
+              >
+                <option value="otp-email-non-qualified">{ts("methodOtpEmail")}</option>
+                <option value="veriff-advanced-signature">{ts("methodVeriff")}</option>
+                <option value="evrotrust-signature">{ts("methodEvrotrust")}</option>
+                <option value="itsme-qes-signature">{ts("methodItsme")}</option>
+              </select>
+            </div>
             {signingError && <p className="text-sm text-red-600">{signingError}</p>}
             <button
               onClick={handleSendForSigning}

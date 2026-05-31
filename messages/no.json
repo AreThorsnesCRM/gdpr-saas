@@ -312,6 +312,7 @@
     "tabNotifications": "Varsler",
     "tabAI": "AI-assistent",
     "tabCategories": "Avtalekategorier",
+    "tabSigning": "Signering",
     "tabSubscription": "Abonnement",
     "profileTitle": "Min profil",
     "profileDesc": "Navn som vises til andre brukere på kontoen.",
@@ -410,7 +411,15 @@
     "privacyDesc": "Les om hvordan Pactiva behandler personopplysninger.",
     "privacyLink": "Personvernerklæring →",
     "fileChoose": "Velg fil",
-    "fileNone": "Ingen fil valgt"
+    "fileNone": "Ingen fil valgt",
+    "signingSettingsTitle": "Digital signering",
+    "signingSettingsDesc": "Velg standard signeringsmetode for kontoen. Kan overstyres per avtale.",
+    "signingMethodLabel": "Standard signeringsmetode",
+    "methodOtpEmail": "OTP e-post (enkel)",
+    "methodVeriff": "Veriff (avansert)",
+    "methodEvrotrust": "Evrotrust (kvalifisert)",
+    "methodItsme": "itsme® (kvalifisert)",
+    "signingMethodOverride": "Signeringsmetode for denne avtalen"
   },
   "slideOver": {
     "backToForm": "← Tilbake til skjema",
@@ -596,6 +605,7 @@
     "statusArchived": "Arkivert",
     "statusExpiresDays": "Utløper om {days} dager",
     "signingPending": "Venter på signering",
-    "signingSigned": "Signert ↗"
+    "signingSigned": "Signert ↗",
+    "signingMethodOverride": "Signeringsmetode for denne avtalen"
   }
 }

@@ -312,6 +312,7 @@
     "tabNotifications": "Ilmoitukset",
     "tabAI": "AI-assistentti",
     "tabCategories": "Sopimuskategoriat",
+    "tabSigning": "Allekirjoitus",
     "tabSubscription": "Tilaus",
     "profileTitle": "Oma profiili",
     "profileDesc": "Nimi, joka näytetään muille tilin käyttäjille.",
@@ -410,7 +411,15 @@
     "privacyDesc": "Lue, miten Pactiva käsittelee henkilötietoja.",
     "privacyLink": "Tietosuojaseloste →",
     "fileChoose": "Valitse tiedosto",
-    "fileNone": "Ei valittua tiedostoa"
+    "fileNone": "Ei valittua tiedostoa",
+    "signingSettingsTitle": "Digitaalinen allekirjoitus",
+    "signingSettingsDesc": "Aseta tilin oletusallekirjoitusmenetelmä. Voidaan ohittaa sopimuskohtaisesti.",
+    "signingMethodLabel": "Oletusallekirjoitusmenetelmä",
+    "methodOtpEmail": "OTP sähköposti (yksinkertainen)",
+    "methodVeriff": "Veriff (edistynyt)",
+    "methodEvrotrust": "Evrotrust (pätevä)",
+    "methodItsme": "itsme® (pätevä)",
+    "signingMethodOverride": "Allekirjoitusmenetelmä tälle sopimukselle"
   },
   "slideOver": {
     "backToForm": "← Takaisin lomakkeeseen",
@@ -596,6 +605,7 @@
     "statusArchived": "Arkistoitu",
     "statusExpiresDays": "Vanhenee {days} päivän kuluttua",
     "signingPending": "Odottaa allekirjoitusta",
-    "signingSigned": "Allekirjoitettu ↗"
+    "signingSigned": "Allekirjoitettu ↗",
+    "signingMethodOverride": "Allekirjoitusmenetelmä tälle sopimukselle"
   }
 }

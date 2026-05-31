@@ -13,6 +13,7 @@ export type Account = {
   stripe_subscription_id: string | null
   ai_assistant_enabled: boolean | null
   ai_dashboard_widget_enabled: boolean | null
+  signing_method: string | null
 }
 
 export type Profile = {

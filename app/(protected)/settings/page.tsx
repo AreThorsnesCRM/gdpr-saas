@@ -54,6 +54,7 @@ export default function SettingsPage() {
     { id: "varsler",        label: t("tabNotifications") },
     { id: "ai",             label: t("tabAI") },
     { id: "kategorier",     label: t("tabCategories") },
+    { id: "signering",      label: t("tabSigning") },
     { id: "abonnement",     label: t("tabSubscription") },
   ]
 
@@ -89,6 +90,10 @@ export default function SettingsPage() {
   const [companyMessage, setCompanyMessage] = useState<{ type: "error"; text: string } | null>(null)
   const [logoUploading, setLogoUploading] = useState(false)
   const [logoMessage, setLogoMessage] = useState<{ type: "success" | "error"; text: string } | null>(null)
+
+  const [signingMethod, setSigningMethod] = useState("otp-email-non-qualified")
+  const [savingSigningMethod, setSavingSigningMethod] = useState(false)
+  const [signingMethodSaved, setSigningMethodSaved] = useState(false)
 
   const [fullName, setFullName] = useState("")
   const [profileSaved, setProfileSaved] = useState(false)
@@ -160,7 +165,20 @@ export default function SettingsPage() {
       })
       setAiEnabled(data.ai_assistant_enabled ?? false)
       setAiDashboardWidget(data.ai_dashboard_widget_enabled ?? false)
+      setSigningMethod(data.signing_method ?? "otp-email-non-qualified")
     }
+  }
+
+  async function handleSigningMethodSave() {
+    setSavingSigningMethod(true)
+    await fetch("/api/account/profile", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ signing_method: signingMethod }),
+    })
+    setSavingSigningMethod(false)
+    setSigningMethodSaved(true)
+    setTimeout(() => setSigningMethodSaved(false), 2000)
   }
 
   async function loadCategories() {
@@ -922,6 +940,44 @@ export default function SettingsPage() {
                     {addingCategory ? t("categoryAdding") : t("categoryAddButton")}
                   </button>
                 </div>
+              </div>
+            )}
+          </section>
+
+          <Divider />
+
+          {/* Digital signering */}
+          <section id="signering" className="scroll-mt-8">
+            <div>
+              <h2 className="text-base font-semibold text-gray-900">{t("signingSettingsTitle")}</h2>
+              <p className="text-sm text-gray-500 mt-0.5">
+                {currentUserRole !== "admin" ? t("adminOnly") : t("signingSettingsDesc")}
+              </p>
+            </div>
+            {currentUserRole === "admin" && (
+              <div className="mt-4 space-y-3 max-w-sm">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">{t("signingMethodLabel")}</label>
+                  <select
+                    value={signingMethod}
+                    onChange={(e) => setSigningMethod(e.target.value)}
+                    className={inputCls}
+                  >
+                    <option value="otp-email-non-qualified">{t("methodOtpEmail")}</option>
+                    <option value="veriff-advanced-signature">{t("methodVeriff")}</option>
+                    <option value="evrotrust-signature">{t("methodEvrotrust")}</option>
+                    <option value="itsme-qes-signature">{t("methodItsme")}</option>
+                  </select>
+                </div>
+                <button
+                  onClick={handleSigningMethodSave}
+                  disabled={savingSigningMethod}
+                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors disabled:opacity-50 ${
+                    signingMethodSaved ? "bg-green-600 text-white" : "bg-slate-800 text-white hover:bg-slate-700"
+                  }`}
+                >
+                  {savingSigningMethod ? tc("saving") : signingMethodSaved ? tc("saved") : tc("save")}
+                </button>
               </div>
             )}
           </section>
