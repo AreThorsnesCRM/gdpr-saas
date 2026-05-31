@@ -64,11 +64,20 @@ export async function POST(
     return { firstname, lastname, email: s.email }
   })
 
-  const { idSign, signers: esignResult } = await createSignatureRequest({
-    title: agreement.title,
-    pdfBase64,
-    signers: esignSigners,
-  })
+  let idSign: number
+  let esignResult: { key: string; url: string }[]
+  try {
+    const result = await createSignatureRequest({
+      title: agreement.title,
+      pdfBase64,
+      signers: esignSigners,
+    })
+    idSign = result.idSign
+    esignResult = result.signers
+  } catch (err: any) {
+    console.error("e-signature.eu feil:", err?.message)
+    return NextResponse.json({ error: err?.message ?? "esign_failed" }, { status: 500 })
+  }
 
   const signersJsonb = signerList.map((s, i) => ({
     name: s.name,
