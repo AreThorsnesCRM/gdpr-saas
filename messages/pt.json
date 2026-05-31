@@ -216,7 +216,7 @@
     "signingSigned": "Assinado",
     "signingSignedPDF": "PDF assinado",
     "signingModalTitle": "Enviar para assinatura",
-    "signingModalInfo": "Será criada uma ligação de assinatura. Partilhe-a com o destinatário para que possa assinar com BankID.",
+    "signingModalInfo": "Será criada uma ligação de assinatura e enviada ao destinatário por e-mail.",
     "signingModalNameLabel": "Nome do destinatário",
     "signingModalEmailLabel": "Enviar ligação de assinatura para",
     "signingModalEmailHint": "A ligação é enviada automaticamente para este endereço. Altere se outra pessoa deve assinar.",

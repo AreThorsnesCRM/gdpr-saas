@@ -216,7 +216,7 @@
     "signingSigned": "Signed",
     "signingSignedPDF": "Signed PDF",
     "signingModalTitle": "Send for signing",
-    "signingModalInfo": "A signing link will be created. Share it with the recipient so they can sign with BankID.",
+    "signingModalInfo": "A signing link will be created and sent to the recipient by email.",
     "signingModalNameLabel": "Recipient name",
     "signingModalEmailLabel": "Send signing link to",
     "signingModalEmailHint": "The link will be sent automatically to this address. Change it if someone else should sign.",
@@ -511,7 +511,7 @@
   },
   "onboarding": {
     "title": "Get started with Pactiva",
-    "subtitle": "Select your country to set up the correct signature method (BankID, MitID, etc.).",
+    "subtitle": "Select your country to set up your account.",
     "countryLabel": "Country",
     "countryHint": "Determines which e-ID is used for digital signing.",
     "saveButton": "Get started",

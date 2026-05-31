@@ -142,7 +142,7 @@ export async function GET(request: NextRequest) {
       metadata: { user_id: user.id },
     });
 
-    const { data: newProfile } = await supabase
+    const { data: newProfile } = await supabaseAdmin
       .from("profiles")
       .insert({
         user_id: user.id,
@@ -157,6 +157,38 @@ export async function GET(request: NextRequest) {
       .single();
 
     profile = newProfile;
+
+    // Opprett account + account_users eksplisitt (ikke stol på trigger)
+    const { data: existingAccountUser } = await supabaseAdmin
+      .from("account_users")
+      .select("account_id")
+      .eq("user_id", user.id)
+      .maybeSingle()
+
+    if (!existingAccountUser) {
+      const { data: newAccount } = await supabaseAdmin
+        .from("accounts")
+        .insert({
+          name: company_name || "Firma mangler",
+          subscription_status: "trialing",
+          trial_start: now.toISOString(),
+          trial_end: trialEnd.toISOString(),
+          stripe_customer_id: customer.id,
+        })
+        .select()
+        .single()
+
+      if (newAccount) {
+        await supabaseAdmin
+          .from("account_users")
+          .insert({ account_id: newAccount.id, user_id: user.id, role: "admin" })
+
+        await supabaseAdmin
+          .from("profiles")
+          .update({ account_id: newAccount.id })
+          .eq("user_id", user.id)
+      }
+    }
   }
 
   // ⭐ 8: Legg inn subscription-status i JWT (viktig for middleware)

@@ -216,7 +216,7 @@
     "signingSigned": "Unterzeichnet",
     "signingSignedPDF": "Unterzeichnetes PDF",
     "signingModalTitle": "Zur Unterzeichnung senden",
-    "signingModalInfo": "Ein Unterzeichnungslink wird erstellt. Teilen Sie ihn mit dem Empfänger, damit dieser mit BankID unterzeichnen kann.",
+    "signingModalInfo": "Ein Signaturlink wird erstellt und per E-Mail an den Empfänger gesendet.",
     "signingModalNameLabel": "Name des Empfängers",
     "signingModalEmailLabel": "Unterzeichnungslink senden an",
     "signingModalEmailHint": "Der Link wird automatisch an diese Adresse gesendet. Ändern Sie die Adresse, falls eine andere Person unterzeichnen soll.",

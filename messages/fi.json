@@ -216,7 +216,7 @@
     "signingSigned": "Allekirjoitettu",
     "signingSignedPDF": "Allekirjoitettu PDF",
     "signingModalTitle": "Lähetä allekirjoitettavaksi",
-    "signingModalInfo": "Allekirjoituslinkki luodaan. Jaa se vastaanottajalle, jotta hän voi allekirjoittaa BankID:llä.",
+    "signingModalInfo": "Allekirjoituslinkki luodaan ja lähetetään vastaanottajalle sähköpostitse.",
     "signingModalNameLabel": "Vastaanottajan nimi",
     "signingModalEmailLabel": "Lähetä allekirjoituslinkki osoitteeseen",
     "signingModalEmailHint": "Linkki lähetetään automaattisesti tähän osoitteeseen. Muuta, jos toinen henkilö allekirjoittaa.",

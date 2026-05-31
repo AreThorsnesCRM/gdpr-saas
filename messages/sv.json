@@ -216,7 +216,7 @@
     "signingSigned": "Signerat",
     "signingSignedPDF": "Signerad PDF",
     "signingModalTitle": "Skicka för signering",
-    "signingModalInfo": "En signeringslänk skapas. Dela den med mottagaren så att de kan signera med BankID.",
+    "signingModalInfo": "En signeringslänk skapas och skickas till mottagaren via e-post.",
     "signingModalNameLabel": "Mottagarens namn",
     "signingModalEmailLabel": "Skicka signeringslänk till",
     "signingModalEmailHint": "Länken skickas automatiskt till den här adressen. Ändra om en annan person ska signera.",
@@ -511,7 +511,7 @@
   },
   "onboarding": {
     "title": "Kom igång med Pactiva",
-    "subtitle": "Välj ditt land för att ställa in rätt signeringsmetod (BankID, MitID, osv.).",
+    "subtitle": "Välj ditt land för att ställa in ditt konto.",
     "countryLabel": "Land",
     "countryHint": "Avgör vilket e-ID som används vid digital signering.",
     "saveButton": "Kom igång",

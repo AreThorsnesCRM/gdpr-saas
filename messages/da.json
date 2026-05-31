@@ -511,7 +511,7 @@
   },
   "onboarding": {
     "title": "Kom i gang med Pactiva",
-    "subtitle": "Vælg dit land for at opsætte den rigtige signeringsmetode (MitID, BankID, osv.).",
+    "subtitle": "Vælg dit land for at opsætte din konto.",
     "countryLabel": "Land",
     "countryHint": "Bestemmer, hvilket e-ID der bruges ved digital signering.",
     "saveButton": "Kom i gang",

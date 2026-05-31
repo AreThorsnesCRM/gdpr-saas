@@ -511,7 +511,7 @@
   },
   "onboarding": {
     "title": "Empezar con Pactiva",
-    "subtitle": "Selecciona tu país para configurar el método de firma correcto (BankID, MitID, etc.).",
+    "subtitle": "Selecciona tu país para configurar tu cuenta.",
     "countryLabel": "País",
     "countryHint": "Determina qué e-ID se usa para la firma digital.",
     "saveButton": "Empezar",
