@@ -26,7 +26,8 @@
       "Bash(git -C /c/MVP/gdpr-saas show 1ecc770:\"app/\\(protected\\)/customers/CustomersPage.tsx\")",
       "Bash(git -C /c/MVP/gdpr-saas show 1ecc770:\"app/\\(protected\\)/customers/CustomersPage.tsx\" > /tmp/CustomersPage_correct.tsx && wc -l /tmp/CustomersPage_correct.tsx)",
       "Bash(Get-ChildItem -Path \"c:\\\\MVP\\\\gdpr-saas\" -Directory)",
-      "Bash(Select-Object Name)"
+      "Bash(Select-Object Name)",
+      "Bash(node -e ' *)"
     ],
     "additionalDirectories": [
       "c:\\MVP\\gdpr-saas\\app\\api\\account\\agreement-categories",
