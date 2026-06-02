@@ -70,28 +70,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       return
     }
 
-    // Håndter temp_session-cookie fra callback (e-postbekreftelse)
-    const tempSessionCookie = document.cookie.split('; ').find(row => row.startsWith('temp_session='))
-    if (tempSessionCookie) {
-      const tempSessionValue = tempSessionCookie.split('=')[1]
-      try {
-        const sessionData = JSON.parse(decodeURIComponent(tempSessionValue))
-        supabase.auth.setSession(sessionData).catch(console.error)
-      } catch (error) {
-        console.error("[AuthProvider] Failed to parse temp session:", error)
-      }
-      document.cookie = 'temp_session=; path=/; maxAge=0'
-    }
-
-    // Hent eksisterende sesjon
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session?.user) {
-        setUser({ id: session.user.id, email: session.user.email })
-      }
-      setLoading(false)
-    }).catch(() => setLoading(false))
-
-    // Lytt alltid på auth-endringer — fanger opp login/logout uansett
+    // Lytt på auth-endringer — settes opp FØR init så ingen events misses
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       if (session?.user) {
         setUser({ id: session.user.id, email: session.user.email })
@@ -100,6 +79,30 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
       setLoading(false)
     })
+
+    async function init() {
+      // Håndter temp_session-cookie fra callback — await setSession før getSession
+      const tempSessionCookie = document.cookie.split('; ').find(row => row.startsWith('temp_session='))
+      if (tempSessionCookie) {
+        const tempSessionValue = tempSessionCookie.split('=')[1]
+        try {
+          const sessionData = JSON.parse(decodeURIComponent(tempSessionValue))
+          await supabase!.auth.setSession(sessionData)
+        } catch (error) {
+          console.error("[AuthProvider] Failed to set temp session:", error)
+        }
+        document.cookie = 'temp_session=; path=/; maxAge=0'
+      }
+
+      // Hent sesjon — setSession er nå fullført
+      const { data: { session } } = await supabase!.auth.getSession()
+      if (session?.user) {
+        setUser({ id: session.user.id, email: session.user.email })
+      }
+      setLoading(false)
+    }
+
+    init()
 
     return () => subscription.unsubscribe()
   }, [])
