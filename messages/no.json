@@ -401,6 +401,8 @@
     "companyPhonePlaceholder": "+47 000 00 000",
     "companyEmailLabel": "Kontakt-e-post",
     "companyEmailPlaceholder": "post@firma.no",
+    "companyCountryLabel": "Land",
+    "companyCountryPlaceholder": "Velg land",
     "usersTitle": "Brukere",
     "usersDesc": "Alle brukere på denne kontoen.",
     "usersCounter": "{current} av {max} brukere",

@@ -401,6 +401,8 @@
     "companyPhonePlaceholder": "+49 000 0000000",
     "companyEmailLabel": "Kontakt-E-Mail",
     "companyEmailPlaceholder": "info@firma.de",
+    "companyCountryLabel": "Land",
+    "companyCountryPlaceholder": "Land auswählen",
     "usersTitle": "Benutzer",
     "usersDesc": "Alle Benutzer dieses Kontos.",
     "usersCounter": "{current} von {max} Benutzern",

@@ -401,6 +401,8 @@
     "companyPhonePlaceholder": "+46 000 000 000",
     "companyEmailLabel": "Kontakt-e-post",
     "companyEmailPlaceholder": "post@foretag.se",
+    "companyCountryLabel": "Land",
+    "companyCountryPlaceholder": "Välj land",
     "usersTitle": "Användare",
     "usersDesc": "Alla användare på det här kontot.",
     "usersCounter": "{current} av {max} användare",

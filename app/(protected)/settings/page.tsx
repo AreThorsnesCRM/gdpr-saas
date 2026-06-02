@@ -40,12 +40,14 @@ type CompanyProfile = {
   phone: string
   contact_email: string
   logo_url: string
+  country: string
 }
 
 export default function SettingsPage() {
   const { account, user, refreshAccount } = useAuth()
   const t = useTranslations("settings")
   const tc = useTranslations("common")
+  const to = useTranslations("onboarding")
 
   const sections = [
     { id: "profil",         label: t("tabProfile") },
@@ -83,7 +85,7 @@ export default function SettingsPage() {
   const [savingAI, setSavingAI] = useState(false)
 
   const [company, setCompany] = useState<CompanyProfile>({
-    name: "", org_number: "", address: "", postal_code: "", city: "", phone: "", contact_email: "", logo_url: "",
+    name: "", org_number: "", address: "", postal_code: "", city: "", phone: "", contact_email: "", logo_url: "", country: "",
   })
   const [savingCompany, setSavingCompany] = useState(false)
   const [companySaved, setCompanySaved] = useState(false)
@@ -162,6 +164,7 @@ export default function SettingsPage() {
         phone: data.phone ?? "",
         contact_email: data.contact_email ?? "",
         logo_url: data.logo_url ? "/api/account/logo" : "",
+        country: data.country ?? "",
       })
       setAiEnabled(data.ai_assistant_enabled ?? false)
       setAiDashboardWidget(data.ai_dashboard_widget_enabled ?? false)
@@ -593,6 +596,18 @@ export default function SettingsPage() {
                     <input type="email" value={company.contact_email} placeholder={t("companyEmailPlaceholder")}
                       onChange={(e) => setCompany((c) => ({ ...c, contact_email: e.target.value }))}
                       className={inputCls} />
+                  </Field>
+                  <Field label={t("companyCountryLabel")} colSpan={2}>
+                    <select
+                      value={company.country}
+                      onChange={(e) => setCompany((c) => ({ ...c, country: e.target.value }))}
+                      className={inputCls}
+                    >
+                      <option value="">{t("companyCountryPlaceholder")}</option>
+                      {(["NO","SE","DK","FI","DE","FR","GB","NL","BE","AT","CH","ES","PT","IT","PL","US","CA","BR","MX","OTHER"] as const).map((code) => (
+                        <option key={code} value={code}>{to(`countries.${code}`)}</option>
+                      ))}
+                    </select>
                   </Field>
                 </div>
                 <div className="flex items-center gap-4 pt-1">

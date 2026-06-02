@@ -401,6 +401,8 @@
     "companyPhonePlaceholder": "+351 000 000 000",
     "companyEmailLabel": "E-mail de contacto",
     "companyEmailPlaceholder": "geral@empresa.pt",
+    "companyCountryLabel": "País",
+    "companyCountryPlaceholder": "Selecionar país",
     "usersTitle": "Utilizadores",
     "usersDesc": "Todos os utilizadores desta conta.",
     "usersCounter": "{current} de {max} utilizadores",

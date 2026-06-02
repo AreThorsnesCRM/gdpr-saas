@@ -401,6 +401,8 @@
     "companyPhonePlaceholder": "+34 000 000 000",
     "companyEmailLabel": "Correo de contacto",
     "companyEmailPlaceholder": "hola@empresa.com",
+    "companyCountryLabel": "País",
+    "companyCountryPlaceholder": "Seleccionar país",
     "usersTitle": "Usuarios",
     "usersDesc": "Todos los usuarios de esta cuenta.",
     "usersCounter": "{current} de {max} usuarios",

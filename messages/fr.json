@@ -401,6 +401,8 @@
     "companyPhonePlaceholder": "+33 0 00 00 00 00",
     "companyEmailLabel": "E-mail de contact",
     "companyEmailPlaceholder": "contact@entreprise.fr",
+    "companyCountryLabel": "Pays",
+    "companyCountryPlaceholder": "Sélectionner un pays",
     "usersTitle": "Utilisateurs",
     "usersDesc": "Tous les utilisateurs de ce compte.",
     "usersCounter": "{current} sur {max} utilisateurs",

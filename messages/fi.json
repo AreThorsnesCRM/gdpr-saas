@@ -401,6 +401,8 @@
     "companyPhonePlaceholder": "+358 00 000 0000",
     "companyEmailLabel": "Yhteyssähköposti",
     "companyEmailPlaceholder": "info@yritys.fi",
+    "companyCountryLabel": "Maa",
+    "companyCountryPlaceholder": "Valitse maa",
     "usersTitle": "Käyttäjät",
     "usersDesc": "Kaikki tämän tilin käyttäjät.",
     "usersCounter": "{current} / {max} käyttäjää",

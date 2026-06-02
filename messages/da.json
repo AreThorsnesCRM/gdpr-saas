@@ -401,6 +401,8 @@
     "companyPhonePlaceholder": "+45 00 00 00 00",
     "companyEmailLabel": "Kontakt-e-mail",
     "companyEmailPlaceholder": "post@firma.dk",
+    "companyCountryLabel": "Land",
+    "companyCountryPlaceholder": "Vælg land",
     "usersTitle": "Brugere",
     "usersDesc": "Alle brugere på denne konto.",
     "usersCounter": "{current} af {max} brugere",
