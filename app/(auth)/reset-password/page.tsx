@@ -128,10 +128,19 @@ export default function ResetPasswordPage() {
             </div>
 
             <div>
-              <label className="block text-xs font-medium text-gray-500 mb-1">{t("confirmLabel")}</label>
+              <label className="block text-xs font-medium text-gray-500 mb-1 flex items-center gap-1">
+                {t("confirmLabel")}
+                {confirm.length > 0 && password === confirm && (
+                  <span className="text-green-500 text-xs font-semibold">✓</span>
+                )}
+              </label>
               <input
                 type="password"
-                className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-slate-400 bg-white"
+                className={`w-full border rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 bg-white transition-colors ${
+                  confirm.length > 0 && password === confirm
+                    ? "border-green-400 focus:ring-green-300"
+                    : "border-gray-200 focus:ring-slate-400"
+                }`}
                 value={confirm}
                 onChange={(e) => setConfirm(e.target.value)}
                 required

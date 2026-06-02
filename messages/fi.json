@@ -103,6 +103,8 @@
     "loginLink": "Kirjaudu sisään",
     "errorTooShort": "Salasanan on oltava vähintään 8 merkkiä",
     "errorTooWeak": "Salasanassa on oltava vähintään yksi iso kirjain, yksi numero ja yksi erikoismerkki",
+    "confirmLabel": "Vahvista salasana",
+    "errorNotMatch": "Salasanat eivät täsmää",
     "errorCaptcha": "Suorita turvatarkistus",
     "errorCaptchaFailed": "Turvatarkistus epäonnistui. Yritä uudelleen.",
     "cookieNotice": "Käytämme vain välttämättömiä evästeitä kirjautumiseen.",

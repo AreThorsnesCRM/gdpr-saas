@@ -103,6 +103,8 @@
     "loginLink": "Logga in",
     "errorTooShort": "Lösenordet måste vara minst 8 tecken",
     "errorTooWeak": "Lösenordet måste innehålla minst en stor bokstav, en siffra och ett specialtecken",
+    "confirmLabel": "Bekräfta lösenord",
+    "errorNotMatch": "Lösenorden matchar inte",
     "errorCaptcha": "Vänligen slutför säkerhetskontrollen",
     "errorCaptchaFailed": "Säkerhetskontrollen misslyckades. Försök igen.",
     "cookieNotice": "Vi använder endast nödvändiga cookies för inloggning.",

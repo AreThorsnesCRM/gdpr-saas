@@ -26,6 +26,7 @@ export default function RegisterPage() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirm, setConfirm] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [turnstileToken, setTurnstileToken] = useState("");
@@ -53,6 +54,10 @@ export default function RegisterPage() {
     }
     if (strength < 2) {
       setError(t("errorTooWeak"));
+      return;
+    }
+    if (password !== confirm) {
+      setError(t("errorNotMatch"));
       return;
     }
     const siteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
@@ -198,6 +203,26 @@ export default function RegisterPage() {
                   </p>
                 </div>
               )}
+            </div>
+
+            <div>
+              <label className="block text-xs font-medium text-gray-500 mb-1 flex items-center gap-1">
+                {t("confirmLabel")}
+                {confirm.length > 0 && password === confirm && (
+                  <span className="text-green-500 text-xs font-semibold">✓</span>
+                )}
+              </label>
+              <input
+                type="password"
+                className={`w-full border rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 bg-white transition-colors ${
+                  confirm.length > 0 && password === confirm
+                    ? "border-green-400 focus:ring-green-300"
+                    : "border-gray-200 focus:ring-slate-400"
+                }`}
+                value={confirm}
+                onChange={(e) => setConfirm(e.target.value)}
+                required
+              />
             </div>
 
             {process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY && (

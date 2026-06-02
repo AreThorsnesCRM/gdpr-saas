@@ -103,6 +103,8 @@
     "loginLink": "Log in",
     "errorTooShort": "Password must be at least 8 characters",
     "errorTooWeak": "Password must contain at least one uppercase letter, one number and one special character",
+    "confirmLabel": "Confirm password",
+    "errorNotMatch": "Passwords do not match",
     "errorCaptcha": "Please complete the security check",
     "errorCaptchaFailed": "Security check failed. Please try again.",
     "cookieNotice": "We only use necessary cookies for authentication.",

@@ -103,6 +103,8 @@
     "loginLink": "Log ind",
     "errorTooShort": "Adgangskoden skal være mindst 8 tegn",
     "errorTooWeak": "Adgangskoden skal indeholde mindst ét stort bogstav, ét tal og ét specialtegn",
+    "confirmLabel": "Bekræft adgangskode",
+    "errorNotMatch": "Adgangskoderne stemmer ikke overens",
     "errorCaptcha": "Gennemfør venligst sikkerhedskontrollen",
     "errorCaptchaFailed": "Sikkerhedskontrollen mislykkedes. Prøv igen.",
     "cookieNotice": "Vi bruger kun nødvendige cookies til login.",

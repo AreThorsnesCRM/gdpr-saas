@@ -103,6 +103,8 @@
     "loginLink": "Iniciar sesión",
     "errorTooShort": "La contraseña debe tener al menos 8 caracteres",
     "errorTooWeak": "La contraseña debe contener al menos una mayúscula, un número y un carácter especial",
+    "confirmLabel": "Confirmar contraseña",
+    "errorNotMatch": "Las contraseñas no coinciden",
     "errorCaptcha": "Por favor complete la verificación de seguridad",
     "errorCaptchaFailed": "La verificación de seguridad falló. Inténtelo de nuevo.",
     "cookieNotice": "Solo usamos cookies necesarias para la autenticación.",
