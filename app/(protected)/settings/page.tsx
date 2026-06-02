@@ -111,6 +111,8 @@ export default function SettingsPage() {
   const [categories, setCategories] = useState<Category[]>([])
   const [newCategoryName, setNewCategoryName] = useState("")
   const [addingCategory, setAddingCategory] = useState(false)
+  const [editingCategoryId, setEditingCategoryId] = useState<string | null>(null)
+  const [editingCategoryName, setEditingCategoryName] = useState("")
 
   useEffect(() => {
     fetchUsers()
@@ -213,6 +215,20 @@ export default function SettingsPage() {
     if (res.ok) {
       setCategories((prev) => prev.filter((c) => c.id !== id))
     }
+  }
+
+  async function saveEditCategory(id: string) {
+    if (!editingCategoryName.trim()) return
+    const res = await fetch(`/api/account/agreement-categories/${id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name: editingCategoryName.trim() }),
+    })
+    if (res.ok) {
+      setCategories((prev) => prev.map((c) => c.id === id ? { ...c, name: editingCategoryName.trim() } : c))
+    }
+    setEditingCategoryId(null)
+    setEditingCategoryName("")
   }
 
   async function handleLogoUpload(file: File) {
@@ -923,20 +939,51 @@ export default function SettingsPage() {
             {currentUserRole === "admin" && (
               <div className="mt-4 space-y-2">
                 {categories.map((cat) => (
-                  <div key={cat.id} className="flex items-center justify-between px-4 py-2.5 border border-gray-200 rounded-lg bg-white">
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm text-gray-800">{getCategoryDisplayName(cat, tc)}</span>
-                      {cat.is_predefined && (
-                        <span className="text-xs text-gray-400 bg-gray-100 px-1.5 py-0.5 rounded">{t("predefinedBadge")}</span>
-                      )}
-                    </div>
-                    <button
-                      onClick={() => deleteCategory(cat.id)}
-                      className="text-gray-300 hover:text-red-500 transition-colors text-sm"
-                      title={t("categoryDeleteTitle")}
-                    >
-                      ✕
-                    </button>
+                  <div key={cat.id} className="flex items-center justify-between px-4 py-2.5 border border-gray-200 rounded-lg bg-white gap-2">
+                    {editingCategoryId === cat.id ? (
+                      <>
+                        <input
+                          autoFocus
+                          type="text"
+                          value={editingCategoryName}
+                          onChange={(e) => setEditingCategoryName(e.target.value)}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter") saveEditCategory(cat.id)
+                            if (e.key === "Escape") { setEditingCategoryId(null); setEditingCategoryName("") }
+                          }}
+                          className="flex-1 border border-slate-300 rounded px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-slate-400"
+                        />
+                        <button onClick={() => saveEditCategory(cat.id)} className="text-xs font-medium text-green-700 hover:text-green-900">{tc("save")}</button>
+                        <button onClick={() => { setEditingCategoryId(null); setEditingCategoryName("") }} className="text-xs text-gray-400 hover:text-gray-600">{tc("cancel")}</button>
+                      </>
+                    ) : (
+                      <>
+                        <div className="flex items-center gap-2 flex-1 min-w-0">
+                          <span className="text-sm text-gray-800 truncate">{getCategoryDisplayName(cat, tc)}</span>
+                          {cat.is_predefined && (
+                            <span className="text-xs text-gray-400 bg-gray-100 px-1.5 py-0.5 rounded shrink-0">{t("predefinedBadge")}</span>
+                          )}
+                        </div>
+                        <div className="flex items-center gap-2 shrink-0">
+                          {!cat.is_predefined && (
+                            <button
+                              onClick={() => { setEditingCategoryId(cat.id); setEditingCategoryName(cat.name) }}
+                              className="text-gray-300 hover:text-slate-600 transition-colors text-sm"
+                              title={tc("edit")}
+                            >
+                              ✎
+                            </button>
+                          )}
+                          <button
+                            onClick={() => deleteCategory(cat.id)}
+                            className="text-gray-300 hover:text-red-500 transition-colors text-sm"
+                            title={t("categoryDeleteTitle")}
+                          >
+                            ✕
+                          </button>
+                        </div>
+                      </>
+                    )}
                   </div>
                 ))}
 
