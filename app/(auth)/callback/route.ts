@@ -73,85 +73,90 @@ export async function GET(request: NextRequest) {
   const company_name = user.user_metadata?.company_name || queryCompanyName || "Mitt firma";
   const full_name = user.user_metadata?.full_name || queryFullName || user.email?.split('@')[0] || "Bruker";
 
-  // ⭐ 5: Sjekk om profil finnes
-  const { data: existingProfile } = await supabase
+  // ⭐ 5: Sjekk om profil og Stripe-kunde allerede finnes
+  const { data: existingProfile } = await supabaseAdmin
     .from("profiles")
-    .select("*")
+    .select("stripe_customer_id, account_id")
     .eq("user_id", user.id)
     .maybeSingle();
 
-  let profile = existingProfile;
+  const now = new Date();
+  const trialEnd = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
 
-  // ⭐ 8: Opprett profil + Stripe-kunde hvis ny bruker
-  if (!existingProfile) {
-    const now = new Date();
-    const trialEnd = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
-
+  // ⭐ 6: Hent eller opprett Stripe-kunde
+  let stripeCustomerId = existingProfile?.stripe_customer_id ?? null;
+  if (!stripeCustomerId) {
     const customer = await stripe.customers.create({
       email: user.email,
       metadata: { user_id: user.id },
     });
+    stripeCustomerId = customer.id;
+  }
 
-    const { data: newProfile } = await supabaseAdmin
-      .from("profiles")
+  // ⭐ 7: Upsert profil (håndterer trigger-opprettede profiler)
+  await supabaseAdmin
+    .from("profiles")
+    .upsert({
+      user_id: user.id,
+      company_name,
+      full_name,
+      stripe_customer_id: stripeCustomerId,
+      subscription_status: "trialing",
+      trial_start: now.toISOString(),
+      trial_end: trialEnd.toISOString(),
+    }, { onConflict: "user_id" });
+
+  // ⭐ 8: Sjekk account_users — opprett eller korriger rolle
+  const { data: existingAccountUser } = await supabaseAdmin
+    .from("account_users")
+    .select("account_id, role")
+    .eq("user_id", user.id)
+    .maybeSingle();
+
+  if (!existingAccountUser) {
+    // Ingen account_users — opprett account og koble til
+    const { data: newAccount, error: accountError } = await supabaseAdmin
+      .from("accounts")
       .insert({
-        user_id: user.id,
-        company_name,
-        full_name,
-        stripe_customer_id: customer.id,
+        name: company_name,
         subscription_status: "trialing",
         trial_start: now.toISOString(),
         trial_end: trialEnd.toISOString(),
+        stripe_customer_id: stripeCustomerId,
+        signing_method: "otp_email",
       })
       .select()
       .single();
 
-    profile = newProfile;
+    if (accountError) console.error("[callback] accounts insert error:", accountError);
 
-    // Opprett account + account_users — håndter både manglende og trigger-opprettede
-    const { data: existingAccountUser } = await supabaseAdmin
-      .from("account_users")
-      .select("account_id, role")
-      .eq("user_id", user.id)
-      .maybeSingle();
+    if (newAccount) {
+      const { error: auError } = await supabaseAdmin
+        .from("account_users")
+        .insert({ account_id: newAccount.id, user_id: user.id, role: "admin" });
 
-    if (!existingAccountUser) {
-      // Ingen account_users — opprett account og koble til
-      const { data: newAccount, error: accountError } = await supabaseAdmin
-        .from("accounts")
-        .insert({
-          name: company_name,
-          subscription_status: "trialing",
-          trial_start: now.toISOString(),
-          trial_end: trialEnd.toISOString(),
-          stripe_customer_id: customer.id,
-          signing_method: "otp_email",
-        })
-        .select()
-        .single();
+      if (auError) console.error("[callback] account_users insert error:", auError);
 
-      if (accountError) console.error("[callback] accounts insert error:", accountError);
-
-      if (newAccount) {
-        const { error: auError } = await supabaseAdmin
-          .from("account_users")
-          .insert({ account_id: newAccount.id, user_id: user.id, role: "admin" });
-
-        if (auError) console.error("[callback] account_users insert error:", auError);
-
-        await supabaseAdmin
-          .from("profiles")
-          .update({ account_id: newAccount.id })
-          .eq("user_id", user.id);
-      }
-    } else if (existingAccountUser.role !== "admin") {
-      // Trigger opprettet account_users med feil rolle — korriger til admin
+      await supabaseAdmin
+        .from("profiles")
+        .update({ account_id: newAccount.id })
+        .eq("user_id", user.id);
+    }
+  } else {
+    // account_users finnes — korriger rolle til admin (trigger setter ofte feil rolle)
+    if (existingAccountUser.role !== "admin") {
       await supabaseAdmin
         .from("account_users")
         .update({ role: "admin" })
         .eq("user_id", user.id);
-
-      console.log("[callback] Korrigerte rolle til admin for ny bruker:", user.id);
+      console.log("[callback] Korrigerte rolle til admin:", user.id);
+    }
+    // Sikre at profil har account_id satt
+    if (!existingProfile?.account_id) {
+      await supabaseAdmin
+        .from("profiles")
+        .update({ account_id: existingAccountUser.account_id })
+        .eq("user_id", user.id);
     }
   }
 
