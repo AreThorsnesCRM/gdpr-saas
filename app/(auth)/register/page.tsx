@@ -55,22 +55,25 @@ export default function RegisterPage() {
       setError(t("errorTooWeak"));
       return;
     }
-    if (!turnstileToken) {
+    const siteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
+    if (siteKey && !turnstileToken) {
       setError(t("errorCaptcha"));
       return;
     }
 
     setLoading(true);
 
-    const captchaRes = await fetch("/api/verify-captcha", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ token: turnstileToken }),
-    });
-    if (!captchaRes.ok) {
-      setError(t("errorCaptchaFailed"));
-      setLoading(false);
-      return;
+    if (siteKey && turnstileToken) {
+      const captchaRes = await fetch("/api/verify-captcha", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ token: turnstileToken }),
+      });
+      if (!captchaRes.ok) {
+        setError(t("errorCaptchaFailed"));
+        setLoading(false);
+        return;
+      }
     }
 
     if (!supabase) {
@@ -195,12 +198,14 @@ export default function RegisterPage() {
               )}
             </div>
 
-            <div
-              className="cf-turnstile"
-              data-sitekey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY}
-              data-callback="__turnstileCallback"
-              data-expired-callback="__turnstileExpired"
-            />
+            {process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY && (
+              <div
+                className="cf-turnstile"
+                data-sitekey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY}
+                data-callback="__turnstileCallback"
+                data-expired-callback="__turnstileExpired"
+              />
+            )}
 
             {error && <p className="text-red-600 text-sm">{error}</p>}
 
