@@ -108,10 +108,12 @@ export default function RegisterPage() {
 
   return (
     <>
-    <Script
-      src="https://challenges.cloudflare.com/turnstile/v0/api.js"
-      strategy="lazyOnload"
-    />
+    {process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY && (
+      <Script
+        src="https://challenges.cloudflare.com/turnstile/v0/api.js"
+        strategy="lazyOnload"
+      />
+    )}
     <div className="min-h-screen flex">
 
       {/* Venstre — branding */}
