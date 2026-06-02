@@ -51,6 +51,39 @@
     "statusUnknown": "Okänt",
     "statusLoading": "Laddar..."
   },
+  "forgotPassword": {
+    "brandingHeadline": "Återställ\nditt lösenord",
+    "brandingSubheadline": "Vi skickar dig ett e-postmeddelande med en länk för att skapa ett nytt lösenord.",
+    "title": "Glömt lösenord?",
+    "subtitle": "Ange din e-postadress så skickar vi en återställningslänk.",
+    "emailLabel": "E-post",
+    "submitButton": "Skicka återställningslänk",
+    "successMessage": "Ett e-postmeddelande med instruktioner har skickats. Kontrollera din inkorg.",
+    "errorMessage": "Kunde inte skicka e-post. Kontrollera adressen och försök igen.",
+    "backToLogin": "← Tillbaka till inloggning"
+  },
+  "resetPassword": {
+    "brandingHeadline": "Välj ett nytt\nlösenord",
+    "brandingSubheadline": "Lösenordet måste innehålla minst 8 tecken med stor bokstav, siffra och specialtecken.",
+    "title": "Nytt lösenord",
+    "subtitle": "Ange ett nytt lösenord för ditt konto.",
+    "passwordLabel": "Nytt lösenord",
+    "confirmLabel": "Bekräfta lösenord",
+    "submitButton": "Uppdatera lösenord",
+    "successMessage": "Lösenordet har uppdaterats! Omdirigerar till inloggning...",
+    "errorMessage": "Kunde inte uppdatera lösenord. Försök igen.",
+    "errorNotMatch": "Lösenorden matchar inte",
+    "backToLogin": "← Tillbaka till inloggning"
+  },
+  "setPassword": {
+    "title": "Välj lösenord",
+    "subtitle": "Du har blivit inbjuden! Välj ett lösenord för att slutföra ditt konto.",
+    "passwordLabel": "Lösenord",
+    "confirmLabel": "Bekräfta lösenord",
+    "submitButton": "Slutför registrering",
+    "submitting": "Sparar...",
+    "errorNotMatch": "Lösenorden matchar inte"
+  },
   "register": {
     "brandingHeadline": "Professionell avtalshantering\nför moderna företag",
     "brandingSubheadline": "Kom igång med 7 dagars gratis provperiod. Inget kreditkort krävs.",

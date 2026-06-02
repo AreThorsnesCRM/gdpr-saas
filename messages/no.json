@@ -51,6 +51,39 @@
     "statusUnknown": "Ukjent",
     "statusLoading": "Laster..."
   },
+  "forgotPassword": {
+    "brandingHeadline": "Tilbakestill\npassordet ditt",
+    "brandingSubheadline": "Vi sender deg en e-post med en lenke for å opprette et nytt passord.",
+    "title": "Glemt passord?",
+    "subtitle": "Oppgi e-postadressen din så sender vi en tilbakestillingslenke.",
+    "emailLabel": "E-post",
+    "submitButton": "Send tilbakestillingslenke",
+    "successMessage": "En e-post med instruksjoner er sendt. Sjekk innboksen din.",
+    "errorMessage": "Kunne ikke sende e-post. Sjekk adressen og prøv igjen.",
+    "backToLogin": "← Tilbake til innlogging"
+  },
+  "resetPassword": {
+    "brandingHeadline": "Velg et nytt\npassord",
+    "brandingSubheadline": "Passordet må inneholde minst 8 tegn med stor bokstav, tall og spesialtegn.",
+    "title": "Nytt passord",
+    "subtitle": "Skriv inn et nytt passord for kontoen din.",
+    "passwordLabel": "Nytt passord",
+    "confirmLabel": "Bekreft passord",
+    "submitButton": "Oppdater passord",
+    "successMessage": "Passordet er oppdatert! Du sendes til innlogging...",
+    "errorMessage": "Kunne ikke oppdatere passord. Prøv igjen.",
+    "errorNotMatch": "Passordene er ikke like",
+    "backToLogin": "← Tilbake til innlogging"
+  },
+  "setPassword": {
+    "title": "Velg passord",
+    "subtitle": "Du er invitert! Velg et passord for å fullføre opprettelsen av kontoen din.",
+    "passwordLabel": "Passord",
+    "confirmLabel": "Bekreft passord",
+    "submitButton": "Fullfør registrering",
+    "submitting": "Lagrer...",
+    "errorNotMatch": "Passordene er ikke like"
+  },
   "register": {
     "brandingHeadline": "Profesjonell avtaleforvaltning\nfor moderne bedrifter",
     "brandingSubheadline": "Kom i gang med 7-dagers gratis prøveperiode. Ingen kredittkort nødvendig.",

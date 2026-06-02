@@ -51,6 +51,39 @@
     "statusUnknown": "Desconhecido",
     "statusLoading": "A carregar..."
   },
+  "forgotPassword": {
+    "brandingHeadline": "Redefinir\na sua palavra-passe",
+    "brandingSubheadline": "Enviaremos um e-mail com um link para criar uma nova palavra-passe.",
+    "title": "Esqueceu a palavra-passe?",
+    "subtitle": "Introduza o seu e-mail e enviaremos um link de redefinição.",
+    "emailLabel": "E-mail",
+    "submitButton": "Enviar link de redefinição",
+    "successMessage": "Um e-mail com instruções foi enviado. Verifique a sua caixa de entrada.",
+    "errorMessage": "Não foi possível enviar o e-mail. Verifique o endereço e tente novamente.",
+    "backToLogin": "← Voltar ao início de sessão"
+  },
+  "resetPassword": {
+    "brandingHeadline": "Escolher uma nova\npalavra-passe",
+    "brandingSubheadline": "A palavra-passe deve ter pelo menos 8 caracteres com maiúscula, número e caractere especial.",
+    "title": "Nova palavra-passe",
+    "subtitle": "Introduza uma nova palavra-passe para a sua conta.",
+    "passwordLabel": "Nova palavra-passe",
+    "confirmLabel": "Confirmar palavra-passe",
+    "submitButton": "Atualizar palavra-passe",
+    "successMessage": "Palavra-passe atualizada! A redirecionar para o início de sessão...",
+    "errorMessage": "Não foi possível atualizar a palavra-passe. Tente novamente.",
+    "errorNotMatch": "As palavras-passe não coincidem",
+    "backToLogin": "← Voltar ao início de sessão"
+  },
+  "setPassword": {
+    "title": "Escolher palavra-passe",
+    "subtitle": "Foi convidado! Escolha uma palavra-passe para concluir a criação da sua conta.",
+    "passwordLabel": "Palavra-passe",
+    "confirmLabel": "Confirmar palavra-passe",
+    "submitButton": "Concluir registo",
+    "submitting": "A guardar...",
+    "errorNotMatch": "As palavras-passe não coincidem"
+  },
   "register": {
     "brandingHeadline": "Gestão profissional de contratos\npara empresas modernas",
     "brandingSubheadline": "Comece com uma avaliação gratuita de 7 dias. Não é necessário cartão de crédito.",

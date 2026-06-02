@@ -51,6 +51,39 @@
     "statusUnknown": "Inconnu",
     "statusLoading": "Chargement..."
   },
+  "forgotPassword": {
+    "brandingHeadline": "Réinitialiser\nvotre mot de passe",
+    "brandingSubheadline": "Nous vous enverrons un e-mail avec un lien pour créer un nouveau mot de passe.",
+    "title": "Mot de passe oublié ?",
+    "subtitle": "Entrez votre adresse e-mail et nous vous enverrons un lien de réinitialisation.",
+    "emailLabel": "E-mail",
+    "submitButton": "Envoyer le lien de réinitialisation",
+    "successMessage": "Un e-mail avec les instructions a été envoyé. Vérifiez votre boîte de réception.",
+    "errorMessage": "Impossible d'envoyer l'e-mail. Vérifiez l'adresse et réessayez.",
+    "backToLogin": "← Retour à la connexion"
+  },
+  "resetPassword": {
+    "brandingHeadline": "Choisir un nouveau\nmot de passe",
+    "brandingSubheadline": "Le mot de passe doit contenir au moins 8 caractères avec majuscule, chiffre et caractère spécial.",
+    "title": "Nouveau mot de passe",
+    "subtitle": "Entrez un nouveau mot de passe pour votre compte.",
+    "passwordLabel": "Nouveau mot de passe",
+    "confirmLabel": "Confirmer le mot de passe",
+    "submitButton": "Mettre à jour le mot de passe",
+    "successMessage": "Mot de passe mis à jour ! Redirection vers la connexion...",
+    "errorMessage": "Impossible de mettre à jour le mot de passe. Veuillez réessayer.",
+    "errorNotMatch": "Les mots de passe ne correspondent pas",
+    "backToLogin": "← Retour à la connexion"
+  },
+  "setPassword": {
+    "title": "Choisir un mot de passe",
+    "subtitle": "Vous avez été invité ! Choisissez un mot de passe pour finaliser la création de votre compte.",
+    "passwordLabel": "Mot de passe",
+    "confirmLabel": "Confirmer le mot de passe",
+    "submitButton": "Terminer l'inscription",
+    "submitting": "Enregistrement...",
+    "errorNotMatch": "Les mots de passe ne correspondent pas"
+  },
   "register": {
     "brandingHeadline": "Gestion professionnelle des contrats\npour les entreprises modernes",
     "brandingSubheadline": "Commencez avec un essai gratuit de 7 jours. Aucune carte de crédit requise.",

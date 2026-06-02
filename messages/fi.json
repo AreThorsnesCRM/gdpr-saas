@@ -51,6 +51,39 @@
     "statusUnknown": "Tuntematon",
     "statusLoading": "Ladataan..."
   },
+  "forgotPassword": {
+    "brandingHeadline": "Palauta\nsalasanasi",
+    "brandingSubheadline": "Lähetämme sinulle sähköpostin, jossa on linkki uuden salasanan luomiseen.",
+    "title": "Unohditko salasanan?",
+    "subtitle": "Syötä sähköpostiosoitteesi ja lähetämme sinulle palautuslinkin.",
+    "emailLabel": "Sähköposti",
+    "submitButton": "Lähetä palautuslinkki",
+    "successMessage": "Ohjeet sisältävä sähköposti on lähetetty. Tarkista postilaatikkosi.",
+    "errorMessage": "Sähköpostin lähettäminen epäonnistui. Tarkista osoite ja yritä uudelleen.",
+    "backToLogin": "← Takaisin kirjautumiseen"
+  },
+  "resetPassword": {
+    "brandingHeadline": "Valitse uusi\nsalasana",
+    "brandingSubheadline": "Salasanassa on oltava vähintään 8 merkkiä isolla kirjaimella, numerolla ja erikoismerkillä.",
+    "title": "Uusi salasana",
+    "subtitle": "Anna uusi salasana tilillesi.",
+    "passwordLabel": "Uusi salasana",
+    "confirmLabel": "Vahvista salasana",
+    "submitButton": "Päivitä salasana",
+    "successMessage": "Salasana päivitetty! Ohjataan kirjautumiseen...",
+    "errorMessage": "Salasanan päivittäminen epäonnistui. Yritä uudelleen.",
+    "errorNotMatch": "Salasanat eivät täsmää",
+    "backToLogin": "← Takaisin kirjautumiseen"
+  },
+  "setPassword": {
+    "title": "Valitse salasana",
+    "subtitle": "Sinut on kutsuttu! Valitse salasana viimeistelläksesi tilin luomisen.",
+    "passwordLabel": "Salasana",
+    "confirmLabel": "Vahvista salasana",
+    "submitButton": "Viimeistele rekisteröinti",
+    "submitting": "Tallennetaan...",
+    "errorNotMatch": "Salasanat eivät täsmää"
+  },
   "register": {
     "brandingHeadline": "Ammattimainen sopimusten hallinta\nmoderneille yrityksille",
     "brandingSubheadline": "Aloita 7 päivän ilmaisella kokeilujaksolla. Luottokorttia ei tarvita.",

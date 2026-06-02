@@ -51,6 +51,39 @@
     "statusUnknown": "Unknown",
     "statusLoading": "Loading..."
   },
+  "forgotPassword": {
+    "brandingHeadline": "Reset your\npassword",
+    "brandingSubheadline": "We'll send you an email with a link to create a new password.",
+    "title": "Forgot password?",
+    "subtitle": "Enter your email address and we'll send you a reset link.",
+    "emailLabel": "Email",
+    "submitButton": "Send reset link",
+    "successMessage": "An email with instructions has been sent. Check your inbox.",
+    "errorMessage": "Could not send email. Check the address and try again.",
+    "backToLogin": "← Back to login"
+  },
+  "resetPassword": {
+    "brandingHeadline": "Choose a new\npassword",
+    "brandingSubheadline": "Password must contain at least 8 characters with uppercase, number and special character.",
+    "title": "New password",
+    "subtitle": "Enter a new password for your account.",
+    "passwordLabel": "New password",
+    "confirmLabel": "Confirm password",
+    "submitButton": "Update password",
+    "successMessage": "Password updated! Redirecting to login...",
+    "errorMessage": "Could not update password. Please try again.",
+    "errorNotMatch": "Passwords do not match",
+    "backToLogin": "← Back to login"
+  },
+  "setPassword": {
+    "title": "Choose a password",
+    "subtitle": "You've been invited! Choose a password to complete your account setup.",
+    "passwordLabel": "Password",
+    "confirmLabel": "Confirm password",
+    "submitButton": "Complete registration",
+    "submitting": "Saving...",
+    "errorNotMatch": "Passwords do not match"
+  },
   "register": {
     "brandingHeadline": "Professional contract management\nfor modern businesses",
     "brandingSubheadline": "Get started with a 7-day free trial. No credit card required.",

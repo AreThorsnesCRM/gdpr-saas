@@ -51,6 +51,39 @@
     "statusUnknown": "Ukendt",
     "statusLoading": "Indlæser..."
   },
+  "forgotPassword": {
+    "brandingHeadline": "Nulstil\ndin adgangskode",
+    "brandingSubheadline": "Vi sender dig en e-mail med et link til at oprette en ny adgangskode.",
+    "title": "Glemt adgangskode?",
+    "subtitle": "Indtast din e-mailadresse, så sender vi et nulstillingslink.",
+    "emailLabel": "E-mail",
+    "submitButton": "Send nulstillingslink",
+    "successMessage": "En e-mail med instruktioner er sendt. Tjek din indbakke.",
+    "errorMessage": "Kunne ikke sende e-mail. Kontroller adressen og prøv igen.",
+    "backToLogin": "← Tilbage til login"
+  },
+  "resetPassword": {
+    "brandingHeadline": "Vælg en ny\nadgangskode",
+    "brandingSubheadline": "Adgangskoden skal indeholde mindst 8 tegn med stort bogstav, tal og specialtegn.",
+    "title": "Ny adgangskode",
+    "subtitle": "Indtast en ny adgangskode til din konto.",
+    "passwordLabel": "Ny adgangskode",
+    "confirmLabel": "Bekræft adgangskode",
+    "submitButton": "Opdater adgangskode",
+    "successMessage": "Adgangskoden er opdateret! Omdirigerer til login...",
+    "errorMessage": "Kunne ikke opdatere adgangskode. Prøv igen.",
+    "errorNotMatch": "Adgangskoderne stemmer ikke overens",
+    "backToLogin": "← Tilbage til login"
+  },
+  "setPassword": {
+    "title": "Vælg adgangskode",
+    "subtitle": "Du er inviteret! Vælg en adgangskode for at fuldføre oprettelsen af din konto.",
+    "passwordLabel": "Adgangskode",
+    "confirmLabel": "Bekræft adgangskode",
+    "submitButton": "Fuldfør registrering",
+    "submitting": "Gemmer...",
+    "errorNotMatch": "Adgangskoderne stemmer ikke overens"
+  },
   "register": {
     "brandingHeadline": "Professionel kontraktstyring\nfor moderne virksomheder",
     "brandingSubheadline": "Kom i gang med 7 dages gratis prøveperiode. Intet kreditkort kræves.",

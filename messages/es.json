@@ -51,6 +51,39 @@
     "statusUnknown": "Desconocido",
     "statusLoading": "Cargando..."
   },
+  "forgotPassword": {
+    "brandingHeadline": "Restablecer\nla contraseña",
+    "brandingSubheadline": "Le enviaremos un correo con un enlace para crear una nueva contraseña.",
+    "title": "¿Olvidó su contraseña?",
+    "subtitle": "Ingrese su correo electrónico y le enviaremos un enlace de restablecimiento.",
+    "emailLabel": "Correo electrónico",
+    "submitButton": "Enviar enlace de restablecimiento",
+    "successMessage": "Se ha enviado un correo con instrucciones. Revise su bandeja de entrada.",
+    "errorMessage": "No se pudo enviar el correo. Verifique la dirección e inténtelo de nuevo.",
+    "backToLogin": "← Volver al inicio de sesión"
+  },
+  "resetPassword": {
+    "brandingHeadline": "Elegir una nueva\ncontraseña",
+    "brandingSubheadline": "La contraseña debe tener al menos 8 caracteres con mayúscula, número y carácter especial.",
+    "title": "Nueva contraseña",
+    "subtitle": "Ingrese una nueva contraseña para su cuenta.",
+    "passwordLabel": "Nueva contraseña",
+    "confirmLabel": "Confirmar contraseña",
+    "submitButton": "Actualizar contraseña",
+    "successMessage": "¡Contraseña actualizada! Redirigiendo al inicio de sesión...",
+    "errorMessage": "No se pudo actualizar la contraseña. Inténtelo de nuevo.",
+    "errorNotMatch": "Las contraseñas no coinciden",
+    "backToLogin": "← Volver al inicio de sesión"
+  },
+  "setPassword": {
+    "title": "Elegir contraseña",
+    "subtitle": "¡Ha sido invitado! Elija una contraseña para completar la creación de su cuenta.",
+    "passwordLabel": "Contraseña",
+    "confirmLabel": "Confirmar contraseña",
+    "submitButton": "Completar registro",
+    "submitting": "Guardando...",
+    "errorNotMatch": "Las contraseñas no coinciden"
+  },
   "register": {
     "brandingHeadline": "Gestión profesional de contratos\npara empresas modernas",
     "brandingSubheadline": "Empiece con una prueba gratuita de 7 días. No se requiere tarjeta de crédito.",
