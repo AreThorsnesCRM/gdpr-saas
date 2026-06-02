@@ -108,15 +108,16 @@ export async function GET(request: NextRequest) {
 
     profile = newProfile;
 
-    // Opprett account + account_users eksplisitt (ikke stol på trigger)
+    // Opprett account + account_users — håndter både manglende og trigger-opprettede
     const { data: existingAccountUser } = await supabaseAdmin
       .from("account_users")
-      .select("account_id")
+      .select("account_id, role")
       .eq("user_id", user.id)
-      .maybeSingle()
+      .maybeSingle();
 
     if (!existingAccountUser) {
-      const { data: newAccount } = await supabaseAdmin
+      // Ingen account_users — opprett account og koble til
+      const { data: newAccount, error: accountError } = await supabaseAdmin
         .from("accounts")
         .insert({
           name: company_name,
@@ -124,20 +125,33 @@ export async function GET(request: NextRequest) {
           trial_start: now.toISOString(),
           trial_end: trialEnd.toISOString(),
           stripe_customer_id: customer.id,
+          signing_method: "otp_email",
         })
         .select()
-        .single()
+        .single();
+
+      if (accountError) console.error("[callback] accounts insert error:", accountError);
 
       if (newAccount) {
-        await supabaseAdmin
+        const { error: auError } = await supabaseAdmin
           .from("account_users")
-          .insert({ account_id: newAccount.id, user_id: user.id, role: "admin" })
+          .insert({ account_id: newAccount.id, user_id: user.id, role: "admin" });
+
+        if (auError) console.error("[callback] account_users insert error:", auError);
 
         await supabaseAdmin
           .from("profiles")
           .update({ account_id: newAccount.id })
-          .eq("user_id", user.id)
+          .eq("user_id", user.id);
       }
+    } else if (existingAccountUser.role !== "admin") {
+      // Trigger opprettet account_users med feil rolle — korriger til admin
+      await supabaseAdmin
+        .from("account_users")
+        .update({ role: "admin" })
+        .eq("user_id", user.id);
+
+      console.log("[callback] Korrigerte rolle til admin for ny bruker:", user.id);
     }
   }
 
