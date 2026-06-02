@@ -51,6 +51,36 @@
     "statusUnknown": "Tuntematon",
     "statusLoading": "Ladataan..."
   },
+  "register": {
+    "brandingHeadline": "Ammattimainen sopimusten hallinta\nmoderneille yrityksille",
+    "brandingSubheadline": "Aloita 7 päivän ilmaisella kokeilujaksolla. Luottokorttia ei tarvita.",
+    "title": "Luo tili",
+    "subtitle": "Aloita 7 päivän ilmainen kokeilujakso",
+    "companyLabel": "Yrityksen nimi",
+    "nameLabel": "Nimi",
+    "emailLabel": "Sähköposti",
+    "passwordLabel": "Salasana",
+    "passwordHint": "Vähintään 8 merkkiä isolla kirjaimella, numerolla ja erikoismerkillä",
+    "strengthWeak": "Heikko",
+    "strengthMedium": "Kohtalainen",
+    "strengthStrong": "Vahva",
+    "createButton": "Luo tili",
+    "creating": "Luodaan...",
+    "hasAccount": "Onko sinulla jo tili?",
+    "loginLink": "Kirjaudu sisään",
+    "errorTooShort": "Salasanan on oltava vähintään 8 merkkiä",
+    "errorTooWeak": "Salasanassa on oltava vähintään yksi iso kirjain, yksi numero ja yksi erikoismerkki",
+    "errorCaptcha": "Suorita turvatarkistus",
+    "errorCaptchaFailed": "Turvatarkistus epäonnistui. Yritä uudelleen.",
+    "cookieNotice": "Käytämme vain välttämättömiä evästeitä kirjautumiseen.",
+    "cookiePrivacyLink": "Lue tietosuojakäytäntömme"
+  },
+  "checkEmail": {
+    "title": "Tarkista sähköpostisi",
+    "body": "Olemme lähettäneet sinulle sähköpostin tilisi vahvistamiseksi. Klikkaa sähköpostissa olevaa linkkiä rekisteröinnin viimeistelemiseksi.",
+    "spam": "Etkö löydä sähköpostia? Tarkista roskapostikansio tai odota muutama minuutti.",
+    "backToLogin": "Takaisin kirjautumiseen"
+  },
   "auth": {
     "headline": "Hallitse asiakkaita\nja sopimuksia — helposti.",
     "subheadline": "CRM rakennettu yrityksille, jotka ottavat GDPR:n vakavasti.",
@@ -66,6 +96,8 @@
     "forgotPassword": "Unohditko salasanan?",
     "createAccount": "Luo tili →",
     "wrongCredentials": "Väärä sähköposti tai salasana",
+    "cookieNotice": "Käytämme vain välttämättömiä evästeitä kirjautumiseen.",
+    "cookiePrivacyLink": "Lue tietosuojakäytäntömme",
     "privacyLink": "Tietosuojaseloste"
   },
   "dashboard": {

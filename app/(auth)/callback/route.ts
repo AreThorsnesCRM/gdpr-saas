@@ -43,63 +43,37 @@ export async function GET(request: NextRequest) {
     }
   );
 
-  // ⭐ 2: Magic link / OAuth
+  // ⭐ 2: Hent session direkte fra exchange / verify — unngår å lese gamle cookies
+  let newSession = null;
+
   if (code) {
-    await supabase.auth.exchangeCodeForSession(code);
+    const { data, error } = await supabase.auth.exchangeCodeForSession(code);
+    if (error) console.error("[callback] exchangeCodeForSession error:", error);
+    else newSession = data.session;
   }
 
-  // ⭐ 3: Email verification
   if (token && type === "signup") {
     const email = url.searchParams.get("email");
-    const verifyPayload: any = {
-      token,
-      type: "signup",
-    }
+    const verifyPayload: any = { token, type: "signup" };
+    if (email) verifyPayload.email = email;
 
-    if (email) {
-      verifyPayload.email = email
-    }
-
-    const { data: verifyData, error: verifyError } = await supabase.auth.verifyOtp(verifyPayload)
-    if (verifyError) {
-      console.error("[callback] verifyOtp error:", verifyError)
-    } else {
-      console.log("[callback] verifyOtp data:", verifyData)
-    }
+    const { data: verifyData, error: verifyError } = await supabase.auth.verifyOtp(verifyPayload);
+    if (verifyError) console.error("[callback] verifyOtp error:", verifyError);
+    else newSession = verifyData.session;
   }
 
-  // ⭐ 4: Hent bruker etter session er satt
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  // ⭐ 3: Bruk bruker direkte fra den nye sesjonen
+  const user = newSession?.user ?? null;
 
   if (!user) {
     return NextResponse.redirect(new URL("/login", request.url));
   }
 
-  console.log("[callback] User object:", user);
-  console.log("[callback] User metadata:", user.user_metadata);
+  // ⭐ 4: Hent metadata — fra user_metadata (satt ved signUp), fallback til query params
+  const company_name = user.user_metadata?.company_name || queryCompanyName || "Mitt firma";
+  const full_name = user.user_metadata?.full_name || queryFullName || user.email?.split('@')[0] || "Bruker";
 
-  // ⭐ 5: Prøv å hente metadata fra bruker-objektet direkte
-  let company_name = user.user_metadata?.company_name ?? null;
-  let full_name = user.user_metadata?.full_name ?? null;
-
-  console.log("[callback] Metadata from user object - company_name:", company_name, "full_name:", full_name);
-
-  // ⭐ 6: Hvis ikke funnet, prøv query params (fra registrering)
-  if (!company_name && queryCompanyName) {
-    company_name = queryCompanyName;
-    console.log("[callback] Using company_name from query params:", company_name);
-  }
-
-  if (!full_name && queryFullName) {
-    full_name = queryFullName;
-    console.log("[callback] Using full_name from query params:", full_name);
-  }
-
-  console.log("[callback] Final metadata - company_name:", company_name, "full_name:", full_name);
-
-  // ⭐ 7: Sjekk om profil finnes
+  // ⭐ 5: Sjekk om profil finnes
   const { data: existingProfile } = await supabase
     .from("profiles")
     .select("*")
@@ -110,30 +84,6 @@ export async function GET(request: NextRequest) {
 
   // ⭐ 8: Opprett profil + Stripe-kunde hvis ny bruker
   if (!existingProfile) {
-    // ⭐ 8.1: Sørg for at metadata er tilgjengelig
-    if (!company_name || !full_name) {
-      console.log("[callback] Missing metadata, trying to update user metadata first...");
-
-      // Prøv å oppdatere brukerens metadata først
-      const { error: updateError } = await supabase.auth.updateUser({
-        data: {
-          full_name: full_name || user.user_metadata?.full_name,
-          company_name: company_name || user.user_metadata?.company_name,
-        }
-      });
-
-      if (updateError) {
-        console.error("[callback] Failed to update user metadata:", updateError);
-      } else {
-        console.log("[callback] Updated user metadata successfully");
-        // Hent metadata på nytt
-        const { data: { user: updatedUser } } = await supabase.auth.getUser();
-        company_name = updatedUser?.user_metadata?.company_name ?? company_name;
-        full_name = updatedUser?.user_metadata?.full_name ?? full_name;
-        console.log("[callback] Updated metadata:", { company_name, full_name });
-      }
-    }
-
     const now = new Date();
     const trialEnd = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
 
@@ -146,8 +96,8 @@ export async function GET(request: NextRequest) {
       .from("profiles")
       .insert({
         user_id: user.id,
-        company_name: company_name || "Firma mangler",
-        full_name: full_name || user.email?.split('@')[0] || "Bruker",
+        company_name,
+        full_name,
         stripe_customer_id: customer.id,
         subscription_status: "trialing",
         trial_start: now.toISOString(),
@@ -169,7 +119,7 @@ export async function GET(request: NextRequest) {
       const { data: newAccount } = await supabaseAdmin
         .from("accounts")
         .insert({
-          name: company_name || "Firma mangler",
+          name: company_name,
           subscription_status: "trialing",
           trial_start: now.toISOString(),
           trial_end: trialEnd.toISOString(),
@@ -191,61 +141,36 @@ export async function GET(request: NextRequest) {
     }
   }
 
-  // ⭐ 8: Legg inn subscription-status i JWT (viktig for middleware)
-  if (profile) {
-    await supabase.auth.updateUser({
-      data: {
-        subscription_status: profile.subscription_status,
-        trial_end: profile.trial_end,
-      },
-    });
-  }
-
-  // ⭐ 9: Hent session for å sette cookies manuelt
-  const {
-    data: { session },
-  } = await supabase.auth.getSession();
-
-  console.log("[callback] Session metadata:", session?.user?.user_metadata);
-
-  // ⭐ 10: Prøv å hente metadata fra session også
-  if (!company_name && session?.user?.user_metadata) {
-    company_name = session.user.user_metadata.company_name ?? null;
-    full_name = session.user.user_metadata.full_name ?? null;
-    console.log("[callback] Got metadata from session:", { company_name, full_name });
-  }
-
-  // ⭐ 11: Lag redirect-response ETTER at session er klar
+  // ⭐ 9: Lag redirect-response og sett cookies fra den nye sesjonen
   const response = NextResponse.redirect(new URL("/dashboard", request.url));
 
-  // ⭐ 12: Sett cookies manuelt (Next.js 16 krever dette)
-  if (session) {
-    const secure = process.env.NODE_ENV === "production"
+  if (newSession) {
+    const secure = process.env.NODE_ENV === "production";
 
-    response.cookies.set("sb-access-token", session.access_token, {
-      path: "/",
-      httpOnly: true,
-      secure,
-      sameSite: "lax",
-    })
-
-    response.cookies.set("sb-refresh-token", session.refresh_token, {
+    response.cookies.set("sb-access-token", newSession.access_token, {
       path: "/",
       httpOnly: true,
       secure,
       sameSite: "lax",
     });
 
-    // Temporary cookie for client to set session
+    response.cookies.set("sb-refresh-token", newSession.refresh_token, {
+      path: "/",
+      httpOnly: true,
+      secure,
+      sameSite: "lax",
+    });
+
+    // Temp-cookie slik at AuthProvider kan kalle setSession() på klientsiden
     response.cookies.set("temp_session", JSON.stringify({
-      access_token: session.access_token,
-      refresh_token: session.refresh_token,
+      access_token: newSession.access_token,
+      refresh_token: newSession.refresh_token,
     }), {
       path: "/",
       httpOnly: false,
       secure,
       sameSite: "lax",
-      maxAge: 60, // 1 minute
+      maxAge: 60,
     });
   }
 

@@ -51,6 +51,36 @@
     "statusUnknown": "Desconocido",
     "statusLoading": "Cargando..."
   },
+  "register": {
+    "brandingHeadline": "Gestión profesional de contratos\npara empresas modernas",
+    "brandingSubheadline": "Empiece con una prueba gratuita de 7 días. No se requiere tarjeta de crédito.",
+    "title": "Crear cuenta",
+    "subtitle": "Inicie su prueba gratuita de 7 días",
+    "companyLabel": "Nombre de la empresa",
+    "nameLabel": "Nombre",
+    "emailLabel": "Correo electrónico",
+    "passwordLabel": "Contraseña",
+    "passwordHint": "Al menos 8 caracteres con mayúscula, número y carácter especial",
+    "strengthWeak": "Débil",
+    "strengthMedium": "Media",
+    "strengthStrong": "Fuerte",
+    "createButton": "Crear cuenta",
+    "creating": "Creando...",
+    "hasAccount": "¿Ya tiene una cuenta?",
+    "loginLink": "Iniciar sesión",
+    "errorTooShort": "La contraseña debe tener al menos 8 caracteres",
+    "errorTooWeak": "La contraseña debe contener al menos una mayúscula, un número y un carácter especial",
+    "errorCaptcha": "Por favor complete la verificación de seguridad",
+    "errorCaptchaFailed": "La verificación de seguridad falló. Inténtelo de nuevo.",
+    "cookieNotice": "Solo usamos cookies necesarias para la autenticación.",
+    "cookiePrivacyLink": "Leer nuestra política de privacidad"
+  },
+  "checkEmail": {
+    "title": "Compruebe su correo electrónico",
+    "body": "Le hemos enviado un correo electrónico para confirmar su cuenta. Haga clic en el enlace del correo para completar el registro.",
+    "spam": "¿No encuentra el correo? Compruebe su carpeta de spam o espere unos minutos.",
+    "backToLogin": "Volver al inicio de sesión"
+  },
   "auth": {
     "headline": "Gestiona clientes\ny contratos — fácilmente.",
     "subheadline": "Un CRM creado para empresas que se toman en serio el RGPD.",
@@ -66,6 +96,8 @@
     "forgotPassword": "¿Olvidaste tu contraseña?",
     "createAccount": "Crear cuenta →",
     "wrongCredentials": "Correo o contraseña incorrectos",
+    "cookieNotice": "Solo usamos cookies necesarias para la autenticación.",
+    "cookiePrivacyLink": "Leer nuestra política de privacidad",
     "privacyLink": "Política de privacidad"
   },
   "dashboard": {

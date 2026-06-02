@@ -51,6 +51,36 @@
     "statusUnknown": "Ukendt",
     "statusLoading": "Indlæser..."
   },
+  "register": {
+    "brandingHeadline": "Professionel kontraktstyring\nfor moderne virksomheder",
+    "brandingSubheadline": "Kom i gang med 7 dages gratis prøveperiode. Intet kreditkort kræves.",
+    "title": "Opret konto",
+    "subtitle": "Start din 7-dages gratis prøveperiode",
+    "companyLabel": "Firmanavn",
+    "nameLabel": "Navn",
+    "emailLabel": "E-mail",
+    "passwordLabel": "Adgangskode",
+    "passwordHint": "Mindst 8 tegn med stort bogstav, tal og specialtegn",
+    "strengthWeak": "Svag",
+    "strengthMedium": "Mellem",
+    "strengthStrong": "Stærk",
+    "createButton": "Opret konto",
+    "creating": "Opretter...",
+    "hasAccount": "Har du allerede en konto?",
+    "loginLink": "Log ind",
+    "errorTooShort": "Adgangskoden skal være mindst 8 tegn",
+    "errorTooWeak": "Adgangskoden skal indeholde mindst ét stort bogstav, ét tal og ét specialtegn",
+    "errorCaptcha": "Gennemfør venligst sikkerhedskontrollen",
+    "errorCaptchaFailed": "Sikkerhedskontrollen mislykkedes. Prøv igen.",
+    "cookieNotice": "Vi bruger kun nødvendige cookies til login.",
+    "cookiePrivacyLink": "Læs vores privatlivspolitik"
+  },
+  "checkEmail": {
+    "title": "Tjek din e-mail",
+    "body": "Vi har sendt dig en e-mail for at bekræfte din konto. Klik på linket i e-mailen for at fuldføre registreringen.",
+    "spam": "Kan du ikke finde e-mailen? Tjek spam-mappen eller vent et par minutter.",
+    "backToLogin": "Tilbage til login"
+  },
   "auth": {
     "headline": "Hold styr på kunder\nog aftaler — nemt.",
     "subheadline": "Et CRM bygget til virksomheder, der tager GDPR alvorligt.",
@@ -66,6 +96,8 @@
     "forgotPassword": "Glemt adgangskode?",
     "createAccount": "Opret konto →",
     "wrongCredentials": "Forkert e-mail eller adgangskode",
+    "cookieNotice": "Vi bruger kun nødvendige cookies til login.",
+    "cookiePrivacyLink": "Læs vores privatlivspolitik",
     "privacyLink": "Privatlivspolitik"
   },
   "dashboard": {

@@ -51,6 +51,36 @@
     "statusUnknown": "Unknown",
     "statusLoading": "Loading..."
   },
+  "register": {
+    "brandingHeadline": "Professional contract management\nfor modern businesses",
+    "brandingSubheadline": "Get started with a 7-day free trial. No credit card required.",
+    "title": "Create account",
+    "subtitle": "Start your 7-day free trial",
+    "companyLabel": "Company name",
+    "nameLabel": "Name",
+    "emailLabel": "Email",
+    "passwordLabel": "Password",
+    "passwordHint": "At least 8 characters with uppercase, number and special character",
+    "strengthWeak": "Weak",
+    "strengthMedium": "Medium",
+    "strengthStrong": "Strong",
+    "createButton": "Create account",
+    "creating": "Creating...",
+    "hasAccount": "Already have an account?",
+    "loginLink": "Log in",
+    "errorTooShort": "Password must be at least 8 characters",
+    "errorTooWeak": "Password must contain at least one uppercase letter, one number and one special character",
+    "errorCaptcha": "Please complete the security check",
+    "errorCaptchaFailed": "Security check failed. Please try again.",
+    "cookieNotice": "We only use necessary cookies for authentication.",
+    "cookiePrivacyLink": "Read our privacy policy"
+  },
+  "checkEmail": {
+    "title": "Check your email",
+    "body": "We have sent you an email to confirm your account. Click the link in the email to complete registration.",
+    "spam": "Can't find the email? Check your spam folder or wait a few minutes.",
+    "backToLogin": "Back to login"
+  },
   "auth": {
     "headline": "Keep track of customers\nand agreements — simply.",
     "subheadline": "A CRM built for businesses that take GDPR seriously.",
@@ -66,7 +96,9 @@
     "forgotPassword": "Forgot password?",
     "createAccount": "Create account →",
     "wrongCredentials": "Wrong email or password",
-    "privacyLink": "Privacy policy"
+    "privacyLink": "Privacy policy",
+    "cookieNotice": "We only use necessary cookies for authentication.",
+    "cookiePrivacyLink": "Read our privacy policy"
   },
   "dashboard": {
     "title": "Overview",

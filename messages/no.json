@@ -51,6 +51,36 @@
     "statusUnknown": "Ukjent",
     "statusLoading": "Laster..."
   },
+  "register": {
+    "brandingHeadline": "Profesjonell avtaleforvaltning\nfor moderne bedrifter",
+    "brandingSubheadline": "Kom i gang med 7-dagers gratis prøveperiode. Ingen kredittkort nødvendig.",
+    "title": "Opprett konto",
+    "subtitle": "Start din 7-dagers gratis prøveperiode",
+    "companyLabel": "Firmanavn",
+    "nameLabel": "Navn",
+    "emailLabel": "E-post",
+    "passwordLabel": "Passord",
+    "passwordHint": "Minst 8 tegn med stor bokstav, tall og spesialtegn",
+    "strengthWeak": "Svakt",
+    "strengthMedium": "Middels",
+    "strengthStrong": "Sterkt",
+    "createButton": "Opprett konto",
+    "creating": "Oppretter...",
+    "hasAccount": "Har du allerede konto?",
+    "loginLink": "Logg inn",
+    "errorTooShort": "Passordet må være minst 8 tegn",
+    "errorTooWeak": "Passordet må inneholde minst én stor bokstav, ett tall og ett spesialtegn",
+    "errorCaptcha": "Vennligst fullfør sikkerhetskontrollen",
+    "errorCaptchaFailed": "Sikkerhetskontrollen feilet. Prøv igjen.",
+    "cookieNotice": "Vi bruker kun nødvendige informasjonskapsler for innlogging.",
+    "cookiePrivacyLink": "Les vår personvernerklæring"
+  },
+  "checkEmail": {
+    "title": "Sjekk e-posten din",
+    "body": "Vi har sendt deg en e-post for å bekrefte kontoen din. Klikk på lenken i e-posten for å fullføre registreringen.",
+    "spam": "Finner du ikke e-posten? Sjekk søppelpost eller vent noen minutter.",
+    "backToLogin": "Tilbake til innlogging"
+  },
   "auth": {
     "headline": "Hold styr på kunder\nog avtaler — enkelt.",
     "subheadline": "Et CRM bygget for bedrifter som tar GDPR på alvor.",
@@ -66,7 +96,9 @@
     "forgotPassword": "Glemt passord?",
     "createAccount": "Opprett konto →",
     "wrongCredentials": "Feil e-post eller passord",
-    "privacyLink": "Personvernerklæring"
+    "privacyLink": "Personvernerklæring",
+    "cookieNotice": "Vi bruker kun nødvendige informasjonskapsler for innlogging.",
+    "cookiePrivacyLink": "Les vår personvernerklæring"
   },
   "dashboard": {
     "title": "Oversikt",

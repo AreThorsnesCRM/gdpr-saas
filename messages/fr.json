@@ -51,6 +51,36 @@
     "statusUnknown": "Inconnu",
     "statusLoading": "Chargement..."
   },
+  "register": {
+    "brandingHeadline": "Gestion professionnelle des contrats\npour les entreprises modernes",
+    "brandingSubheadline": "Commencez avec un essai gratuit de 7 jours. Aucune carte de crédit requise.",
+    "title": "Créer un compte",
+    "subtitle": "Démarrez votre essai gratuit de 7 jours",
+    "companyLabel": "Nom de l'entreprise",
+    "nameLabel": "Nom",
+    "emailLabel": "E-mail",
+    "passwordLabel": "Mot de passe",
+    "passwordHint": "Au moins 8 caractères avec majuscule, chiffre et caractère spécial",
+    "strengthWeak": "Faible",
+    "strengthMedium": "Moyen",
+    "strengthStrong": "Fort",
+    "createButton": "Créer un compte",
+    "creating": "Création...",
+    "hasAccount": "Vous avez déjà un compte ?",
+    "loginLink": "Se connecter",
+    "errorTooShort": "Le mot de passe doit comporter au moins 8 caractères",
+    "errorTooWeak": "Le mot de passe doit contenir au moins une majuscule, un chiffre et un caractère spécial",
+    "errorCaptcha": "Veuillez compléter la vérification de sécurité",
+    "errorCaptchaFailed": "La vérification de sécurité a échoué. Veuillez réessayer.",
+    "cookieNotice": "Nous utilisons uniquement les cookies nécessaires à l'authentification.",
+    "cookiePrivacyLink": "Lire notre politique de confidentialité"
+  },
+  "checkEmail": {
+    "title": "Vérifiez votre e-mail",
+    "body": "Nous vous avons envoyé un e-mail pour confirmer votre compte. Cliquez sur le lien dans l'e-mail pour finaliser l'inscription.",
+    "spam": "Vous ne trouvez pas l'e-mail ? Vérifiez vos spams ou attendez quelques minutes.",
+    "backToLogin": "Retour à la connexion"
+  },
   "auth": {
     "headline": "Gérez vos clients\net contrats — simplement.",
     "subheadline": "Un CRM conçu pour les entreprises qui prennent le GDPR au sérieux.",
@@ -66,6 +96,8 @@
     "forgotPassword": "Mot de passe oublié ?",
     "createAccount": "Créer un compte →",
     "wrongCredentials": "E-mail ou mot de passe incorrect",
+    "cookieNotice": "Nous utilisons uniquement les cookies nécessaires à l'authentification.",
+    "cookiePrivacyLink": "Lire notre politique de confidentialité",
     "privacyLink": "Politique de confidentialité"
   },
   "dashboard": {

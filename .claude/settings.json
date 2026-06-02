@@ -1,7 +1,9 @@
 {
   "permissions": {
     "allow": [
-      "Bash(node -e ' *)"
+      "Bash(node -e ' *)",
+      "Bash(xargs grep -l \"AuthProvider\\\\|temp_session\")",
+      "Bash(Get-ChildItem -Path \"C:\\\\MVP\\\\gdpr-saas\" -Directory)"
     ]
   }
 }

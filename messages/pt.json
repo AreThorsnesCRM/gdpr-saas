@@ -51,6 +51,36 @@
     "statusUnknown": "Desconhecido",
     "statusLoading": "A carregar..."
   },
+  "register": {
+    "brandingHeadline": "Gestão profissional de contratos\npara empresas modernas",
+    "brandingSubheadline": "Comece com uma avaliação gratuita de 7 dias. Não é necessário cartão de crédito.",
+    "title": "Criar conta",
+    "subtitle": "Inicie a sua avaliação gratuita de 7 dias",
+    "companyLabel": "Nome da empresa",
+    "nameLabel": "Nome",
+    "emailLabel": "E-mail",
+    "passwordLabel": "Palavra-passe",
+    "passwordHint": "Pelo menos 8 caracteres com maiúscula, número e caractere especial",
+    "strengthWeak": "Fraca",
+    "strengthMedium": "Média",
+    "strengthStrong": "Forte",
+    "createButton": "Criar conta",
+    "creating": "A criar...",
+    "hasAccount": "Já tem uma conta?",
+    "loginLink": "Iniciar sessão",
+    "errorTooShort": "A palavra-passe deve ter pelo menos 8 caracteres",
+    "errorTooWeak": "A palavra-passe deve conter pelo menos uma maiúscula, um número e um caractere especial",
+    "errorCaptcha": "Por favor complete a verificação de segurança",
+    "errorCaptchaFailed": "A verificação de segurança falhou. Tente novamente.",
+    "cookieNotice": "Utilizamos apenas cookies necessários para autenticação.",
+    "cookiePrivacyLink": "Ler a nossa política de privacidade"
+  },
+  "checkEmail": {
+    "title": "Verifique o seu e-mail",
+    "body": "Enviámos um e-mail para confirmar a sua conta. Clique na ligação no e-mail para concluir o registo.",
+    "spam": "Não encontra o e-mail? Verifique a pasta de spam ou aguarde alguns minutos.",
+    "backToLogin": "Voltar ao início de sessão"
+  },
   "auth": {
     "headline": "Gira os seus clientes\ne contratos — facilmente.",
     "subheadline": "Um CRM criado para empresas que levam o GDPR a sério.",
@@ -66,6 +96,8 @@
     "forgotPassword": "Esqueceu-se da palavra-passe?",
     "createAccount": "Criar conta →",
     "wrongCredentials": "E-mail ou palavra-passe incorretos",
+    "cookieNotice": "Utilizamos apenas cookies necessários para autenticação.",
+    "cookiePrivacyLink": "Ler a nossa política de privacidade",
     "privacyLink": "Política de privacidade"
   },
   "dashboard": {

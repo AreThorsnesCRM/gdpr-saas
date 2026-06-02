@@ -51,6 +51,36 @@
     "statusUnknown": "Okänt",
     "statusLoading": "Laddar..."
   },
+  "register": {
+    "brandingHeadline": "Professionell avtalshantering\nför moderna företag",
+    "brandingSubheadline": "Kom igång med 7 dagars gratis provperiod. Inget kreditkort krävs.",
+    "title": "Skapa konto",
+    "subtitle": "Starta din 7 dagars gratis provperiod",
+    "companyLabel": "Företagsnamn",
+    "nameLabel": "Namn",
+    "emailLabel": "E-post",
+    "passwordLabel": "Lösenord",
+    "passwordHint": "Minst 8 tecken med stor bokstav, siffra och specialtecken",
+    "strengthWeak": "Svagt",
+    "strengthMedium": "Medel",
+    "strengthStrong": "Starkt",
+    "createButton": "Skapa konto",
+    "creating": "Skapar...",
+    "hasAccount": "Har du redan ett konto?",
+    "loginLink": "Logga in",
+    "errorTooShort": "Lösenordet måste vara minst 8 tecken",
+    "errorTooWeak": "Lösenordet måste innehålla minst en stor bokstav, en siffra och ett specialtecken",
+    "errorCaptcha": "Vänligen slutför säkerhetskontrollen",
+    "errorCaptchaFailed": "Säkerhetskontrollen misslyckades. Försök igen.",
+    "cookieNotice": "Vi använder endast nödvändiga cookies för inloggning.",
+    "cookiePrivacyLink": "Läs vår integritetspolicy"
+  },
+  "checkEmail": {
+    "title": "Kontrollera din e-post",
+    "body": "Vi har skickat ett e-postmeddelande för att bekräfta ditt konto. Klicka på länken i e-postmeddelandet för att slutföra registreringen.",
+    "spam": "Hittar du inte e-postmeddelandet? Kontrollera skräppost eller vänta några minuter.",
+    "backToLogin": "Tillbaka till inloggning"
+  },
   "auth": {
     "headline": "Håll koll på kunder\noch avtal — enkelt.",
     "subheadline": "Ett CRM byggt för företag som tar GDPR på allvar.",
@@ -66,6 +96,8 @@
     "forgotPassword": "Glömt lösenord?",
     "createAccount": "Skapa konto →",
     "wrongCredentials": "Fel e-post eller lösenord",
+    "cookieNotice": "Vi använder endast nödvändiga cookies för inloggning.",
+    "cookiePrivacyLink": "Läs vår integritetspolicy",
     "privacyLink": "Integritetspolicy"
   },
   "dashboard": {

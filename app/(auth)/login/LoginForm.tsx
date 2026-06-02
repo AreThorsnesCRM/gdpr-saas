@@ -135,6 +135,13 @@ export default function LoginForm() {
             </Link>
           </div>
 
+          <p className="mt-6 text-center text-xs text-gray-400">
+            {t("cookieNotice")}{" "}
+            <Link href="/privacy" className="underline hover:text-gray-600 transition-colors">
+              {t("cookiePrivacyLink")}
+            </Link>
+          </p>
+
         </div>
       </div>
     </div>
