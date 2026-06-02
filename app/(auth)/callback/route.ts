@@ -180,17 +180,24 @@ export async function GET(request: NextRequest) {
       sameSite: "lax",
     });
 
-    // Temp-cookie slik at AuthProvider kan kalle setSession() på klientsiden
-    response.cookies.set("temp_session", JSON.stringify({
+    // Temp-cookie for klient — split i to deler om verdien er for lang
+    const tempValue = encodeURIComponent(JSON.stringify({
       access_token: newSession.access_token,
       refresh_token: newSession.refresh_token,
-    }), {
-      path: "/",
-      httpOnly: false,
-      secure,
-      sameSite: "lax",
-      maxAge: 60,
-    });
+    }));
+    const chunkSize = 3000;
+    if (tempValue.length <= chunkSize) {
+      response.cookies.set("temp_session", tempValue, {
+        path: "/", httpOnly: false, secure, sameSite: "lax", maxAge: 60,
+      });
+    } else {
+      response.cookies.set("temp_session.0", tempValue.slice(0, chunkSize), {
+        path: "/", httpOnly: false, secure, sameSite: "lax", maxAge: 60,
+      });
+      response.cookies.set("temp_session.1", tempValue.slice(chunkSize), {
+        path: "/", httpOnly: false, secure, sameSite: "lax", maxAge: 60,
+      });
+    }
   }
 
   return response;

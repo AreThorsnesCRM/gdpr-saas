@@ -82,16 +82,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     async function init() {
       // Håndter temp_session-cookie fra callback — await setSession før getSession
-      const tempSessionCookie = document.cookie.split('; ').find(row => row.startsWith('temp_session='))
-      if (tempSessionCookie) {
-        const tempSessionValue = tempSessionCookie.split('=')[1]
+      const allCookies = document.cookie.split('; ')
+      const tempParts = allCookies
+        .filter(row => row.startsWith('temp_session=') || row.startsWith('temp_session.'))
+        .sort()
+      if (tempParts.length > 0) {
+        const rawValue = tempParts.map(p => p.split('=').slice(1).join('=')).join('')
         try {
-          const sessionData = JSON.parse(decodeURIComponent(tempSessionValue))
+          const sessionData = JSON.parse(decodeURIComponent(rawValue))
           await supabase!.auth.setSession(sessionData)
         } catch (error) {
           console.error("[AuthProvider] Failed to set temp session:", error)
         }
-        document.cookie = 'temp_session=; path=/; maxAge=0'
+        // Fjern alle temp_session-cookies
+        tempParts.forEach(p => {
+          const name = p.split('=')[0]
+          document.cookie = `${name}=; path=/; maxAge=0`
+        })
       }
 
       // Hent sesjon — setSession er nå fullført
