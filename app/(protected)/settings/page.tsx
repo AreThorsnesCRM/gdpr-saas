@@ -985,6 +985,30 @@ export default function SettingsPage() {
                     <option value="evrotrust-signature">{t("methodEvrotrust")}</option>
                     <option value="itsme-qes-signature">{t("methodItsme")}</option>
                   </select>
+
+                  {/* Info-kort for valgt metode */}
+                  {(() => {
+                    const info: Record<string, { level: string; levelKey: string; desc: string; descKey: string; usage: string; usageKey: string; cost: "Low" | "Medium" | "High"; costKey: string; color: string }> = {
+                      "otp-email-non-qualified": { level: "SES", levelKey: "methodOtpEmailLevel", desc: "", descKey: "methodOtpEmailDesc", usage: "", usageKey: "methodOtpEmailUsage", cost: "Low", costKey: "signingCostLow", color: "bg-green-100 text-green-800" },
+                      "veriff-advanced-signature": { level: "AES", levelKey: "methodVeriffLevel", desc: "", descKey: "methodVeriffDesc", usage: "", usageKey: "methodVeriffUsage", cost: "Medium", costKey: "signingCostMedium", color: "bg-yellow-100 text-yellow-800" },
+                      "evrotrust-signature": { level: "QES", levelKey: "methodEvrotrustLevel", desc: "", descKey: "methodEvrotrustDesc", usage: "", usageKey: "methodEvrotrustUsage", cost: "High", costKey: "signingCostHigh", color: "bg-blue-100 text-blue-800" },
+                      "itsme-qes-signature": { level: "QES", levelKey: "methodItsmeLevel", desc: "", descKey: "methodItsmeDesc", usage: "", usageKey: "methodItsmeUsage", cost: "High", costKey: "signingCostHigh", color: "bg-blue-100 text-blue-800" },
+                    }
+                    const m = info[signingMethod]
+                    if (!m) return null
+                    return (
+                      <div className="mt-3 rounded-lg border border-gray-200 bg-gray-50 p-3 space-y-2 text-xs">
+                        <span className={`inline-block px-2 py-0.5 rounded-full font-semibold text-xs ${m.color}`}>
+                          {t(m.levelKey as any)}
+                        </span>
+                        <p className="text-gray-700">{t(m.descKey as any)}</p>
+                        <div className="flex flex-col gap-1 text-gray-500">
+                          <span><span className="font-medium text-gray-700">{t("signingUsageLabel")}:</span> {t(m.usageKey as any)}</span>
+                          <span><span className="font-medium text-gray-700">{t("signingCostLabel")}:</span> {t(m.costKey as any)}</span>
+                        </div>
+                      </div>
+                    )
+                  })()}
                 </div>
                 <button
                   onClick={handleSigningMethodSave}
