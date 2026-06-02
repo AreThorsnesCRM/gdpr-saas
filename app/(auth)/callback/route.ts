@@ -8,26 +8,20 @@ import Stripe from "stripe";
 const stripe = process.env.STRIPE_SECRET_KEY ? new Stripe(process.env.STRIPE_SECRET_KEY) : null;
 
 export async function GET(request: NextRequest) {
-  if (!stripe) {
-    return NextResponse.redirect(new URL("/login", request.url));
-  }
-
-  if (!supabaseAdmin) {
-    return NextResponse.redirect(new URL("/login", request.url));
-  }
+  if (!stripe) return NextResponse.redirect(new URL("/login", request.url));
+  if (!supabaseAdmin) return NextResponse.redirect(new URL("/login", request.url));
 
   const url = new URL(request.url);
   const code = url.searchParams.get("code");
   const token = url.searchParams.get("token");
   const type = url.searchParams.get("type");
-
-  // ⭐ 1: Hent metadata fra query parameters (fra registrering)
   const queryCompanyName = url.searchParams.get("company_name");
   const queryFullName = url.searchParams.get("full_name");
 
-  console.log("[callback] Query params - company_name:", queryCompanyName, "full_name:", queryFullName);
+  // Response opprettes FØRST slik at setAll kan sette Supabase-cookies direkte
+  const response = NextResponse.redirect(new URL("/dashboard", request.url));
+  const secure = process.env.NODE_ENV === "production";
 
-  // ⭐ 1: Opprett supabase-klient FØR vi lager response
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
@@ -36,14 +30,17 @@ export async function GET(request: NextRequest) {
         getAll() {
           return request.cookies.getAll();
         },
-        setAll() {
-          // Vi setter cookies manuelt senere
+        setAll(cookiesToSet) {
+          // Supabase setter sine egne cookies direkte på response
+          cookiesToSet.forEach(({ name, value, options }) =>
+            response.cookies.set(name, value, options)
+          );
         },
       },
     }
   );
 
-  // ⭐ 2: Hent session direkte fra exchange / verify — unngår å lese gamle cookies
+  // Hent session direkte fra exchange / verify
   let newSession = null;
 
   if (code) {
@@ -56,24 +53,27 @@ export async function GET(request: NextRequest) {
     const email = url.searchParams.get("email");
     const verifyPayload: any = { token, type: "signup" };
     if (email) verifyPayload.email = email;
-
-    const { data: verifyData, error: verifyError } = await supabase.auth.verifyOtp(verifyPayload);
-    if (verifyError) console.error("[callback] verifyOtp error:", verifyError);
-    else newSession = verifyData.session;
+    const { data, error } = await supabase.auth.verifyOtp(verifyPayload);
+    if (error) console.error("[callback] verifyOtp error:", error);
+    else newSession = data.session;
   }
 
-  // ⭐ 3: Bruk bruker direkte fra den nye sesjonen
   const user = newSession?.user ?? null;
+  if (!user) return NextResponse.redirect(new URL("/login", request.url));
 
-  if (!user) {
-    return NextResponse.redirect(new URL("/login", request.url));
-  }
+  // Sett sb-access-token for middleware-kompatibilitet
+  response.cookies.set("sb-access-token", newSession!.access_token, {
+    path: "/", httpOnly: true, secure, sameSite: "lax",
+  });
+  response.cookies.set("sb-refresh-token", newSession!.refresh_token, {
+    path: "/", httpOnly: true, secure, sameSite: "lax",
+  });
 
-  // ⭐ 4: Hent metadata — fra user_metadata (satt ved signUp), fallback til query params
+  // Metadata
   const company_name = user.user_metadata?.company_name || queryCompanyName || "Mitt firma";
   const full_name = user.user_metadata?.full_name || queryFullName || user.email?.split('@')[0] || "Bruker";
 
-  // ⭐ 5: Sjekk om profil og Stripe-kunde allerede finnes
+  // Sjekk om Stripe-kunde og profil allerede finnes
   const { data: existingProfile } = await supabaseAdmin
     .from("profiles")
     .select("stripe_customer_id, account_id")
@@ -83,7 +83,7 @@ export async function GET(request: NextRequest) {
   const now = new Date();
   const trialEnd = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
 
-  // ⭐ 6: Hent eller opprett Stripe-kunde
+  // Hent eller opprett Stripe-kunde
   let stripeCustomerId = existingProfile?.stripe_customer_id ?? null;
   if (!stripeCustomerId) {
     const customer = await stripe.customers.create({
@@ -93,7 +93,7 @@ export async function GET(request: NextRequest) {
     stripeCustomerId = customer.id;
   }
 
-  // ⭐ 7: Upsert profil (håndterer trigger-opprettede profiler)
+  // Upsert profil
   await supabaseAdmin
     .from("profiles")
     .upsert({
@@ -106,7 +106,7 @@ export async function GET(request: NextRequest) {
       trial_end: trialEnd.toISOString(),
     }, { onConflict: "user_id" });
 
-  // ⭐ 8: Sjekk account_users — opprett eller korriger rolle
+  // Sjekk account_users — opprett eller korriger rolle
   const { data: existingAccountUser } = await supabaseAdmin
     .from("account_users")
     .select("account_id, role")
@@ -114,7 +114,6 @@ export async function GET(request: NextRequest) {
     .maybeSingle();
 
   if (!existingAccountUser) {
-    // Ingen account_users — opprett account og koble til
     const { data: newAccount, error: accountError } = await supabaseAdmin
       .from("accounts")
       .insert({
@@ -143,60 +142,17 @@ export async function GET(request: NextRequest) {
         .eq("user_id", user.id);
     }
   } else {
-    // account_users finnes — korriger rolle til admin (trigger setter ofte feil rolle)
     if (existingAccountUser.role !== "admin") {
       await supabaseAdmin
         .from("account_users")
         .update({ role: "admin" })
         .eq("user_id", user.id);
-      console.log("[callback] Korrigerte rolle til admin:", user.id);
     }
-    // Sikre at profil har account_id satt
     if (!existingProfile?.account_id) {
       await supabaseAdmin
         .from("profiles")
         .update({ account_id: existingAccountUser.account_id })
         .eq("user_id", user.id);
-    }
-  }
-
-  // ⭐ 9: Lag redirect-response og sett cookies fra den nye sesjonen
-  const response = NextResponse.redirect(new URL("/dashboard", request.url));
-
-  if (newSession) {
-    const secure = process.env.NODE_ENV === "production";
-
-    response.cookies.set("sb-access-token", newSession.access_token, {
-      path: "/",
-      httpOnly: true,
-      secure,
-      sameSite: "lax",
-    });
-
-    response.cookies.set("sb-refresh-token", newSession.refresh_token, {
-      path: "/",
-      httpOnly: true,
-      secure,
-      sameSite: "lax",
-    });
-
-    // Temp-cookie for klient — split i to deler om verdien er for lang
-    const tempValue = encodeURIComponent(JSON.stringify({
-      access_token: newSession.access_token,
-      refresh_token: newSession.refresh_token,
-    }));
-    const chunkSize = 3000;
-    if (tempValue.length <= chunkSize) {
-      response.cookies.set("temp_session", tempValue, {
-        path: "/", httpOnly: false, secure, sameSite: "lax", maxAge: 60,
-      });
-    } else {
-      response.cookies.set("temp_session.0", tempValue.slice(0, chunkSize), {
-        path: "/", httpOnly: false, secure, sameSite: "lax", maxAge: 60,
-      });
-      response.cookies.set("temp_session.1", tempValue.slice(chunkSize), {
-        path: "/", httpOnly: false, secure, sameSite: "lax", maxAge: 60,
-      });
     }
   }
 
