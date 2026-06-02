@@ -2,21 +2,19 @@
 
 import { useEffect } from "react"
 import { useRouter } from "next/navigation"
-import { supabase } from "@/lib/supabaseClient"
 import { useAuth } from "@/lib/AuthContext"
 
 export default function AuthGuard() {
   const router = useRouter()
-  const { account, loading: authLoading } = useAuth()
+  const { user, account, loading: authLoading } = useAuth()
 
+  // Vent til AuthProvider er ferdig — unngår race condition med setSession
   useEffect(() => {
-    async function checkSession() {
-      if (!supabase) { router.replace("/login"); return }
-      const { data: { session } } = await supabase.auth.getSession()
-      if (!session?.user) { router.replace("/login"); return }
+    if (authLoading) return
+    if (!user) {
+      router.replace("/login")
     }
-    checkSession()
-  }, [router])
+  }, [user, authLoading, router])
 
   useEffect(() => {
     if (authLoading || !account) return
