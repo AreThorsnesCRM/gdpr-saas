@@ -58,12 +58,14 @@ export async function POST() {
       stripeCustomerId = customer.id;
 
       if (supabaseAdmin) {
-        const trialEnd = new Date();
-        trialEnd.setDate(trialEnd.getDate() + 7);
+        // Behold eksisterende trial_end hvis den finnes — ikke nullstill prøveperioden
+        const existingTrialEnd = profile.trial_end ? new Date(profile.trial_end) : null;
+        const trialEnd = existingTrialEnd ?? (() => { const d = new Date(); d.setDate(d.getDate() + 7); return d; })();
+        const trialStart = profile.trial_start ?? new Date().toISOString();
         const trialData = {
           stripe_customer_id: customer.id,
           subscription_status: "trialing",
-          trial_start: new Date().toISOString(),
+          trial_start: trialStart,
           trial_end: trialEnd.toISOString(),
         };
         await supabaseAdmin.from("profiles").update(trialData).eq("user_id", user.id);
