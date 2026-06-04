@@ -34,6 +34,14 @@ export async function createSignatureRequest(opts: {
   lang?: string
   method?: string
 }): Promise<CreateSignatureResult> {
+  const METHOD_ALIASES: Record<string, string> = {
+    "otp_email": "otp-email-non-qualified",
+    "otp-email": "otp-email-non-qualified",
+  }
+  const resolvedMethod = opts.method
+    ? (METHOD_ALIASES[opts.method] ?? opts.method)
+    : "otp-email-non-qualified"
+
   const res = await fetch(`${BASE_URL}/request?userid=${USER_ID}`, {
     method: "POST",
     headers: authHeaders(),
@@ -44,7 +52,7 @@ export async function createSignatureRequest(opts: {
       send_email: false,
       email_notification: true,
       reminder: 7,
-      methods: [opts.method ?? "otp-email-non-qualified"],
+      methods: [resolvedMethod],
       signers: opts.signers.map(s => ({
         firstname: s.firstname,
         lastname: s.lastname,
