@@ -8,7 +8,7 @@ import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { supabase } from "@/lib/supabaseClient"
 import { useAuth } from "@/lib/AuthContext"
-import { ChevronLeftIcon } from "@heroicons/react/24/outline"
+import { ChevronLeftIcon, DocumentIcon } from "@heroicons/react/24/outline"
 import RichTextEditor from "@/app/components/RichTextEditor"
 import { substituteMergeFields } from "@/lib/mergeFields"
 import { useTranslations, useLocale } from "next-intl"
@@ -441,9 +441,13 @@ export default function AgreementDetailPage({ params }: { params: Promise<{ id: 
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <a href={agreement.file_url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 text-sm font-medium text-slate-700 hover:text-slate-900 border border-gray-200 px-3 py-1.5 rounded-lg transition-colors">
-                  {t("pdfOpen")} ↗
-                </a>
+                <div className="flex items-center gap-2 px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-lg">
+                  <DocumentIcon className="h-4 w-4 text-gray-400 shrink-0" />
+                  <span className="text-sm text-gray-700 truncate max-w-[220px]">
+                    {(() => { try { const p = decodeURIComponent(new URL(agreement.file_url!).pathname).split("/"); return p[p.length - 1] || "dokument.pdf" } catch { return "dokument.pdf" } })()}
+                  </span>
+                  <a href={agreement.file_url} target="_blank" rel="noopener noreferrer" className="text-slate-500 hover:text-slate-800 transition-colors text-sm">↗</a>
+                </div>
                 {!agreement?.signing_status && (
                   <button
                     onClick={handleRemoveFile}
@@ -523,9 +527,7 @@ export default function AgreementDetailPage({ params }: { params: Promise<{ id: 
                   <p className="text-xs font-medium text-gray-500">{t("pdfFromTemplateLabel")}</p>
                   <select value={selectedTemplateId} onChange={e => setSelectedTemplateId(e.target.value)} className={inputClass}>
                     <option value="">{t("pdfSelectTemplate")}</option>
-                    {templates.map(tmpl => (
-                      <option key={tmpl.id} value={tmpl.id}>{tmpl.name}</option>
-                    ))}
+                    {groupedTemplateOptions()}
                   </select>
                   {selectedTemplateId && (
                     <button onClick={() => { setPreviewContent(getPreviewHtml()); setPreviewMode(true) }} className="bg-slate-800 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-slate-700 transition-colors">
