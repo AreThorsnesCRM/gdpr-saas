@@ -156,8 +156,8 @@
     "seeAll": "Se alle →",
     "criticalTitle": "Kunder uten aktiv avtale",
     "criticalEmpty": "Alle kunder har aktive avtaler",
-    "uncontactedTitle": "Ikke kontaktet",
-    "uncontactedEmpty": "Alle kunder er nylig kontaktet",
+    "uncontactedTitle": "Lengst siden kontakt",
+    "uncontactedEmpty": "Ingen kunder ennå",
     "uncontactedNever": "Aldri kontaktet",
     "uncontactedDaysAgo": "Sist for {days} d siden",
     "open": "Åpne →",
@@ -223,7 +223,11 @@
     "newManagerLabel": "Kundeansvarlig",
     "newManagerNone": "Ingen ansvarlig valgt",
     "newCreateButton": "Opprett kunde",
-    "newNameRequired": "Navn er påkrevd"
+    "newNameRequired": "Navn er påkrevd",
+    "newWebsiteLabel": "Nettside",
+    "newWebsitePlaceholder": "www.eksempel.no",
+    "newCountryLabel": "Land",
+    "newCountryPlaceholder": "Velg land"
   },
   "customerDetail": {
     "backToCustomers": "Kunder",
@@ -245,6 +249,8 @@
     "placeholderAddress": "Gateadresse",
     "placeholderPostalCode": "0000",
     "placeholderCity": "By",
+    "labelCountry": "Land",
+    "placeholderCountry": "Velg land",
     "activityTitle": "Aktivitet",
     "activityTypeNote": "Notat",
     "activityTypeCall": "Samtale",
@@ -568,7 +574,12 @@
     "columnAddress": "Adresse",
     "columnPostal": "Postnr",
     "columnCity": "Sted",
-    "columnWebsite": "Nettside"
+    "columnWebsite": "Nettside",
+    "columnCountry": "Land",
+    "duplicatesFound": "{count} mulige duplikater funnet",
+    "duplicateHint": "Disse kundene finnes kanskje allerede. Huk av for å importere allikevel.",
+    "importColumn": "Importer",
+    "possibleDuplicate": "Mulig duplikat"
   },
   "assistant": {
     "title": "Pactiva Assistent",

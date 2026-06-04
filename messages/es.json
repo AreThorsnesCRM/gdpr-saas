@@ -155,8 +155,8 @@
     "upcomingEmpty": "No hay próximos contratos",
     "seeAll": "Ver todos →",
     "criticalTitle": "Clientes sin contrato activo",
-    "uncontactedTitle": "Sin contactar",
-    "uncontactedEmpty": "Todos los clientes han sido contactados recientemente",
+    "uncontactedTitle": "Menos contactados recientemente",
+    "uncontactedEmpty": "Aún no hay clientes",
     "uncontactedNever": "Nunca contactado",
     "uncontactedDaysAgo": "Último hace {days}d",
     "criticalEmpty": "Todos los clientes tienen contratos activos",
@@ -223,7 +223,11 @@
     "newManagerLabel": "Gestor de cuenta",
     "newManagerNone": "Sin gestor seleccionado",
     "newCreateButton": "Crear cliente",
-    "newNameRequired": "El nombre es obligatorio"
+    "newNameRequired": "El nombre es obligatorio",
+    "newWebsiteLabel": "Sitio web",
+    "newWebsitePlaceholder": "www.ejemplo.es",
+    "newCountryLabel": "País",
+    "newCountryPlaceholder": "Seleccionar país"
   },
   "customerDetail": {
     "backToCustomers": "Clientes",
@@ -245,6 +249,8 @@
     "placeholderAddress": "Dirección",
     "placeholderPostalCode": "00000",
     "placeholderCity": "Ciudad",
+    "labelCountry": "País",
+    "placeholderCountry": "Seleccionar país",
     "activityTitle": "Actividad",
     "activityTypeNote": "Nota",
     "activityTypeCall": "Llamada",
@@ -550,7 +556,12 @@
     "columnAddress": "Dirección",
     "columnPostal": "C.P.",
     "columnCity": "Ciudad",
-    "columnWebsite": "Sitio web"
+    "columnWebsite": "Sitio web",
+    "columnCountry": "País",
+    "duplicatesFound": "{count} posible(s) duplicado(s) encontrado(s)",
+    "duplicateHint": "Estos clientes pueden ya existir. Marque la casilla para importar de todos modos.",
+    "importColumn": "Importar",
+    "possibleDuplicate": "Posible duplicado"
   },
   "assistant": {
     "title": "Asistente Pactiva",

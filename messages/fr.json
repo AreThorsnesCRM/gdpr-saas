@@ -156,8 +156,8 @@
     "seeAll": "Voir tout →",
     "criticalTitle": "Clients sans contrat actif",
     "criticalEmpty": "Tous les clients ont des contrats actifs",
-    "uncontactedTitle": "Non contactés",
-    "uncontactedEmpty": "Tous les clients ont été contactés récemment",
+    "uncontactedTitle": "Moins récemment contactés",
+    "uncontactedEmpty": "Pas encore de clients",
     "uncontactedNever": "Jamais contacté",
     "uncontactedDaysAgo": "Dernier contact il y a {days} j",
     "open": "Ouvrir →",
@@ -223,7 +223,11 @@
     "newManagerLabel": "Responsable client",
     "newManagerNone": "Aucun responsable sélectionné",
     "newCreateButton": "Créer le client",
-    "newNameRequired": "Le nom est obligatoire"
+    "newNameRequired": "Le nom est obligatoire",
+    "newWebsiteLabel": "Site web",
+    "newWebsitePlaceholder": "www.exemple.fr",
+    "newCountryLabel": "Pays",
+    "newCountryPlaceholder": "Sélectionner un pays"
   },
   "customerDetail": {
     "backToCustomers": "Clients",
@@ -245,6 +249,8 @@
     "placeholderAddress": "Adresse postale",
     "placeholderPostalCode": "00000",
     "placeholderCity": "Ville",
+    "labelCountry": "Pays",
+    "placeholderCountry": "Sélectionner un pays",
     "activityTitle": "Activité",
     "activityTypeNote": "Note",
     "activityTypeCall": "Appel",
@@ -550,7 +556,12 @@
     "columnAddress": "Adresse",
     "columnPostal": "Code postal",
     "columnCity": "Ville",
-    "columnWebsite": "Site web"
+    "columnWebsite": "Site web",
+    "columnCountry": "Pays",
+    "duplicatesFound": "{count} doublon(s) possible(s) trouvé(s)",
+    "duplicateHint": "Ces clients existent peut-être déjà. Cochez pour importer quand même.",
+    "importColumn": "Importer",
+    "possibleDuplicate": "Doublon possible"
   },
   "assistant": {
     "title": "Assistant Pactiva",

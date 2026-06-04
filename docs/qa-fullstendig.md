@@ -77,13 +77,15 @@
 
 | # | Testpunkt | Status | Kommentar |
 |---|-----------|--------|-----------|
-| 39 | «Aktive avtaler»-kortet viser riktig tall | | |
+| 39 | «Kunder»-kortet viser riktig tall | | |
 | 40 | «Usignerte avtaler»-kortet viser riktig tall | | |
-| 41 | «Utløper snart»-kortet viser riktig tall | | |
-| 42 | «Utløper snart»-liste viser riktige avtaler | | |
-| 43 | «Kunder ikke kontaktet»-liste viser riktige kunder | | |
-| 44 | AI-widget laster og gir forslag | | |
-| 45 | AI-widget er opt-in (deaktivert som standard?) | | |
+| 41 | «Aktive avtaler»-kortet viser riktig tall | | |
+| 42 | «Utløper snart»-kortet viser riktig tall | | |
+| 43 | «Sendt til signering»-listen viser riktige avtaler | | |
+| 44 | «Kunder uten aktiv avtale»-listen fungerer | | |
+| 45 | «Ikke kontaktet»-listen fungerer | | |
+| 46 | AI-widget («Hva bør du gjøre i dag?») laster og gir forslag | | |
+| 47 | AI kan slås av og på i Innstillinger | | |
 
 ---
 

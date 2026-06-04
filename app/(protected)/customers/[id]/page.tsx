@@ -21,6 +21,7 @@ interface Customer {
   postal_code: string | null
   city: string | null
   website: string | null
+  country: string | null
   account_manager_id: string | null
 }
 
@@ -78,6 +79,7 @@ export default function CustomerPage(props: CustomerPageProps) {
   const [postalCode, setPostalCode] = useState("")
   const [city, setCity] = useState("")
   const [website, setWebsite] = useState("")
+  const [country, setCountry] = useState("")
   const [accountManagerId, setAccountManagerId] = useState("")
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>([])
   const [saved, setSaved] = useState(false)
@@ -140,6 +142,7 @@ export default function CustomerPage(props: CustomerPageProps) {
       setPostalCode(data.postal_code ?? "")
       setCity(data.city ?? "")
       setWebsite(data.website ?? "")
+      setCountry(data.country ?? "")
       setAccountManagerId(data.account_manager_id ?? "")
     }
   }
@@ -167,6 +170,7 @@ export default function CustomerPage(props: CustomerPageProps) {
       postal_code: postalCode || null,
       city: city || null,
       website: website || null,
+      country: country || null,
       account_manager_id: accountManagerId || null,
     }).eq("id", id)
     fetchCustomer()
@@ -417,6 +421,16 @@ export default function CustomerPage(props: CustomerPageProps) {
                   <label className="block text-xs font-medium text-gray-500 mb-1">{t("labelCity")}</label>
                   <input className={inputClass} placeholder={t("placeholderCity")} value={city} onChange={(e) => setCity(e.target.value)} />
                 </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-medium text-gray-500 mb-1">{t("labelCountry")}</label>
+                <select className={inputClass} value={country} onChange={(e) => setCountry(e.target.value)}>
+                  <option value="">{t("placeholderCountry")}</option>
+                  {(["NO","SE","DK","FI","DE","FR","GB","NL","BE","AT","CH","ES","PT","IT","PL","US","CA","BR","MX","OTHER"] as const).map((code) => (
+                    <option key={code} value={code}>{code}</option>
+                  ))}
+                </select>
               </div>
 
               {teamMembers.length > 0 && (

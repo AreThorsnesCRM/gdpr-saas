@@ -211,6 +211,7 @@ export default function CustomersPage() {
         open={importOpen}
         onClose={() => setImportOpen(false)}
         onImported={() => { loadCustomers(); setImportOpen(false) }}
+        existingCustomers={customers}
       />
 
       {/* Filtre */}

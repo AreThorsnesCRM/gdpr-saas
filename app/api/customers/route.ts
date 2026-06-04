@@ -32,6 +32,8 @@ export async function POST(req: Request) {
     address: body.address ?? null,
     postal_code: body.postal_code ?? null,
     city: body.city ?? null,
+    country: body.country ?? null,
+    website: body.website ?? null,
     account_manager_id: body.account_manager_id ?? null,
   }]).select("id").single()
 

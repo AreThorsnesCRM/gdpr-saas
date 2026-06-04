@@ -3,7 +3,10 @@
     "allow": [
       "Bash(node -e ' *)",
       "Bash(xargs grep -l \"AuthProvider\\\\|temp_session\")",
-      "Bash(Get-ChildItem -Path \"C:\\\\MVP\\\\gdpr-saas\" -Directory)"
+      "Bash(Get-ChildItem -Path \"C:\\\\MVP\\\\gdpr-saas\" -Directory)",
+      "Bash(git commit -m ' *)",
+      "Bash(git push *)",
+      "Bash(git commit --allow-empty -m ' *)"
     ]
   }
 }

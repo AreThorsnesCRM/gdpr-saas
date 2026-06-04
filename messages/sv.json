@@ -156,8 +156,8 @@
     "seeAll": "Se alla →",
     "criticalTitle": "Kunder utan aktivt avtal",
     "criticalEmpty": "Alla kunder har aktiva avtal",
-    "uncontactedTitle": "Ej kontaktade",
-    "uncontactedEmpty": "Alla kunder har nyligen kontaktats",
+    "uncontactedTitle": "Längst sedan kontakt",
+    "uncontactedEmpty": "Inga kunder ännu",
     "uncontactedNever": "Aldrig kontaktad",
     "uncontactedDaysAgo": "Senast för {days} d sedan",
     "open": "Öppna →",
@@ -223,7 +223,11 @@
     "newManagerLabel": "Kundansvarig",
     "newManagerNone": "Ingen ansvarig vald",
     "newCreateButton": "Skapa kund",
-    "newNameRequired": "Namn krävs"
+    "newNameRequired": "Namn krävs",
+    "newWebsiteLabel": "Hemsida",
+    "newWebsitePlaceholder": "www.exempel.se",
+    "newCountryLabel": "Land",
+    "newCountryPlaceholder": "Välj land"
   },
   "customerDetail": {
     "backToCustomers": "Kunder",
@@ -245,6 +249,8 @@
     "placeholderAddress": "Gatuadress",
     "placeholderPostalCode": "000 00",
     "placeholderCity": "Stad",
+    "labelCountry": "Land",
+    "placeholderCountry": "Välj land",
     "activityTitle": "Aktivitet",
     "activityTypeNote": "Anteckning",
     "activityTypeCall": "Samtal",
@@ -550,7 +556,12 @@
     "columnAddress": "Adress",
     "columnPostal": "Postnr",
     "columnCity": "Ort",
-    "columnWebsite": "Webbplats"
+    "columnWebsite": "Webbplats",
+    "columnCountry": "Land",
+    "duplicatesFound": "{count} möjliga dubbletter hittades",
+    "duplicateHint": "Dessa kunder kanske redan finns. Bocka i för att importera ändå.",
+    "importColumn": "Importera",
+    "possibleDuplicate": "Möjlig dubblett"
   },
   "assistant": {
     "title": "Pactiva Assistent",

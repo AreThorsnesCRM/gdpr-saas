@@ -156,8 +156,8 @@
     "seeAll": "Ver todos →",
     "criticalTitle": "Clientes sem contrato ativo",
     "criticalEmpty": "Todos os clientes têm contratos ativos",
-    "uncontactedTitle": "Não contactados",
-    "uncontactedEmpty": "Todos os clientes foram contactados recentemente",
+    "uncontactedTitle": "Menos contactados recentemente",
+    "uncontactedEmpty": "Ainda sem clientes",
     "uncontactedNever": "Nunca contactado",
     "uncontactedDaysAgo": "Último contacto há {days} d",
     "open": "Abrir →",
@@ -223,7 +223,11 @@
     "newManagerLabel": "Responsável pelo cliente",
     "newManagerNone": "Nenhum responsável selecionado",
     "newCreateButton": "Criar cliente",
-    "newNameRequired": "O nome é obrigatório"
+    "newNameRequired": "O nome é obrigatório",
+    "newWebsiteLabel": "Website",
+    "newWebsitePlaceholder": "www.exemplo.pt",
+    "newCountryLabel": "País",
+    "newCountryPlaceholder": "Selecionar país"
   },
   "customerDetail": {
     "backToCustomers": "Clientes",
@@ -245,6 +249,8 @@
     "placeholderAddress": "Morada",
     "placeholderPostalCode": "0000-000",
     "placeholderCity": "Cidade",
+    "labelCountry": "País",
+    "placeholderCountry": "Selecionar país",
     "activityTitle": "Atividade",
     "activityTypeNote": "Nota",
     "activityTypeCall": "Chamada",
@@ -550,7 +556,12 @@
     "columnAddress": "Morada",
     "columnPostal": "Cód. postal",
     "columnCity": "Localidade",
-    "columnWebsite": "Website"
+    "columnWebsite": "Website",
+    "columnCountry": "País",
+    "duplicatesFound": "{count} possível(is) duplicado(s) encontrado(s)",
+    "duplicateHint": "Estes clientes podem já existir. Marque a caixa para importar de qualquer forma.",
+    "importColumn": "Importar",
+    "possibleDuplicate": "Possível duplicado"
   },
   "assistant": {
     "title": "Assistente Pactiva",

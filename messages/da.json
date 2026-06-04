@@ -156,8 +156,8 @@
     "seeAll": "Se alle →",
     "criticalTitle": "Kunder uden aktiv aftale",
     "criticalEmpty": "Alle kunder har aktive aftaler",
-    "uncontactedTitle": "Ikke kontaktet",
-    "uncontactedEmpty": "Alle kunder er for nylig kontaktet",
+    "uncontactedTitle": "Længst siden kontakt",
+    "uncontactedEmpty": "Ingen kunder endnu",
     "uncontactedNever": "Aldrig kontaktet",
     "uncontactedDaysAgo": "Sidst for {days} d siden",
     "open": "Åbn →",
@@ -223,7 +223,11 @@
     "newManagerLabel": "Kundeansvarlig",
     "newManagerNone": "Ingen ansvarlig valgt",
     "newCreateButton": "Opret kunde",
-    "newNameRequired": "Navn er påkrævet"
+    "newNameRequired": "Navn er påkrævet",
+    "newWebsiteLabel": "Hjemmeside",
+    "newWebsitePlaceholder": "www.eksempel.dk",
+    "newCountryLabel": "Land",
+    "newCountryPlaceholder": "Vælg land"
   },
   "customerDetail": {
     "backToCustomers": "Kunder",
@@ -245,6 +249,8 @@
     "placeholderAddress": "Gadeadresse",
     "placeholderPostalCode": "0000",
     "placeholderCity": "By",
+    "labelCountry": "Land",
+    "placeholderCountry": "Vælg land",
     "activityTitle": "Aktivitet",
     "activityTypeNote": "Note",
     "activityTypeCall": "Opkald",
@@ -550,7 +556,12 @@
     "columnAddress": "Adresse",
     "columnPostal": "Postnr.",
     "columnCity": "By",
-    "columnWebsite": "Hjemmeside"
+    "columnWebsite": "Hjemmeside",
+    "columnCountry": "Land",
+    "duplicatesFound": "{count} mulige dubletter fundet",
+    "duplicateHint": "Disse kunder findes måske allerede. Sæt kryds for at importere alligevel.",
+    "importColumn": "Importer",
+    "possibleDuplicate": "Mulig dublet"
   },
   "assistant": {
     "title": "Pactiva Assistent",

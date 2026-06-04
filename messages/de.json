@@ -156,8 +156,8 @@
     "seeAll": "Alle anzeigen →",
     "criticalTitle": "Kunden ohne aktiven Vertrag",
     "criticalEmpty": "Alle Kunden haben aktive Verträge",
-    "uncontactedTitle": "Nicht kontaktiert",
-    "uncontactedEmpty": "Alle Kunden wurden kürzlich kontaktiert",
+    "uncontactedTitle": "Am längsten nicht kontaktiert",
+    "uncontactedEmpty": "Noch keine Kunden",
     "uncontactedNever": "Nie kontaktiert",
     "uncontactedDaysAgo": "Zuletzt vor {days} T kontaktiert",
     "open": "Öffnen →",
@@ -223,7 +223,11 @@
     "newManagerLabel": "Kundenbetreuer",
     "newManagerNone": "Kein Verantwortlicher ausgewählt",
     "newCreateButton": "Kunde erstellen",
-    "newNameRequired": "Name ist erforderlich"
+    "newNameRequired": "Name ist erforderlich",
+    "newWebsiteLabel": "Webseite",
+    "newWebsitePlaceholder": "www.beispiel.de",
+    "newCountryLabel": "Land",
+    "newCountryPlaceholder": "Land auswählen"
   },
   "customerDetail": {
     "backToCustomers": "Kunden",
@@ -245,6 +249,8 @@
     "placeholderAddress": "Straßenadresse",
     "placeholderPostalCode": "00000",
     "placeholderCity": "Stadt",
+    "labelCountry": "Land",
+    "placeholderCountry": "Land auswählen",
     "activityTitle": "Aktivität",
     "activityTypeNote": "Notiz",
     "activityTypeCall": "Anruf",
@@ -550,7 +556,12 @@
     "columnAddress": "Adresse",
     "columnPostal": "PLZ",
     "columnCity": "Ort",
-    "columnWebsite": "Website"
+    "columnWebsite": "Website",
+    "columnCountry": "Land",
+    "duplicatesFound": "{count} mögliche Duplikat(e) gefunden",
+    "duplicateHint": "Diese Kunden existieren möglicherweise bereits. Aktivieren Sie das Kontrollkästchen, um trotzdem zu importieren.",
+    "importColumn": "Importieren",
+    "possibleDuplicate": "Mögliches Duplikat"
   },
   "assistant": {
     "title": "Pactiva Assistent",

@@ -156,8 +156,8 @@
     "seeAll": "Näytä kaikki →",
     "criticalTitle": "Asiakkaat ilman aktiivista sopimusta",
     "criticalEmpty": "Kaikilla asiakkailla on aktiiviset sopimukset",
-    "uncontactedTitle": "Ei kontaktoitu",
-    "uncontactedEmpty": "Kaikki asiakkaat on äskettäin kontaktoitu",
+    "uncontactedTitle": "Pisimpään sitten yhteys",
+    "uncontactedEmpty": "Ei asiakkaita vielä",
     "uncontactedNever": "Ei koskaan kontaktoitu",
     "uncontactedDaysAgo": "Viimeksi {days} pv sitten",
     "open": "Avaa →",
@@ -223,7 +223,11 @@
     "newManagerLabel": "Asiakasvastaava",
     "newManagerNone": "Ei vastuuhenkilöä valittu",
     "newCreateButton": "Luo asiakas",
-    "newNameRequired": "Nimi on pakollinen"
+    "newNameRequired": "Nimi on pakollinen",
+    "newWebsiteLabel": "Verkkosivusto",
+    "newWebsitePlaceholder": "www.esimerkki.fi",
+    "newCountryLabel": "Maa",
+    "newCountryPlaceholder": "Valitse maa"
   },
   "customerDetail": {
     "backToCustomers": "Asiakkaat",
@@ -245,6 +249,8 @@
     "placeholderAddress": "Katuosoite",
     "placeholderPostalCode": "00000",
     "placeholderCity": "Kaupunki",
+    "labelCountry": "Maa",
+    "placeholderCountry": "Valitse maa",
     "activityTitle": "Toiminta",
     "activityTypeNote": "Muistiinpano",
     "activityTypeCall": "Puhelu",
@@ -550,7 +556,12 @@
     "columnAddress": "Osoite",
     "columnPostal": "Postinro",
     "columnCity": "Paikkakunta",
-    "columnWebsite": "Verkkosivusto"
+    "columnWebsite": "Verkkosivusto",
+    "columnCountry": "Maa",
+    "duplicatesFound": "{count} mahdollista kaksoiskappaletta löydetty",
+    "duplicateHint": "Nämä asiakkaat saattavat jo olla olemassa. Valitse tuodaksesi joka tapauksessa.",
+    "importColumn": "Tuo",
+    "possibleDuplicate": "Mahdollinen kaksoisekappale"
   },
   "assistant": {
     "title": "Pactiva Assistentti",

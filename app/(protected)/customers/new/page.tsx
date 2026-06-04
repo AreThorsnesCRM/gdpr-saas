@@ -26,6 +26,8 @@ export default function NewCustomerPage() {
   const [address, setAddress] = useState("")
   const [postalCode, setPostalCode] = useState("")
   const [city, setCity] = useState("")
+  const [country, setCountry] = useState("")
+  const [website, setWebsite] = useState("")
   const [accountManagerId, setAccountManagerId] = useState("")
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>([])
   const [loading, setLoading] = useState(false)
@@ -61,6 +63,8 @@ export default function NewCustomerPage() {
         address: address || null,
         postal_code: postalCode || null,
         city: city || null,
+        country: country || null,
+        website: website || null,
         account_manager_id: accountManagerId || null,
       }),
     })
@@ -117,6 +121,22 @@ export default function NewCustomerPage() {
           <div>
             <label className="block text-xs font-medium text-gray-500 mb-1">{t("newCityLabel")}</label>
             <input className={inputClass} placeholder={t("newCityPlaceholder")} value={city} onChange={(e) => setCity(e.target.value)} />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-2 gap-3">
+          <div>
+            <label className="block text-xs font-medium text-gray-500 mb-1">{t("newCountryLabel")}</label>
+            <select className={inputClass} value={country} onChange={(e) => setCountry(e.target.value)}>
+              <option value="">{t("newCountryPlaceholder")}</option>
+              {(["NO","SE","DK","FI","DE","FR","GB","NL","BE","AT","CH","ES","PT","IT","PL","US","CA","BR","MX","OTHER"] as const).map((code) => (
+                <option key={code} value={code}>{code}</option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label className="block text-xs font-medium text-gray-500 mb-1">{t("newWebsiteLabel")}</label>
+            <input className={inputClass} placeholder={t("newWebsitePlaceholder")} value={website} onChange={(e) => setWebsite(e.target.value)} />
           </div>
         </div>
 

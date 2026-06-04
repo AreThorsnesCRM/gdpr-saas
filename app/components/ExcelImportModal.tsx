@@ -12,13 +12,21 @@ type CustomerRow = {
   address: string
   postal_code: string
   city: string
+  country: string
   website: string
+}
+
+type ImportRow = {
+  customer: CustomerRow
+  isDuplicate: boolean
+  include: boolean
 }
 
 type Props = {
   open: boolean
   onClose: () => void
   onImported: () => void
+  existingCustomers?: Array<{ name: string; org_nummer: string | null }>
 }
 
 const COL_MAP: Record<string, keyof CustomerRow> = {
@@ -154,6 +162,18 @@ const COL_MAP: Record<string, keyof CustomerRow> = {
   site: "website",
   // FI
   verkkosivusto: "website", kotisivu: "website",
+
+  // --- Land / Country ---
+  // NO/SV/DA/DE
+  land: "country",
+  // EN
+  country: "country",
+  // FR
+  pays: "country",
+  // ES/PT
+  "país": "country", pais: "country",
+  // FI
+  maa: "country",
 }
 
 function normalizeKey(raw: string): keyof CustomerRow | null {
@@ -170,7 +190,7 @@ function parseSheet(data: any[][]): CustomerRow[] {
   })
 
   return data.slice(1).map((row) => {
-    const customer: CustomerRow = { name: "", email: "", phone: "", org_nummer: "", address: "", postal_code: "", city: "", website: "" }
+    const customer: CustomerRow = { name: "", email: "", phone: "", org_nummer: "", address: "", postal_code: "", city: "", country: "", website: "" }
     fieldMap.forEach(({ colIdx, field }) => {
       customer[field] = String(row[colIdx] ?? "").trim()
     })
@@ -178,10 +198,10 @@ function parseSheet(data: any[][]): CustomerRow[] {
   }).filter((c) => c.name)
 }
 
-export default function ExcelImportModal({ open, onClose, onImported }: Props) {
+export default function ExcelImportModal({ open, onClose, onImported, existingCustomers = [] }: Props) {
   const t = useTranslations("excelImport")
   const inputRef = useRef<HTMLInputElement>(null)
-  const [rows, setRows] = useState<CustomerRow[]>([])
+  const [rows, setRows] = useState<ImportRow[]>([])
   const [fileName, setFileName] = useState("")
   const [importing, setImporting] = useState(false)
   const [imported, setImported] = useState<number | null>(null)
@@ -198,8 +218,16 @@ export default function ExcelImportModal({ open, onClose, onImported }: Props) {
     { key: "address",     label: t("columnAddress") },
     { key: "postal_code", label: t("columnPostal") },
     { key: "city",        label: t("columnCity") },
+    { key: "country",     label: t("columnCountry") },
     { key: "website",     label: t("columnWebsite") },
   ]
+
+  const includedCount = rows.filter((r) => r.include).length
+  const duplicateCount = rows.filter((r) => r.isDuplicate).length
+
+  function toggleInclude(idx: number) {
+    setRows((prev) => prev.map((r, i) => i === idx ? { ...r, include: !r.include } : r))
+  }
 
   async function handleFile(file: File) {
     setError("")
@@ -218,7 +246,16 @@ export default function ExcelImportModal({ open, onClose, onImported }: Props) {
       setError(t("noValidRows"))
       return
     }
-    setRows(parsed)
+    const importRows: ImportRow[] = parsed.map((customer) => {
+      const isDuplicate = existingCustomers.some(
+        (e) =>
+          e.name.toLowerCase().trim() === customer.name.toLowerCase().trim() ||
+          (customer.org_nummer && e.org_nummer &&
+            e.org_nummer.trim() === customer.org_nummer.trim())
+      )
+      return { customer, isDuplicate, include: !isDuplicate }
+    })
+    setRows(importRows)
   }
 
   function handleFileInput(e: React.ChangeEvent<HTMLInputElement>) {
@@ -241,7 +278,7 @@ export default function ExcelImportModal({ open, onClose, onImported }: Props) {
       const res = await fetch("/api/customers/import", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ customers: rows }),
+        body: JSON.stringify({ customers: rows.filter((r) => r.include).map((r) => r.customer) }),
       })
       const json = await res.json()
       if (!res.ok) { setError(json.error ?? t("cancel")); return }
@@ -302,7 +339,7 @@ export default function ExcelImportModal({ open, onClose, onImported }: Props) {
                 <div className="rounded-lg bg-blue-50 border border-blue-100 px-4 py-3 text-xs text-blue-700 space-y-1">
                   <p className="font-medium">{t("columnsTitle")}</p>
                   <p className="text-blue-600">
-                    <strong>{t("columnName")}</strong> (påkrevd) · {t("columnEmail")} · {t("columnPhone")} · {t("columnOrg")} · {t("columnAddress")} · {t("columnPostal")} · {t("columnCity")}
+                    <strong>{t("columnName")}</strong> (påkrevd) · {t("columnEmail")} · {t("columnPhone")} · {t("columnOrg")} · {t("columnAddress")} · {t("columnPostal")} · {t("columnCity")} · {t("columnCountry")} · {t("columnWebsite")}
                   </p>
                   <p className="text-blue-500 mt-1">{t("columnsEnglish")}</p>
                 </div>
@@ -315,19 +352,27 @@ export default function ExcelImportModal({ open, onClose, onImported }: Props) {
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-sm font-medium text-gray-900">{fileName}</p>
-                      <p className="text-xs text-gray-400">{t("readyToImport", { count: rows.length })}</p>
+                      <p className="text-xs text-gray-400">{t("readyToImport", { count: includedCount })}</p>
                     </div>
-                    <button onClick={() => { setRows([]); setFileName("") }}
+                    <button onClick={() => { setRows([]); setFileName(""); }}
                       className="text-xs text-gray-400 hover:text-gray-700 transition-colors">
                       {t("changeFile")}
                     </button>
                   </div>
+
+                  {duplicateCount > 0 && (
+                    <div className="rounded-lg bg-amber-50 border border-amber-200 px-4 py-2.5 text-xs text-amber-800 space-y-0.5">
+                      <p className="font-medium">{t("duplicatesFound", { count: duplicateCount })}</p>
+                      <p className="text-amber-700">{t("duplicateHint")}</p>
+                    </div>
+                  )}
 
                   <div className="rounded-xl border border-gray-200 overflow-hidden">
                     <div className="overflow-x-auto max-h-80">
                       <table className="w-full text-xs">
                         <thead>
                           <tr className="bg-gray-50 border-b border-gray-200">
+                            <th className="px-3 py-2 text-left font-medium text-gray-500 whitespace-nowrap">{t("importColumn")}</th>
                             {fields.map((f) => (
                               <th key={f.key} className="text-left px-3 py-2 font-medium text-gray-500 whitespace-nowrap">
                                 {f.label}{f.key === "name" && <span className="text-red-400 ml-0.5">*</span>}
@@ -336,11 +381,25 @@ export default function ExcelImportModal({ open, onClose, onImported }: Props) {
                           </tr>
                         </thead>
                         <tbody>
-                          {rows.map((row, i) => (
-                            <tr key={i} className="border-t border-gray-100 hover:bg-gray-50">
+                          {rows.map(({ customer: row, isDuplicate, include }, i) => (
+                            <tr key={i} className={`border-t border-gray-100 hover:bg-gray-50 ${isDuplicate && !include ? "opacity-50" : ""}`}>
+                              <td className="px-3 py-2">
+                                <input
+                                  type="checkbox"
+                                  checked={include}
+                                  onChange={() => toggleInclude(i)}
+                                  className="rounded border-gray-300 text-slate-800 focus:ring-slate-500"
+                                />
+                              </td>
                               {fields.map((f) => (
                                 <td key={f.key} className="px-3 py-2 text-gray-700 whitespace-nowrap max-w-[160px] truncate">
-                                  {row[f.key] || <span className="text-gray-300">—</span>}
+                                  {f.key === "name" && isDuplicate
+                                    ? <span className="flex items-center gap-1.5">
+                                        <span className="truncate">{row[f.key]}</span>
+                                        <span className="shrink-0 bg-amber-100 text-amber-700 text-[10px] font-medium px-1.5 py-0.5 rounded-full">{t("possibleDuplicate")}</span>
+                                      </span>
+                                    : row[f.key] || <span className="text-gray-300">—</span>
+                                  }
                                 </td>
                               ))}
                             </tr>
@@ -362,10 +421,10 @@ export default function ExcelImportModal({ open, onClose, onImported }: Props) {
             </button>
             <button
               onClick={handleImport}
-              disabled={importing}
+              disabled={importing || includedCount === 0}
               className="bg-slate-800 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-slate-700 disabled:opacity-50 transition-colors"
             >
-              {importing ? t("importing") : t("importButton", { count: rows.length })}
+              {importing ? t("importing") : t("importButton", { count: includedCount })}
             </button>
           </div>
         )}

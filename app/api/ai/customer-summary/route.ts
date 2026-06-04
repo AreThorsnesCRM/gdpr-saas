@@ -45,7 +45,7 @@ export async function GET(req: Request) {
     { data: agreements },
     { data: notes },
   ] = await Promise.all([
-    supabase.from("customers").select("name, email, phone, org_number, city").eq("id", customerId).single(),
+    supabase.from("customers").select("name, email, phone, org_nummer, city").eq("id", customerId).single(),
     supabase.from("agreements").select("title, start_date, end_date, signed, archived, signing_status").eq("customer_id", customerId).order("start_date", { ascending: false }),
     supabase.from("notes").select("content, created_at").eq("customer_id", customerId).order("created_at", { ascending: false }).limit(15),
   ])
@@ -60,7 +60,7 @@ export async function GET(req: Request) {
 Kunde: ${customer.name}
 E-post: ${customer.email || "ikke registrert"}
 Telefon: ${customer.phone || "ikke registrert"}
-Org.nr: ${customer.org_number || "ikke registrert"}
+Org.nr: ${customer.org_nummer || "ikke registrert"}
 Sted: ${customer.city || "ikke registrert"}
 
 Aktive avtaler (${activeAgreements.length}):
