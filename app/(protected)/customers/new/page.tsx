@@ -18,6 +18,7 @@ export default function NewCustomerPage() {
   const router = useRouter()
   const t = useTranslations("customers")
   const tc = useTranslations("common")
+  const to = useTranslations("onboarding")
 
   const [name, setName] = useState("")
   const [email, setEmail] = useState("")
@@ -130,7 +131,7 @@ export default function NewCustomerPage() {
             <select className={inputClass} value={country} onChange={(e) => setCountry(e.target.value)}>
               <option value="">{t("newCountryPlaceholder")}</option>
               {(["NO","SE","DK","FI","DE","FR","GB","NL","BE","AT","CH","ES","PT","IT","PL","US","CA","BR","MX","OTHER"] as const).map((code) => (
-                <option key={code} value={code}>{code}</option>
+                <option key={code} value={code}>{to(`countries.${code}`)}</option>
               ))}
             </select>
           </div>

@@ -271,14 +271,15 @@ export default function ExcelImportModal({ open, onClose, onImported, existingCu
   }
 
   async function handleImport() {
-    if (!rows.length) return
+    const toImport = rows.filter((r) => r.include === true).map((r) => r.customer)
+    if (!toImport.length) return
     setImporting(true)
     setError("")
     try {
       const res = await fetch("/api/customers/import", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ customers: rows.filter((r) => r.include).map((r) => r.customer) }),
+        body: JSON.stringify({ customers: toImport }),
       })
       const json = await res.json()
       if (!res.ok) { setError(json.error ?? t("cancel")); return }

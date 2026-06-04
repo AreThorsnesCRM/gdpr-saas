@@ -68,6 +68,7 @@ export default function CustomerPage(props: CustomerPageProps) {
   const t = useTranslations("customerDetail")
   const tc = useTranslations("common")
   const tad = useTranslations("agreementDetail")
+  const to = useTranslations("onboarding")
   const locale = useLocale()
 
   const [customer, setCustomer] = useState<Customer | null>(null)
@@ -428,7 +429,7 @@ export default function CustomerPage(props: CustomerPageProps) {
                 <select className={inputClass} value={country} onChange={(e) => setCountry(e.target.value)}>
                   <option value="">{t("placeholderCountry")}</option>
                   {(["NO","SE","DK","FI","DE","FR","GB","NL","BE","AT","CH","ES","PT","IT","PL","US","CA","BR","MX","OTHER"] as const).map((code) => (
-                    <option key={code} value={code}>{code}</option>
+                    <option key={code} value={code}>{to(`countries.${code}`)}</option>
                   ))}
                 </select>
               </div>
