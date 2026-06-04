@@ -275,8 +275,8 @@ export default function AgreementDetailPage({ params }: { params: Promise<{ id: 
       const json = await res.json()
       if (!res.ok) throw new Error(json.error)
       await fetchAgreement()
-    } catch {
-      setSigningError(t("signingError"))
+    } catch (err: any) {
+      setSigningError(err?.message ?? t("signingError"))
     } finally {
       setSigningLoading(false)
     }
