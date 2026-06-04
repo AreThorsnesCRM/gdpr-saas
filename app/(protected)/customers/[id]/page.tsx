@@ -429,7 +429,7 @@ export default function CustomerPage(props: CustomerPageProps) {
                 <select className={inputClass} value={country} onChange={(e) => setCountry(e.target.value)}>
                   <option value="">{t("placeholderCountry")}</option>
                   {(["NO","SE","DK","FI","DE","FR","GB","NL","BE","AT","CH","ES","PT","IT","PL","US","CA","BR","MX","OTHER"] as const).map((code) => (
-                    <option key={code} value={code}>{to(`countries.${code}`)}</option>
+                    <option key={code} value={code}>{to(`countries.${code}`).replace(/^[\u{1F1E0}-\u{1F1FF}\u{1F30D}-\u{1F315}\s]+/u, "").trim()}</option>
                   ))}
                 </select>
               </div>
