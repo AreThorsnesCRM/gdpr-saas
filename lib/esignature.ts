@@ -27,6 +27,8 @@ export const SIGNING_METHODS = [
 
 export type SigningMethodValue = typeof SIGNING_METHODS[number]["value"]
 
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://app.pactiva.io"
+
 export async function createSignatureRequest(opts: {
   title: string
   pdfBase64: string
@@ -52,6 +54,7 @@ export async function createSignatureRequest(opts: {
       send_email: false,
       email_notification: true,
       reminder: 7,
+      callback_url: `${APP_URL}/api/webhooks/esignature`,
       methods: [resolvedMethod],
       signers: opts.signers.map(s => ({
         firstname: s.firstname,
