@@ -91,6 +91,7 @@ export default function AgreementDetailPage({ params }: { params: Promise<{ id: 
   const [signerManuallySet, setSignerManuallySet] = useState(false)
   const [signingLoading, setSigningLoading] = useState(false)
   const [signingError, setSigningError] = useState("")
+  const [checkingStatus, setCheckingStatus] = useState(false)
   const [signingMethod, setSigningMethod] = useState<string>(account?.signing_method ?? "otp-email-non-qualified")
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null)
   const [branding, setBranding] = useState<PDFBranding | undefined>(undefined)
@@ -279,6 +280,17 @@ export default function AgreementDetailPage({ params }: { params: Promise<{ id: 
       setSigningError(err?.message ?? t("signingError"))
     } finally {
       setSigningLoading(false)
+    }
+  }
+
+  async function handleCheckSigningStatus() {
+    setCheckingStatus(true)
+    try {
+      const res = await fetch(`/api/agreements/${id}/check-status`, { method: "POST" })
+      const json = await res.json()
+      if (json.status === "signed") await fetchAgreement()
+    } finally {
+      setCheckingStatus(false)
     }
   }
 
@@ -589,6 +601,13 @@ export default function AgreementDetailPage({ params }: { params: Promise<{ id: 
                     </div>
                   ))}
                 </div>
+                <button
+                  onClick={handleCheckSigningStatus}
+                  disabled={checkingStatus}
+                  className="text-xs text-slate-600 hover:text-slate-900 border border-gray-200 px-3 py-1.5 rounded-lg transition-colors disabled:opacity-50"
+                >
+                  {checkingStatus ? "Sjekker..." : "↻ Sjekk signeringsstatus"}
+                </button>
               </div>
             )
           })()
