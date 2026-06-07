@@ -3,9 +3,13 @@ import { supabaseAdmin } from "@/lib/supabaseAdmin"
 import { getSignatureRequest } from "@/lib/esignature"
 
 export const dynamic = "force-dynamic"
-export const maxDuration = 60
 
-export async function GET() {
+export async function GET(req: Request) {
+  const authHeader = req.headers.get("authorization")
+  if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+  }
+
   if (!supabaseAdmin) return NextResponse.json({ error: "Not configured" }, { status: 500 })
 
   const { data: pending } = await supabaseAdmin

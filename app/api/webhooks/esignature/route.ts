@@ -2,7 +2,6 @@ import { NextResponse } from "next/server"
 import { supabaseAdmin } from "@/lib/supabaseAdmin"
 import { getSignatureRequest } from "@/lib/esignature"
 
-export const maxDuration = 60
 
 async function processSigningSession(idSign: string | number) {
   if (!supabaseAdmin) return { error: "Not configured" }
