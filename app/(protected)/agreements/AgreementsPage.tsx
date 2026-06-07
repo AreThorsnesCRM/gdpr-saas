@@ -46,7 +46,7 @@ export default function AgreementsPage() {
 
   const [filter, setFilter] = useState<Filter>("all")
   const [search, setSearch] = useState("")
-  const [sortKey, setSortKey] = useState<"title" | "customer" | "category" | "period" | "signed" | null>(null)
+  const [sortKey, setSortKey] = useState<"title" | "customer" | "category" | "period" | "signed" | "status" | null>(null)
   const [sortDir, setSortDir] = useState<"asc" | "desc">("asc")
   const [agreements, setAgreements] = useState<Agreement[]>([])
   const [customers, setCustomers] = useState<Customer[]>([])
@@ -155,7 +155,9 @@ export default function AgreementsPage() {
     router.push(f === "all" ? "/agreements" : `/agreements?filter=${f}`)
   }
 
-  function toggleSort(key: "title" | "customer" | "category" | "period" | "signed") {
+  const statusOrder: Record<string, number> = { unsigned: 0, pending: 1, upcoming: 2, active: 3, expired: 4 }
+
+  function toggleSort(key: "title" | "customer" | "category" | "period" | "signed" | "status") {
     if (sortKey === key) {
       setSortDir(d => d === "asc" ? "desc" : "asc")
     } else {
@@ -195,6 +197,10 @@ export default function AgreementsPage() {
         return sortDir === "asc"
           ? a.end_date.localeCompare(b.end_date)
           : b.end_date.localeCompare(a.end_date)
+      }
+      if (sortKey === "status") {
+        const diff = statusOrder[getStatus(a)] - statusOrder[getStatus(b)]
+        return sortDir === "asc" ? diff : -diff
       }
       const valA = sortKey === "title" ? a.title : sortKey === "customer" ? (a.customers?.name ?? "") : (a.agreement_categories?.name ?? "")
       const valB = sortKey === "title" ? b.title : sortKey === "customer" ? (b.customers?.name ?? "") : (b.agreement_categories?.name ?? "")
@@ -314,7 +320,12 @@ export default function AgreementsPage() {
                     <span className="text-gray-300">{sortKey === "signed" ? (sortDir === "asc" ? "↑" : "↓") : "↕"}</span>
                   </button>
                 </th>
-                <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wide">{t("columnStatus")}</th>
+                <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wide">
+                  <button onClick={() => toggleSort("status")} className="flex items-center gap-1 hover:text-gray-800 transition-colors">
+                    {t("columnStatus")}
+                    <span className="text-gray-300">{sortKey === "status" ? (sortDir === "asc" ? "↑" : "↓") : "↕"}</span>
+                  </button>
+                </th>
               </tr>
             </thead>
             <tbody>

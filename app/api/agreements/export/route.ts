@@ -88,11 +88,16 @@ export async function GET(req: Request) {
     { wch: 13 }, { wch: 13 }, { wch: 12 }, { wch: 10 },
   ]
 
-  const sheetName = locale === "en" ? "Agreements" : locale === "es" ? "Contratos" : "Avtaler"
+  const sheetName = archivedOnly
+    ? (locale === "en" ? "Archived agreements" : locale === "es" ? "Contratos archivados" : "Arkiverte avtaler")
+    : (locale === "en" ? "Agreements" : locale === "es" ? "Contratos" : "Avtaler")
   const wb = XLSX.utils.book_new()
   XLSX.utils.book_append_sheet(wb, ws, sheetName)
 
-  const filename = `${sheetName.toLowerCase()}-${today}.xlsx`
+  const fileBase = archivedOnly
+    ? (locale === "en" ? "archived-agreements" : locale === "es" ? "contratos-archivados" : "arkiverte-avtaler")
+    : (locale === "en" ? "agreements" : locale === "es" ? "contratos" : "avtaler")
+  const filename = `${fileBase}-${today}.xlsx`
   const buf = XLSX.write(wb, { type: "buffer", bookType: "xlsx" })
 
   return new NextResponse(buf, {
