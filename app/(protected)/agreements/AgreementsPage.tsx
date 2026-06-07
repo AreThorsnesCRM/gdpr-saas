@@ -46,7 +46,7 @@ export default function AgreementsPage() {
 
   const [filter, setFilter] = useState<Filter>("all")
   const [search, setSearch] = useState("")
-  const [sortKey, setSortKey] = useState<"title" | "customer" | "category" | "signed" | null>(null)
+  const [sortKey, setSortKey] = useState<"title" | "customer" | "category" | "period" | "signed" | null>(null)
   const [sortDir, setSortDir] = useState<"asc" | "desc">("asc")
   const [agreements, setAgreements] = useState<Agreement[]>([])
   const [customers, setCustomers] = useState<Customer[]>([])
@@ -155,7 +155,7 @@ export default function AgreementsPage() {
     router.push(f === "all" ? "/agreements" : `/agreements?filter=${f}`)
   }
 
-  function toggleSort(key: "title" | "customer" | "category" | "signed") {
+  function toggleSort(key: "title" | "customer" | "category" | "period" | "signed") {
     if (sortKey === key) {
       setSortDir(d => d === "asc" ? "desc" : "asc")
     } else {
@@ -190,6 +190,11 @@ export default function AgreementsPage() {
         const valA = a.signed ? 1 : 0
         const valB = b.signed ? 1 : 0
         return sortDir === "asc" ? valA - valB : valB - valA
+      }
+      if (sortKey === "period") {
+        return sortDir === "asc"
+          ? a.end_date.localeCompare(b.end_date)
+          : b.end_date.localeCompare(a.end_date)
       }
       const valA = sortKey === "title" ? a.title : sortKey === "customer" ? (a.customers?.name ?? "") : (a.agreement_categories?.name ?? "")
       const valB = sortKey === "title" ? b.title : sortKey === "customer" ? (b.customers?.name ?? "") : (b.agreement_categories?.name ?? "")
@@ -297,7 +302,12 @@ export default function AgreementsPage() {
                     <span className="text-gray-300">{sortKey === "category" ? (sortDir === "asc" ? "↑" : "↓") : "↕"}</span>
                   </button>
                 </th>
-                <th className="hidden md:table-cell text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wide">{t("columnPeriod")}</th>
+                <th className="hidden md:table-cell text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wide">
+                  <button onClick={() => toggleSort("period")} className="flex items-center gap-1 hover:text-gray-800 transition-colors">
+                    {t("columnPeriod")}
+                    <span className="text-gray-300">{sortKey === "period" ? (sortDir === "asc" ? "↑" : "↓") : "↕"}</span>
+                  </button>
+                </th>
                 <th className="hidden sm:table-cell text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wide">
                   <button onClick={() => toggleSort("signed")} className="flex items-center gap-1 hover:text-gray-800 transition-colors">
                     {t("columnSigned")}

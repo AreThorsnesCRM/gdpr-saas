@@ -30,6 +30,7 @@ export async function GET(req: Request) {
 
   const { searchParams } = new URL(req.url)
   const locale = searchParams.get("locale") ?? "no"
+  const archivedOnly = searchParams.get("archived") === "true"
 
   const { data: customers } = await supabaseAdmin
     .from("customers")
@@ -38,13 +39,19 @@ export async function GET(req: Request) {
 
   const customerIds = (customers ?? []).map(c => c.id)
 
-  const { data: agreements } = customerIds.length > 0
-    ? await supabaseAdmin
+  let agreementsQuery = customerIds.length > 0
+    ? supabaseAdmin
         .from("agreements")
         .select("title, start_date, end_date, archived, signed, customers(name), agreement_categories(name)")
         .in("customer_id", customerIds)
         .order("end_date", { ascending: false })
-    : { data: [] }
+    : null
+
+  if (agreementsQuery && archivedOnly) {
+    agreementsQuery = agreementsQuery.eq("archived", true)
+  }
+
+  const { data: agreements } = agreementsQuery ? await agreementsQuery : { data: [] }
 
   const today = new Date().toISOString().split("T")[0]
 
