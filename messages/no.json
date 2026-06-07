@@ -678,6 +678,8 @@
     "signingCopyLink": "Kopier lenke",
     "signingCopied": "Kopiert!",
     "signingError": "Noe gikk galt. Prøv igjen.",
+    "signingTrialBlocked": "Digital signering er ikke tilgjengelig i prøveperioden. Oppgrader for å bruke denne funksjonen.",
+    "signingAutoUpdate": "Status oppdateres automatisk når alle har signert — eller sjekk manuelt.",
     "signingPendingStatus": "Venter på signering",
     "addSigner": "Legg til signatar",
     "signingSignedLabel": "Digitalt signert",

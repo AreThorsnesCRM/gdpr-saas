@@ -660,6 +660,8 @@
     "signingCopyLink": "Link kopieren",
     "signingCopied": "Kopiert!",
     "signingError": "Etwas ist schiefgelaufen. Bitte erneut versuchen.",
+    "signingTrialBlocked": "Digitale Unterzeichnung ist während der Testphase nicht verfügbar. Upgraden Sie, um diese Funktion zu nutzen.",
+    "signingAutoUpdate": "Status wird automatisch aktualisiert, wenn alle unterzeichnet haben — oder manuell prüfen.",
     "signingPendingStatus": "Warte auf Unterzeichnung",
     "addSigner": "Unterzeichner hinzufügen",
     "signingSignedLabel": "Digital unterzeichnet",

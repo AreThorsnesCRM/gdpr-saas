@@ -670,13 +670,20 @@ export default function AgreementDetailPage({ params }: { params: Promise<{ id: 
               </select>
             </div>
             {signingError && <p className="text-sm text-red-600">{signingError}</p>}
-            <button
-              onClick={handleSendForSigning}
-              disabled={signingLoading || signers.every(s => !s.email)}
-              className="inline-flex items-center gap-1.5 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium disabled:opacity-50 transition-colors"
-            >
-              ✍ {signingLoading ? t("signingSending") : t("signingSend")}
-            </button>
+            {account?.subscription_status === "trialing" ? (
+              <div className="rounded-lg bg-amber-50 border border-amber-200 px-4 py-3 text-sm text-amber-800">
+                {t("signingTrialBlocked")}
+              </div>
+            ) : (
+              <button
+                onClick={handleSendForSigning}
+                disabled={signingLoading || signers.every(s => !s.email)}
+                className="inline-flex items-center gap-1.5 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium disabled:opacity-50 transition-colors"
+              >
+                ✍ {signingLoading ? t("signingSending") : t("signingSend")}
+              </button>
+            )}
+            <p className="text-xs text-gray-400">{t("signingAutoUpdate")}</p>
           </div>
         )}
       </div>

@@ -660,6 +660,8 @@
     "signingCopyLink": "Kopiera länk",
     "signingCopied": "Kopierat!",
     "signingError": "Något gick fel. Försök igen.",
+    "signingTrialBlocked": "Digital signering är inte tillgänglig under provperioden. Uppgradera för att använda denna funktion.",
+    "signingAutoUpdate": "Status uppdateras automatiskt när alla har signerat — eller kontrollera manuellt.",
     "signingPendingStatus": "Inväntar signering",
     "addSigner": "Lägg till signerare",
     "signingSignedLabel": "Digitalt signerat",

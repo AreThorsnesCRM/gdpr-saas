@@ -660,6 +660,8 @@
     "signingCopyLink": "Kopioi linkki",
     "signingCopied": "Kopioitu!",
     "signingError": "Jotain meni pieleen. Yritä uudelleen.",
+    "signingTrialBlocked": "Digitaalinen allekirjoitus ei ole käytettävissä kokeilujakson aikana. Päivitä käyttääksesi tätä toimintoa.",
+    "signingAutoUpdate": "Tila päivittyy automaattisesti, kun kaikki ovat allekirjoittaneet — tai tarkista manuaalisesti.",
     "signingPendingStatus": "Odottaa allekirjoitusta",
     "addSigner": "Lisää allekirjoittaja",
     "signingSignedLabel": "Digitaalisesti allekirjoitettu",

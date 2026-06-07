@@ -660,6 +660,8 @@
     "signingCopyLink": "Copier le lien",
     "signingCopied": "Copié !",
     "signingError": "Une erreur s'est produite. Veuillez réessayer.",
+    "signingTrialBlocked": "La signature numérique n'est pas disponible pendant la période d'essai. Mettez à niveau pour utiliser cette fonctionnalité.",
+    "signingAutoUpdate": "Le statut se met à jour automatiquement lorsque tout le monde a signé — ou vérifiez manuellement.",
     "signingPendingStatus": "En attente de signature",
     "addSigner": "Ajouter un signataire",
     "signingSignedLabel": "Signé numériquement",

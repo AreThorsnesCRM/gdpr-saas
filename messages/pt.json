@@ -660,6 +660,8 @@
     "signingCopyLink": "Copiar ligação",
     "signingCopied": "Copiado!",
     "signingError": "Ocorreu um erro. Tente novamente.",
+    "signingTrialBlocked": "A assinatura digital não está disponível durante o período de teste. Faça upgrade para usar esta funcionalidade.",
+    "signingAutoUpdate": "O estado é atualizado automaticamente quando todos assinarem — ou verifique manualmente.",
     "signingPendingStatus": "A aguardar assinatura",
     "addSigner": "Adicionar signatário",
     "signingSignedLabel": "Assinado digitalmente",
