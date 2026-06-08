@@ -52,6 +52,9 @@ export async function POST(
   if (!pdfRes.ok) return NextResponse.json({ error: "pdf_download_failed" }, { status: 500 })
   const pdfBase64 = Buffer.from(await pdfRes.arrayBuffer()).toString("base64")
 
+  const requestCookies = await cookies()
+  const locale = requestCookies.get("NEXT_LOCALE")?.value ?? "no"
+
   const { data: account } = await supabaseAdmin
     .from("accounts")
     .select("name, signing_method")
@@ -105,7 +108,7 @@ export async function POST(
   let emailSent = false
   for (const s of signersJsonb) {
     if (s.email) {
-      await sendSigningLinkEmail(s.email, s.name, agreement.title, s.url, account?.name ?? "Pactiva")
+      await sendSigningLinkEmail(s.email, s.name, agreement.title, s.url, account?.name ?? "Pactiva", locale)
       emailSent = true
     }
   }

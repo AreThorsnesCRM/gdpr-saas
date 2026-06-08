@@ -29,7 +29,7 @@ export async function GET(req: Request) {
   // ── 1. Prøveperiode-varsler ───────────────────────────────────────────────
   const { data: trialingAccounts } = await supabaseAdmin
     .from("accounts")
-    .select("id, trial_end, notify_trial_ending")
+    .select("id, trial_end, notify_trial_ending, language")
     .eq("subscription_status", "trialing")
     .eq("notify_trial_ending", true)
 
@@ -43,7 +43,7 @@ export async function GET(req: Request) {
     const recipient = await getAdminEmail(account.id)
     if (!recipient) continue
 
-    await sendTrialEndingEmail(recipient.email, recipient.name, diffDays)
+    await sendTrialEndingEmail(recipient.email, recipient.name, diffDays, account.language ?? "no")
     sent++
     console.log(`[cron] Trial warning (${diffDays}d) → ${recipient.email}`)
   }
@@ -65,15 +65,14 @@ export async function GET(req: Request) {
       (new Date(agreement.end_date).getTime() - now.getTime()) / (1000 * 60 * 60 * 24)
     )
 
-    const recipient = await getRecipient(
-      customer.account_manager_id,
-      customer.account_id,
-      "notify_expiring_agreements"
-    )
+    const [recipient, lang] = await Promise.all([
+      getRecipient(customer.account_manager_id, customer.account_id, "notify_expiring_agreements"),
+      getAccountLanguage(customer.account_id),
+    ])
     if (!recipient) continue
 
     await sendExpiringAgreementEmail(
-      recipient.email, recipient.name, customer.name, agreement.title, daysLeft
+      recipient.email, recipient.name, customer.name, agreement.title, daysLeft, lang
     )
     sent++
     console.log(`[cron] Expiring agreement (${daysLeft}d) → ${recipient.email}`)
@@ -104,15 +103,14 @@ export async function GET(req: Request) {
 
     if (active && active.length > 0) continue
 
-    const recipient = await getRecipient(
-      customer.account_manager_id,
-      customer.account_id,
-      "notify_no_active_agreement"
-    )
+    const [recipient, lang] = await Promise.all([
+      getRecipient(customer.account_manager_id, customer.account_id, "notify_no_active_agreement"),
+      getAccountLanguage(customer.account_id),
+    ])
     if (!recipient) continue
 
     await sendAgreementExpiredEmail(
-      recipient.email, recipient.name, customer.name, agreement.title
+      recipient.email, recipient.name, customer.name, agreement.title, lang
     )
     sent++
     console.log(`[cron] No active agreement → ${recipient.email}`)
@@ -185,6 +183,16 @@ async function getRecipient(
     name: (adminProfile as { full_name?: string } | null)?.full_name
       ?? authUser.user.email.split("@")[0],
   }
+}
+
+async function getAccountLanguage(accountId: string): Promise<string> {
+  if (!supabaseAdmin) return "no"
+  const { data } = await supabaseAdmin
+    .from("accounts")
+    .select("language")
+    .eq("id", accountId)
+    .single()
+  return (data as { language?: string } | null)?.language ?? "no"
 }
 
 async function getAdminEmail(accountId: string): Promise<{ email: string; name: string } | null> {
