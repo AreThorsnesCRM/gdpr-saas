@@ -133,19 +133,21 @@ export default function CustomerPage(props: CustomerPageProps) {
   async function fetchCustomer() {
     if (!supabase) return
     const { data } = await supabase.from("customers").select("*").eq("id", id).single()
-    if (data) {
-      setCustomer(data)
-      setName(data.name ?? "")
-      setEmail(data.email ?? "")
-      setPhone(data.phone ?? "")
-      setOrgNummer(data.org_nummer ?? "")
-      setAddress(data.address ?? "")
-      setPostalCode(data.postal_code ?? "")
-      setCity(data.city ?? "")
-      setWebsite(data.website ?? "")
-      setCountry(data.country ?? "")
-      setAccountManagerId(data.account_manager_id ?? "")
+    if (!data) {
+      router.push("/customers")
+      return
     }
+    setCustomer(data)
+    setName(data.name ?? "")
+    setEmail(data.email ?? "")
+    setPhone(data.phone ?? "")
+    setOrgNummer(data.org_nummer ?? "")
+    setAddress(data.address ?? "")
+    setPostalCode(data.postal_code ?? "")
+    setCity(data.city ?? "")
+    setWebsite(data.website ?? "")
+    setCountry(data.country ?? "")
+    setAccountManagerId(data.account_manager_id ?? "")
   }
 
   async function fetchNotes() {

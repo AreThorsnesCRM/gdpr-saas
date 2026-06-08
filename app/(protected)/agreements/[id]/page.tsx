@@ -123,20 +123,22 @@ export default function AgreementDetailPage({ params }: { params: Promise<{ id: 
       .select("*, customers(id, name, org_nummer)")
       .eq("id", id)
       .single()
-    if (data) {
-      const a = data as AgreementDetail
-      setAgreement(a)
-      setTitle(a.title)
-      setStartDate(a.start_date)
-      setEndDate(a.end_date)
-      setContactName(a.contact_name ?? "")
-      setContactEmail(a.contact_email ?? "")
-      setContactPhone(a.contact_phone ?? "")
-      setSigned(a.signed ?? false)
-      setCategoryId(a.category_id ?? "")
-      if (!a.signing_status) {
-        setSigners([{ name: a.signer_name ?? a.contact_name ?? "", email: a.signer_email ?? a.contact_email ?? "" }])
-      }
+    if (!data) {
+      router.push("/agreements")
+      return
+    }
+    const a = data as AgreementDetail
+    setAgreement(a)
+    setTitle(a.title)
+    setStartDate(a.start_date)
+    setEndDate(a.end_date)
+    setContactName(a.contact_name ?? "")
+    setContactEmail(a.contact_email ?? "")
+    setContactPhone(a.contact_phone ?? "")
+    setSigned(a.signed ?? false)
+    setCategoryId(a.category_id ?? "")
+    if (!a.signing_status) {
+      setSigners([{ name: a.signer_name ?? a.contact_name ?? "", email: a.signer_email ?? a.contact_email ?? "" }])
     }
   }
 
