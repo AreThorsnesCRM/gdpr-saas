@@ -4,6 +4,7 @@ import { cookies } from "next/headers"
 import { createServerClient } from "@supabase/ssr"
 import { createSignatureRequest } from "@/lib/esignature"
 import { sendSigningLinkEmail } from "@/lib/email"
+import { getMethodCost, deductCredits, triggerAutoTopup } from "@/lib/signing-credits"
 
 async function getAccountUser() {
   const cookieStore = await cookies()
@@ -57,9 +58,22 @@ export async function POST(
 
   const { data: account } = await supabaseAdmin
     .from("accounts")
-    .select("name, signing_method")
+    .select("name, signing_method, subscription_status, signings_credits_included, signings_credits_purchased")
     .eq("id", accountUser.account_id)
     .single()
+
+  // Blokkér prøveperiode-brukere
+  if (!account || account.subscription_status === "trialing") {
+    return NextResponse.json({ error: "trial_blocked" }, { status: 403 })
+  }
+
+  // Sjekk kredittbalanse
+  const resolvedMethod = methodOverride ?? account.signing_method ?? "otp-email-non-qualified"
+  const cost = getMethodCost(resolvedMethod)
+  const total = (account.signings_credits_included ?? 0) + (account.signings_credits_purchased ?? 0)
+  if (total < cost) {
+    return NextResponse.json({ error: "insufficient_credits", cost, balance: total }, { status: 402 })
+  }
 
   const esignSigners = signerList.map(s => {
     const parts = s.name.trim().split(/\s+/)
@@ -108,8 +122,32 @@ export async function POST(
   let emailSent = false
   for (const s of signersJsonb) {
     if (s.email) {
-      await sendSigningLinkEmail(s.email, s.name, agreement.title, s.url, account?.name ?? "Pactiva", locale)
+      await sendSigningLinkEmail(s.email, s.name, agreement.title, s.url, account.name ?? "Pactiva", locale)
       emailSent = true
+    }
+  }
+
+  // Trekk fra kreditter etter vellykket signering
+  const { remaining } = await deductCredits(accountUser.account_id, cost)
+
+  // Auto-topup når saldo er 1
+  if (remaining === 1) {
+    const { data: adminUser } = await supabaseAdmin
+      .from("account_users")
+      .select("user_id")
+      .eq("account_id", accountUser.account_id)
+      .eq("role", "admin")
+      .single()
+    if (adminUser) {
+      const { data: profile } = await supabaseAdmin
+        .from("profiles")
+        .select("full_name")
+        .eq("user_id", adminUser.user_id)
+        .single()
+      const { data: authData } = await supabaseAdmin.auth.admin.getUserById(adminUser.user_id)
+      const adminEmail = authData?.user?.email ?? ""
+      // Fire-and-forget
+      triggerAutoTopup(accountUser.account_id, adminEmail, profile?.full_name ?? "").catch(console.error)
     }
   }
 

@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import Stripe from "stripe";
 import { createClient } from "@supabase/supabase-js";
 import { headers } from "next/headers";
+import { addCredits } from "@/lib/signing-credits";
+import { sendAutoTopupSuccessEmail } from "@/lib/email";
 
 const stripe = process.env.STRIPE_SECRET_KEY ? new Stripe(process.env.STRIPE_SECRET_KEY) : null;
 
@@ -53,6 +55,48 @@ export async function POST(req: Request) {
 
   console.log("🔔 Received Stripe event:", event.type);
 
+  // ✅ Signeringskreditter — håndteres separat, krever ikke user_id
+  if (event.type === "checkout.session.completed") {
+    const session = event.data.object as Stripe.Checkout.Session;
+    if (session.metadata?.type === "signing_credits") {
+      const credits = parseInt(session.metadata.credits ?? "0", 10)
+      const accountId = session.metadata.account_id
+      if (accountId && credits > 0) {
+        await addCredits(accountId, credits)
+      }
+      return NextResponse.json({ received: true });
+    }
+  }
+
+  if (event.type === "payment_intent.succeeded") {
+    const intent = event.data.object as Stripe.PaymentIntent;
+    if (intent.metadata?.type === "signing_credits" && intent.metadata?.auto_topup === "true") {
+      const credits = parseInt(intent.metadata.credits ?? "0", 10)
+      const accountId = intent.metadata.account_id
+      if (accountId && credits > 0) {
+        await addCredits(accountId, credits)
+        const { data: adminUser } = await supabase!
+          .from("account_users")
+          .select("user_id")
+          .eq("account_id", accountId)
+          .eq("role", "admin")
+          .single()
+        if (adminUser) {
+          const { data: profile } = await supabase!
+            .from("profiles")
+            .select("full_name")
+            .eq("user_id", adminUser.user_id)
+            .single()
+          const { data: authData } = await supabase!.auth.admin.getUserById(adminUser.user_id)
+          if (authData?.user?.email) {
+            await sendAutoTopupSuccessEmail(authData.user.email, profile?.full_name ?? "")
+          }
+        }
+      }
+      return NextResponse.json({ received: true });
+    }
+  }
+
   let userId: string | null = null;
 
   // 1️⃣ checkout.session.completed → metadata har user_id
@@ -84,13 +128,13 @@ export async function POST(req: Request) {
   switch (event.type) {
     case "checkout.session.completed": {
       const session = event.data.object as Stripe.Checkout.Session;
-      const accountId = await getAccountIdFromUserId(userId);
+      const accountId = await getAccountIdFromUserId(userId!);
 
       await supabase.from("profiles").update({
         stripe_customer_id: session.customer,
         stripe_subscription_id: session.subscription,
         subscription_status: "active",
-      }).eq("user_id", userId);
+      }).eq("user_id", userId!);
 
       if (accountId) {
         await supabase.from("accounts").update({
@@ -122,14 +166,15 @@ export async function POST(req: Request) {
     }
 
     case "customer.subscription.deleted": {
-      const accountId = await getAccountIdFromUserId(userId);
+      const accountId = await getAccountIdFromUserId(userId!);
 
-      await supabase.from("profiles").update({ subscription_status: "canceled" }).eq("user_id", userId);
+      await supabase.from("profiles").update({ subscription_status: "canceled" }).eq("user_id", userId!);
       if (accountId) {
         await supabase.from("accounts").update({ subscription_status: "canceled" }).eq("id", accountId);
       }
       break;
     }
+
   }
 
   return NextResponse.json({ received: true });

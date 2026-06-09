@@ -455,6 +455,37 @@ export async function sendSigningLinkEmail(
   })
 }
 
+export async function sendAutoTopupSuccessEmail(to: string, name: string) {
+  if (!resend) return
+  await resend.emails.send({
+    from: FROM,
+    to,
+    subject: "20 signeringskreditter er lagt til kontoen din",
+    html: `
+      <p>${translations.greeting["no"](name)}</p>
+      <p>Auto-topup er gjennomført. <strong>20 signeringskreditter</strong> er belastet og lagt til kontoen din.</p>
+      <p><a href="${APP_URL}/settings" style="${btnStyle("#1e293b")}">Se saldo</a></p>
+      <p style="${footerStyle}">Du kan endre innstillinger for signeringspakker under Innstillinger → Abonnement.</p>
+    `,
+  })
+}
+
+export async function sendAutoTopupFailedEmail(to: string, name: string) {
+  if (!resend) return
+  await resend.emails.send({
+    from: FROM,
+    to,
+    subject: "Auto-topup av signeringskreditter feilet",
+    html: `
+      <p>${translations.greeting["no"](name)}</p>
+      <p>Vi klarte ikke å gjennomføre automatisk kjøp av signeringskreditter. Kontoen din har nå lav saldo.</p>
+      <p>Logg inn og kjøp en ny pakke for å fortsette å bruke digital signering.</p>
+      <p><a href="${APP_URL}/settings" style="${btnStyle("#dc2626")}">Kjøp signeringskreditter</a></p>
+      <p style="${footerStyle}">Gå til Innstillinger → Abonnement for å administrere signeringskreditter.</p>
+    `,
+  })
+}
+
 const btnStyle = (bg: string) =>
   `background:${bg};color:white;padding:10px 20px;border-radius:6px;text-decoration:none;display:inline-block;margin-top:8px`
 
