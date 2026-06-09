@@ -299,7 +299,10 @@
     "signingLinkInfo": "Teilen Sie diesen Link mit dem Empfänger:",
     "signingCopyLink": "Link kopieren",
     "signingLinkCopied": "Kopiert!",
-    "signingError": "Etwas ist schiefgelaufen. Bitte erneut versuchen."
+    "signingError": "Etwas ist schiefgelaufen. Bitte erneut versuchen.",
+    "aiSummaryButton": "Kundenübersicht",
+    "aiSummaryTitle": "Kundenübersicht",
+    "aiSummaryError": "Zusammenfassung konnte nicht generiert werden."
   },
   "agreements": {
     "title": "Verträge",

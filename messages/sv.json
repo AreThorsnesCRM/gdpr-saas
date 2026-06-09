@@ -299,7 +299,10 @@
     "signingLinkInfo": "Dela den här länken med mottagaren:",
     "signingCopyLink": "Kopiera länk",
     "signingLinkCopied": "Kopierat!",
-    "signingError": "Något gick fel. Försök igen."
+    "signingError": "Något gick fel. Försök igen.",
+    "aiSummaryButton": "Kundsammanfattning",
+    "aiSummaryTitle": "Kundsammanfattning",
+    "aiSummaryError": "Kunde inte generera sammanfattning."
   },
   "agreements": {
     "title": "Avtal",

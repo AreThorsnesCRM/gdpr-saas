@@ -299,7 +299,10 @@
     "signingLinkInfo": "Jaa tämä linkki vastaanottajalle:",
     "signingCopyLink": "Kopioi linkki",
     "signingLinkCopied": "Kopioitu!",
-    "signingError": "Jotain meni pieleen. Yritä uudelleen."
+    "signingError": "Jotain meni pieleen. Yritä uudelleen.",
+    "aiSummaryButton": "Asiakasyhteenveto",
+    "aiSummaryTitle": "Asiakasyhteenveto",
+    "aiSummaryError": "Yhteenvetoa ei voitu luoda."
   },
   "agreements": {
     "title": "Sopimukset",

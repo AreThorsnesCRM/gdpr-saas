@@ -299,7 +299,10 @@
     "signingLinkInfo": "Del denne lenken med mottakeren:",
     "signingCopyLink": "Kopier lenke",
     "signingLinkCopied": "Kopiert!",
-    "signingError": "Noe gikk galt. Prøv igjen."
+    "signingError": "Noe gikk galt. Prøv igjen.",
+    "aiSummaryButton": "Kundeoppsummering",
+    "aiSummaryTitle": "Kundeoppsummering",
+    "aiSummaryError": "Kunne ikke generere sammendrag."
   },
   "agreements": {
     "title": "Avtaler",

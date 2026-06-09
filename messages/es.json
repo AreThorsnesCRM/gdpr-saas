@@ -299,7 +299,10 @@
     "signingLinkInfo": "Comparte este enlace con el destinatario:",
     "signingCopyLink": "Copiar enlace",
     "signingLinkCopied": "¡Copiado!",
-    "signingError": "Algo salió mal. Inténtalo de nuevo."
+    "signingError": "Algo salió mal. Inténtalo de nuevo.",
+    "aiSummaryButton": "Resumen del cliente",
+    "aiSummaryTitle": "Resumen del cliente",
+    "aiSummaryError": "No se pudo generar el resumen."
   },
   "agreements": {
     "title": "Contratos",

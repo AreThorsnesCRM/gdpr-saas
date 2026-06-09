@@ -12,6 +12,7 @@ export async function GET(req: Request) {
 
   const { searchParams } = new URL(req.url)
   const customerId = searchParams.get("customerId")
+  const locale = searchParams.get("locale") ?? "no"
   if (!customerId) return NextResponse.json({ error: "Missing customerId" }, { status: 400 })
 
   const cookieStore = await cookies()
@@ -73,12 +74,23 @@ Siste aktiviteter (${notes?.length ?? 0} totalt):
 ${notes?.slice(0, 8).map((n: any) => `- ${new Date(n.created_at).toLocaleDateString("no-NO")}: ${n.content}`).join("\n") || "Ingen aktivitet registrert"}
 `
 
+  const langInstruction =
+    locale === "en" ? "Write in English." :
+    locale === "es" ? "Escribe en español." :
+    locale === "sv" ? "Skriv på svenska." :
+    locale === "da" ? "Skriv på dansk." :
+    locale === "fi" ? "Kirjoita suomeksi." :
+    locale === "de" ? "Schreibe auf Deutsch." :
+    locale === "fr" ? "Écris en français." :
+    locale === "pt" ? "Escreva em português." :
+    "Skriv på norsk."
+
   const message = await anthropic.messages.create({
     model: "claude-haiku-4-5-20251001",
     max_tokens: 500,
     messages: [{
       role: "user",
-      content: `Lag et kort, profesjonelt sammendrag av denne kunden for bruk før et møte. Maks 4–5 setninger. Inkluder nøkkelpunkter om kundeforhold, aktive avtaler og siste aktivitet. Skriv på norsk.\n\n${context}`,
+      content: `Write a short, professional customer summary to be used before a meeting. Max 4–5 sentences. Include key points about the customer relationship, active agreements, and recent activity. ${langInstruction}\n\n${context}`,
     }],
   })
 

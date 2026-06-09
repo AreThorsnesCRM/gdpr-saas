@@ -299,7 +299,10 @@
     "signingLinkInfo": "Share this link with the recipient:",
     "signingCopyLink": "Copy link",
     "signingLinkCopied": "Copied!",
-    "signingError": "Something went wrong. Please try again."
+    "signingError": "Something went wrong. Please try again.",
+    "aiSummaryButton": "Customer Summary",
+    "aiSummaryTitle": "Customer Summary",
+    "aiSummaryError": "Could not generate summary."
   },
   "agreements": {
     "title": "Agreements",

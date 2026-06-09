@@ -299,7 +299,10 @@
     "signingLinkInfo": "Partagez ce lien avec le destinataire :",
     "signingCopyLink": "Copier le lien",
     "signingLinkCopied": "Copié !",
-    "signingError": "Une erreur s'est produite. Veuillez réessayer."
+    "signingError": "Une erreur s'est produite. Veuillez réessayer.",
+    "aiSummaryButton": "Résumé client",
+    "aiSummaryTitle": "Résumé client",
+    "aiSummaryError": "Impossible de générer le résumé."
   },
   "agreements": {
     "title": "Contrats",

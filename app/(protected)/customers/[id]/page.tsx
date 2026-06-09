@@ -191,9 +191,9 @@ export default function CustomerPage(props: CustomerPageProps) {
     setSummaryOpen(true)
     setSummary("")
     setSummaryLoading(true)
-    const res = await fetch(`/api/ai/customer-summary?customerId=${id}`)
+    const res = await fetch(`/api/ai/customer-summary?customerId=${id}&locale=${locale}`)
     const data = await res.json()
-    setSummary(data.summary ?? "Kunne ikke generere sammendrag.")
+    setSummary(data.summary ?? t("aiSummaryError"))
     setSummaryLoading(false)
   }
 
@@ -339,7 +339,7 @@ export default function CustomerPage(props: CustomerPageProps) {
               className="flex items-center gap-1.5 text-sm bg-slate-800 text-white px-3 py-1.5 rounded-lg hover:bg-slate-700 transition"
             >
               <span className="text-amber-400">✦</span>
-              Kundeoppsummering
+              {t("aiSummaryButton")}
             </button>
           )}
           <button
@@ -357,7 +357,7 @@ export default function CustomerPage(props: CustomerPageProps) {
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
               <span className="text-amber-400">✦</span>
-              <p className="text-sm font-semibold">Kundeoppsummering</p>
+              <p className="text-sm font-semibold">{t("aiSummaryTitle")}</p>
             </div>
             <button onClick={() => setSummaryOpen(false)} className="text-white/50 hover:text-white text-lg leading-none">×</button>
           </div>
