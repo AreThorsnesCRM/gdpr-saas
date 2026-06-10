@@ -108,7 +108,9 @@ export async function triggerAutoTopup(
     // Opprett faktura med ekte produkt — gir riktig kvittering og sporbarhet i Stripe
     await stripe.invoiceItems.create({
       customer: account.stripe_customer_id,
-      price: priceId,
+      amount: 57900,
+      currency: "nok",
+      description: "Pactiva — 20 signeringskreditter",
     })
 
     const invoice = await stripe.invoices.create({
