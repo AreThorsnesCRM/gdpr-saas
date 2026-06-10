@@ -13,7 +13,7 @@ export default function LoginForm() {
   const [error, setError] = useState("")
   const [loading, setLoading] = useState(false)
 
-  const features = [t("feature1"), t("feature2"), t("feature3")]
+  const features = [t("feature1"), t("feature2"), t("feature3"), t("feature4"), t("feature5")]
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
