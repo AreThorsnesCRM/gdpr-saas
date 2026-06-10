@@ -679,13 +679,14 @@ export default function AgreementDetailPage({ params }: { params: Promise<{ id: 
                 "evrotrust-signature": 3,
                 "itsme-qes-signature": 3,
               }
-              const cost = METHOD_COST[signingMethod] ?? 1
+              const costPerSigner = METHOD_COST[signingMethod] ?? 1
+              const totalCost = costPerSigner * signers.length
               const balance = (account?.signings_credits_included ?? 0) + (account?.signings_credits_purchased ?? 0)
-              const hasEnough = balance >= cost
+              const hasEnough = balance >= totalCost
               return (
                 <div className={`flex items-center justify-between rounded-lg px-3 py-2.5 text-xs ${hasEnough ? "bg-gray-50 text-gray-500" : "bg-red-50 text-red-700 border border-red-100"}`}>
                   <span>
-                    {t("signingCreditCost", { cost })} &nbsp;·&nbsp; {t("signingCreditBalance", { balance })}
+                    {t("signingCreditCost", { cost: totalCost })} &nbsp;·&nbsp; {t("signingCreditBalance", { balance })}
                   </span>
                   {!hasEnough && (
                     <Link href="/settings#signering" className="font-medium underline underline-offset-2 hover:text-red-900 transition-colors">
