@@ -10,13 +10,14 @@ type Stats = {
     active: number
     canceled: number
     past_due: number
-    other: number
   }
   users: { total: number }
   credits: {
     totalPurchased: number
+    totalIncluded: number
     totalUnused: number
     autoTopupEnabled: number
+    esignatureNeeded: number
   }
   agreements: {
     total: number
@@ -85,9 +86,16 @@ export default function OwnerDashboard() {
         <section className="space-y-3">
           <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-widest">Signeringskreditter</h2>
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-            <StatCard label="Kjøpt totalt" value={stats.credits.totalPurchased} />
-            <StatCard label="Ubrukt (alle kontoer)" value={stats.credits.totalUnused} />
+            <StatCard label="Kjøpt av kunder" value={stats.credits.totalPurchased} note="Kun aktive abonnenter" />
+            <StatCard label="Inkludert i abonnement" value={stats.credits.totalIncluded} note="Kun aktive abonnenter" />
+            <StatCard label="Totalt utestående" value={stats.credits.totalUnused} note="Kun aktive abonnenter" />
             <StatCard label="Auto-påfyll aktivert" value={stats.credits.autoTopupEnabled} />
+            <StatCard
+              label="e-signature kreditter nødvendig"
+              value={stats.credits.esignatureNeeded}
+              color="red"
+              note="Maks behov (alle OTP)"
+            />
           </div>
         </section>
 
@@ -96,9 +104,9 @@ export default function OwnerDashboard() {
           <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-widest">Avtaler</h2>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             <StatCard label="Totalt" value={stats.agreements.total} />
-            <StatCard label="Aktive (ikke arkivert)" value={stats.agreements.active} />
-            <StatCard label="Sendt til signering" value={stats.agreements.signingPending} color="blue" />
-            <StatCard label="Digitalt signert" value={stats.agreements.signingSigned} color="green" />
+            <StatCard label="Aktive nå" value={stats.agreements.active} color="green" note="Signert og innenfor perioden" />
+            <StatCard label="Venter på signering" value={stats.agreements.signingPending} color="blue" />
+            <StatCard label="Digitalt signert" value={stats.agreements.signingSigned} />
           </div>
         </section>
 
@@ -110,10 +118,11 @@ export default function OwnerDashboard() {
   )
 }
 
-function StatCard({ label, value, color = "default" }: {
+function StatCard({ label, value, color = "default", note }: {
   label: string
   value: number
   color?: "default" | "green" | "blue" | "red" | "gray"
+  note?: string
 }) {
   const valueColors = {
     default: "text-gray-900",
@@ -126,6 +135,7 @@ function StatCard({ label, value, color = "default" }: {
     <div className="bg-white rounded-xl border border-gray-200 p-4">
       <p className="text-xs text-gray-400 mb-1">{label}</p>
       <p className={`text-3xl font-bold ${valueColors[color]}`}>{value}</p>
+      {note && <p className="text-xs text-gray-300 mt-1">{note}</p>}
     </div>
   )
 }

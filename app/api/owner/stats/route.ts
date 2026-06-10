@@ -27,16 +27,22 @@ export async function GET() {
 
   const statusCounts: Record<string, number> = {}
   let totalCreditsPurchased = 0
-  let totalCreditsUnused = 0
+  let totalCreditsIncluded = 0
   let autoTopupEnabled = 0
 
   for (const a of accounts ?? []) {
     const s = a.subscription_status ?? "unknown"
     statusCounts[s] = (statusCounts[s] ?? 0) + 1
-    totalCreditsPurchased += a.signings_credits_purchased ?? 0
-    totalCreditsUnused += (a.signings_credits_included ?? 0) + (a.signings_credits_purchased ?? 0)
+    if (a.subscription_status === "active") {
+      totalCreditsPurchased += a.signings_credits_purchased ?? 0
+      totalCreditsIncluded += a.signings_credits_included ?? 0
+    }
     if (a.signing_auto_topup) autoTopupEnabled++
   }
+
+  const totalCreditsUnused = totalCreditsIncluded + totalCreditsPurchased
+  // Verste tilfelle: alle bruker OTP (0.4 e-sig-kreditter per signering = 0.4 per Pactiva-kreditt)
+  const esignatureNeeded = Math.ceil(totalCreditsUnused * 0.4)
 
   const totalAccounts = accounts?.length ?? 0
 
@@ -45,13 +51,16 @@ export async function GET() {
     .from("profiles")
     .select("*", { count: "exact", head: true })
 
-  // Avtaler per signeringsstatus
+  // Avtaler
   const { data: agreements } = await supabaseAdmin
     .from("agreements")
-    .select("signing_status, archived")
+    .select("signing_status, archived, signed, start_date, end_date")
 
+  const today = new Date().toISOString().slice(0, 10)
   const totalAgreements = agreements?.length ?? 0
-  const activeAgreements = agreements?.filter(a => !a.archived).length ?? 0
+  const activeAgreements = agreements?.filter(
+    a => !a.archived && a.signed && a.start_date <= today && a.end_date >= today
+  ).length ?? 0
   const signingPending = agreements?.filter(a => a.signing_status === "pending").length ?? 0
   const signingSigned = agreements?.filter(a => a.signing_status === "signed").length ?? 0
 
@@ -62,15 +71,16 @@ export async function GET() {
       active: statusCounts["active"] ?? 0,
       canceled: statusCounts["canceled"] ?? 0,
       past_due: statusCounts["past_due"] ?? 0,
-      other: totalAccounts - (statusCounts["trialing"] ?? 0) - (statusCounts["active"] ?? 0) - (statusCounts["canceled"] ?? 0) - (statusCounts["past_due"] ?? 0),
     },
     users: {
       total: totalUsers ?? 0,
     },
     credits: {
       totalPurchased: totalCreditsPurchased,
+      totalIncluded: totalCreditsIncluded,
       totalUnused: totalCreditsUnused,
       autoTopupEnabled,
+      esignatureNeeded,
     },
     agreements: {
       total: totalAgreements,
