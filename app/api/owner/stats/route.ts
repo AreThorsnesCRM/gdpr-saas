@@ -20,10 +20,11 @@ export async function GET() {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 })
   }
 
-  // Kontoer per status
+  // Kontoer per status + nyeste registreringer
   const { data: accounts } = await supabaseAdmin
     .from("accounts")
-    .select("subscription_status, signings_credits_included, signings_credits_purchased, signing_auto_topup")
+    .select("id, name, subscription_status, signings_credits_included, signings_credits_purchased, signing_auto_topup, created_at")
+    .order("created_at", { ascending: false })
 
   const statusCounts: Record<string, number> = {}
   let totalCreditsPurchased = 0
@@ -45,6 +46,20 @@ export async function GET() {
   const esignatureNeeded = Math.ceil(totalCreditsUnused * 0.4)
 
   const totalAccounts = accounts?.length ?? 0
+
+  // Nyeste 8 registreringer
+  const recentAccounts = (accounts ?? []).slice(0, 8).map(a => ({
+    name: a.name,
+    status: a.subscription_status ?? "unknown",
+    created_at: a.created_at,
+  }))
+
+  // Konverteringsrate: aktive / (aktive + kansellerte) — ekskl. prøveperiode
+  const converted = statusCounts["active"] ?? 0
+  const churned = statusCounts["canceled"] ?? 0
+  const conversionRate = (converted + churned) > 0
+    ? Math.round((converted / (converted + churned)) * 100)
+    : null
 
   // Brukere (profiler)
   const { count: totalUsers } = await supabaseAdmin
@@ -88,5 +103,7 @@ export async function GET() {
       signingPending,
       signingSigned,
     },
+    recentAccounts,
+    conversionRate,
   })
 }
