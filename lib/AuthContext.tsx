@@ -16,6 +16,7 @@ export type Account = {
   signing_method: string | null
   signings_credits_included: number | null
   signings_credits_purchased: number | null
+  signing_auto_topup: boolean | null
 }
 
 export type Profile = {

@@ -58,7 +58,7 @@ export async function POST(
 
   const { data: account } = await supabaseAdmin
     .from("accounts")
-    .select("name, signing_method, subscription_status, signings_credits_included, signings_credits_purchased")
+    .select("name, signing_method, subscription_status, signings_credits_included, signings_credits_purchased, signing_auto_topup")
     .eq("id", accountUser.account_id)
     .single()
 
@@ -130,8 +130,8 @@ export async function POST(
   // Trekk fra kreditter etter vellykket signering
   const { remaining } = await deductCredits(accountUser.account_id, cost)
 
-  // Auto-topup når saldo er 1
-  if (remaining === 1) {
+  // Auto-topup når saldo er 1 og brukeren har aktivert det
+  if (remaining === 1 && account.signing_auto_topup === true) {
     const { data: adminUser } = await supabaseAdmin
       .from("account_users")
       .select("user_id")

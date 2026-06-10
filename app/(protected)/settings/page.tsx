@@ -97,6 +97,7 @@ export default function SettingsPage() {
   const [savingSigningMethod, setSavingSigningMethod] = useState(false)
   const [signingMethodSaved, setSigningMethodSaved] = useState(false)
   const [buyingCredits, setBuyingCredits] = useState<number | null>(null)
+  const [autoTopup, setAutoTopup] = useState<boolean>(account?.signing_auto_topup ?? false)
 
   const [fullName, setFullName] = useState("")
   const [profileSaved, setProfileSaved] = useState(false)
@@ -370,6 +371,7 @@ export default function SettingsPage() {
   useEffect(() => {
     setAiEnabled(account?.ai_assistant_enabled ?? false)
     setAiDashboardWidget(account?.ai_dashboard_widget_enabled ?? false)
+    setAutoTopup(account?.signing_auto_topup ?? false)
   }, [account])
 
   async function handleToggleAI(value: boolean) {
@@ -394,6 +396,16 @@ export default function SettingsPage() {
     })
     await refreshAccount()
     setSavingAI(false)
+  }
+
+  async function handleToggleAutoTopup(value: boolean) {
+    setAutoTopup(value)
+    await fetch("/api/account/profile", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ signing_auto_topup: value }),
+    })
+    await refreshAccount()
   }
 
   async function handleCompanySave(e: React.FormEvent) {
@@ -1115,7 +1127,7 @@ export default function SettingsPage() {
                           key={credits}
                           onClick={() => buyCredits(credits)}
                           disabled={buyingCredits !== null}
-                          className="flex flex-col items-center border border-gray-200 rounded-lg p-3 hover:border-slate-400 hover:bg-slate-50 transition-colors disabled:opacity-50 text-center"
+                          className="flex flex-col items-center border border-gray-200 rounded-lg p-3 bg-gray-50 hover:border-slate-400 hover:bg-slate-100 transition-colors disabled:opacity-50 text-center"
                         >
                           <span className="text-lg font-bold text-gray-900">{credits}</span>
                           <span className="text-xs text-gray-500">{t("signingCreditsUnit")}</span>
@@ -1128,6 +1140,21 @@ export default function SettingsPage() {
                     })}
                   </div>
                   <p className="text-xs text-gray-400">{t("signingCreditsMethodInfo")}</p>
+
+                  <div className="border-t border-gray-100 pt-4 flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-gray-800">{t("autoTopupTitle")}</p>
+                      <p className="text-xs text-gray-500 mt-0.5">{t("autoTopupDesc")}</p>
+                    </div>
+                    <button
+                      role="switch"
+                      aria-checked={autoTopup}
+                      onClick={() => handleToggleAutoTopup(!autoTopup)}
+                      className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${autoTopup ? "bg-slate-800" : "bg-gray-200"}`}
+                    >
+                      <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform shadow ${autoTopup ? "translate-x-6" : "translate-x-1"}`} />
+                    </button>
+                  </div>
                 </div>
               </>
             )}

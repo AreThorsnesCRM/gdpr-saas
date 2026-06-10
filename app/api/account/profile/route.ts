@@ -73,6 +73,9 @@ export async function PATCH(req: Request) {
   if (typeof body.ai_dashboard_widget_enabled === "boolean") {
     updates.ai_dashboard_widget_enabled = body.ai_dashboard_widget_enabled
   }
+  if (typeof body.signing_auto_topup === "boolean") {
+    updates.signing_auto_topup = body.signing_auto_topup
+  }
 
   if (Object.keys(updates).length === 0) {
     return NextResponse.json({ error: "Ingen gyldige felter" }, { status: 400 })
