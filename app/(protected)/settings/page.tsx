@@ -1064,11 +1064,11 @@ export default function SettingsPage() {
 
                   {/* Info-kort for valgt metode */}
                   {(() => {
-                    const info: Record<string, { level: string; levelKey: string; desc: string; descKey: string; usage: string; usageKey: string; cost: "Low" | "Medium" | "High"; costKey: string; color: string }> = {
-                      "otp-email-non-qualified": { level: "SES", levelKey: "methodOtpEmailLevel", desc: "", descKey: "methodOtpEmailDesc", usage: "", usageKey: "methodOtpEmailUsage", cost: "Low", costKey: "signingCostLow", color: "bg-green-100 text-green-800" },
-                      "veriff-advanced-signature": { level: "AES", levelKey: "methodVeriffLevel", desc: "", descKey: "methodVeriffDesc", usage: "", usageKey: "methodVeriffUsage", cost: "Medium", costKey: "signingCostMedium", color: "bg-yellow-100 text-yellow-800" },
-                      "evrotrust-signature": { level: "QES", levelKey: "methodEvrotrustLevel", desc: "", descKey: "methodEvrotrustDesc", usage: "", usageKey: "methodEvrotrustUsage", cost: "High", costKey: "signingCostHigh", color: "bg-blue-100 text-blue-800" },
-                      "itsme-qes-signature": { level: "QES", levelKey: "methodItsmeLevel", desc: "", descKey: "methodItsmeDesc", usage: "", usageKey: "methodItsmeUsage", cost: "High", costKey: "signingCostHigh", color: "bg-blue-100 text-blue-800" },
+                    const info: Record<string, { levelKey: string; descKey: string; usageKey: string; costKey: string; color: string; credits: number }> = {
+                      "otp-email-non-qualified": { levelKey: "methodOtpEmailLevel", descKey: "methodOtpEmailDesc", usageKey: "methodOtpEmailUsage", costKey: "signingCostLow", color: "bg-green-100 text-green-800", credits: 1 },
+                      "veriff-advanced-signature": { levelKey: "methodVeriffLevel", descKey: "methodVeriffDesc", usageKey: "methodVeriffUsage", costKey: "signingCostMedium", color: "bg-yellow-100 text-yellow-800", credits: 2 },
+                      "evrotrust-signature": { levelKey: "methodEvrotrustLevel", descKey: "methodEvrotrustDesc", usageKey: "methodEvrotrustUsage", costKey: "signingCostHigh", color: "bg-blue-100 text-blue-800", credits: 3 },
+                      "itsme-qes-signature": { levelKey: "methodItsmeLevel", descKey: "methodItsmeDesc", usageKey: "methodItsmeUsage", costKey: "signingCostHigh", color: "bg-blue-100 text-blue-800", credits: 3 },
                     }
                     const m = info[signingMethod]
                     if (!m) return null
@@ -1080,7 +1080,7 @@ export default function SettingsPage() {
                         <p className="text-gray-700">{t(m.descKey as any)}</p>
                         <div className="flex flex-col gap-1 text-gray-500">
                           <span><span className="font-medium text-gray-700">{t("signingUsageLabel")}:</span> {t(m.usageKey as any)}</span>
-                          <span><span className="font-medium text-gray-700">{t("signingCostLabel")}:</span> {t(m.costKey as any)}</span>
+                          <span><span className="font-medium text-gray-700">{t("signingCostLabel")}:</span> {t(m.costKey as any)} — {m.credits} {t("signingCreditsUnit")}</span>
                         </div>
                       </div>
                     )
