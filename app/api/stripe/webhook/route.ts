@@ -68,11 +68,11 @@ export async function POST(req: Request) {
     }
   }
 
-  if (event.type === "payment_intent.succeeded") {
-    const intent = event.data.object as Stripe.PaymentIntent;
-    if (intent.metadata?.type === "signing_credits" && intent.metadata?.auto_topup === "true") {
-      const credits = parseInt(intent.metadata.credits ?? "0", 10)
-      const accountId = intent.metadata.account_id
+  if (event.type === "invoice.payment_succeeded") {
+    const invoice = event.data.object as Stripe.Invoice;
+    if (invoice.metadata?.type === "signing_credits" && invoice.metadata?.auto_topup === "true") {
+      const credits = parseInt(invoice.metadata.credits ?? "0", 10)
+      const accountId = invoice.metadata.account_id
       if (accountId && credits > 0) {
         await addCredits(accountId, credits)
         const { data: adminUser } = await supabase!

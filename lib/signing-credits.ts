@@ -98,19 +98,23 @@ export async function triggerAutoTopup(
         ? customer.invoice_settings.default_payment_method
         : null
 
-    if (!paymentMethodId) {
+    const priceId = process.env.STRIPE_SIGNING_PRICE_20
+    if (!paymentMethodId || !priceId) {
       const { sendAutoTopupFailedEmail } = await import("@/lib/email")
       await sendAutoTopupFailedEmail(adminEmail, adminName)
       return
     }
 
-    await stripe.paymentIntents.create({
-      amount: 57900,
-      currency: "nok",
+    // Opprett faktura med ekte produkt — gir riktig kvittering og sporbarhet i Stripe
+    await stripe.invoiceItems.create({
       customer: account.stripe_customer_id,
-      payment_method: paymentMethodId,
-      confirm: true,
-      off_session: true,
+      price: priceId,
+    })
+
+    const invoice = await stripe.invoices.create({
+      customer: account.stripe_customer_id,
+      default_payment_method: paymentMethodId,
+      auto_advance: true,
       metadata: {
         type: "signing_credits",
         credits: "20",
@@ -119,7 +123,10 @@ export async function triggerAutoTopup(
       },
       description: "Pactiva — auto-topup 20 signeringskreditter",
     })
-    // Kreditter legges til via webhook (payment_intent.succeeded)
+
+    await stripe.invoices.finalizeInvoice(invoice.id)
+    await stripe.invoices.pay(invoice.id)
+    // Kreditter legges til via webhook (invoice.payment_succeeded)
   } catch (err: any) {
     console.error("Auto-topup feilet:", err?.message)
     const { sendAutoTopupFailedEmail } = await import("@/lib/email")

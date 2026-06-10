@@ -44,17 +44,13 @@ export async function POST(req: Request) {
 
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL!
 
+  const priceId = process.env[`STRIPE_SIGNING_PRICE_${pkg.credits}`]
+  if (!priceId) return NextResponse.json({ error: "Pris ikke konfigurert" }, { status: 500 })
+
   const session = await stripe.checkout.sessions.create({
     mode: "payment",
     customer: account.stripe_customer_id ?? undefined,
-    line_items: [{
-      price_data: {
-        currency: "nok",
-        product_data: { name: pkg.label },
-        unit_amount: pkg.amount,
-      },
-      quantity: 1,
-    }],
+    line_items: [{ price: priceId, quantity: 1 }],
     success_url: `${baseUrl}/settings?tab=abonnement&credits=purchased`,
     cancel_url: `${baseUrl}/settings?tab=abonnement`,
     metadata: {
