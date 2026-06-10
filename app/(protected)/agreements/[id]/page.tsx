@@ -671,6 +671,31 @@ export default function AgreementDetailPage({ params }: { params: Promise<{ id: 
                 <option value="itsme-qes-signature">{ts("methodItsme")}</option>
               </select>
             </div>
+            {/* Kredittinfo */}
+            {account?.subscription_status !== "trialing" && (() => {
+              const METHOD_COST: Record<string, number> = {
+                "otp-email-non-qualified": 1,
+                "veriff-advanced-signature": 2,
+                "evrotrust-signature": 3,
+                "itsme-qes-signature": 3,
+              }
+              const cost = METHOD_COST[signingMethod] ?? 1
+              const balance = (account?.signings_credits_included ?? 0) + (account?.signings_credits_purchased ?? 0)
+              const hasEnough = balance >= cost
+              return (
+                <div className={`flex items-center justify-between rounded-lg px-3 py-2.5 text-xs ${hasEnough ? "bg-gray-50 text-gray-500" : "bg-red-50 text-red-700 border border-red-100"}`}>
+                  <span>
+                    {t("signingCreditCost", { cost })} &nbsp;·&nbsp; {t("signingCreditBalance", { balance })}
+                  </span>
+                  {!hasEnough && (
+                    <Link href="/settings#signering" className="font-medium underline underline-offset-2 hover:text-red-900 transition-colors">
+                      {t("signingBuyCredits")} →
+                    </Link>
+                  )}
+                </div>
+              )
+            })()}
+
             {signingError && <p className="text-sm text-red-600">{signingError}</p>}
             {account?.subscription_status === "trialing" ? (
               <div className="rounded-lg bg-amber-50 border border-amber-200 px-4 py-3 text-sm text-amber-800">
