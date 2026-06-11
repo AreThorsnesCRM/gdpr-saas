@@ -6,6 +6,7 @@ import { getLocale, getMessages } from "next-intl/server"
 export const metadata = {
   title: "Pactiva",
   description: "Customer and agreement management",
+  icons: { icon: "/favicon.svg" },
 }
 
 export const viewport = {
