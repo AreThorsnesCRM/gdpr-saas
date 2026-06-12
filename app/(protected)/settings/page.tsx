@@ -5,7 +5,7 @@ export const dynamic = "force-dynamic"
 import { useEffect, useState } from "react"
 import { useAuth } from "@/lib/AuthContext"
 import { supabase } from "@/lib/supabaseClient"
-import { useTranslations } from "next-intl"
+import { useTranslations, useLocale } from "next-intl"
 import { getCategoryDisplayName } from "@/lib/categoryUtils"
 
 type Member = {
@@ -47,6 +47,8 @@ export default function SettingsPage() {
   const { account, user, refreshAccount } = useAuth()
   const t = useTranslations("settings")
   const tc = useTranslations("common")
+  const locale = useLocale()
+  const isNok = locale === "no"
   const to = useTranslations("onboarding")
 
   const sections = [
@@ -448,7 +450,7 @@ export default function SettingsPage() {
       const res = await fetch("/api/signing-credits/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ credits }),
+        body: JSON.stringify({ credits, currency: isNok ? "nok" : "eur" }),
       })
       const data = await res.json()
       if (data.url) window.location.href = data.url
@@ -1120,24 +1122,27 @@ export default function SettingsPage() {
                     <span>{t("signingCreditsPurchased", { n: account.signings_credits_purchased ?? 0 })}</span>
                   </div>
                   <div className="grid grid-cols-3 gap-2 max-w-sm">
-                    {([5, 10, 20] as const).map((credits, i) => {
-                      const amts = [175, 319, 579]
-                      return (
+                    {([
+                      { credits: 5,  nokDisplay: 175, eurDisplay: 15 },
+                      { credits: 10, nokDisplay: 319, eurDisplay: 27 },
+                      { credits: 20, nokDisplay: 579, eurDisplay: 49 },
+                    ] as const).map((pkg) => (
                         <button
-                          key={credits}
-                          onClick={() => buyCredits(credits)}
+                          key={pkg.credits}
+                          onClick={() => buyCredits(pkg.credits)}
                           disabled={buyingCredits !== null}
                           className="flex flex-col items-center border border-gray-200 rounded-lg p-3 bg-gray-50 hover:border-slate-400 hover:bg-slate-100 transition-colors disabled:opacity-50 text-center"
                         >
-                          <span className="text-lg font-bold text-gray-900">{credits}</span>
+                          <span className="text-lg font-bold text-gray-900">{pkg.credits}</span>
                           <span className="text-xs text-gray-500">{t("signingCreditsUnit")}</span>
-                          <span className="text-xs font-medium text-gray-700 mt-1">NOK {amts[i]}</span>
-                          {buyingCredits === credits && (
+                          <span className="text-xs font-medium text-gray-700 mt-1">
+                            {isNok ? `NOK ${pkg.nokDisplay}` : `€${pkg.eurDisplay}`}
+                          </span>
+                          {buyingCredits === pkg.credits && (
                             <span className="text-xs text-slate-500 mt-1">...</span>
                           )}
                         </button>
-                      )
-                    })}
+                    ))}
                   </div>
                   <p className="text-xs text-gray-400">{t("signingCreditsMethodInfo")}</p>
 

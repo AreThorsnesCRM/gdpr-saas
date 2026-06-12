@@ -20,7 +20,7 @@ export default function PrivacyPage() {
 
           <div>
             <h1 className="text-3xl font-bold text-gray-900">Personvernerklæring</h1>
-            <p className="text-gray-500 mt-2 text-sm">Sist oppdatert: mai 2026</p>
+            <p className="text-gray-500 mt-2 text-sm">Sist oppdatert: juni 2026</p>
           </div>
 
           <Section title="1. Behandlingsansvarlig">
@@ -30,7 +30,7 @@ export default function PrivacyPage() {
             </p>
             <p className="mt-3">
               <strong>Kontakt:</strong><br />
-              E-post: <a href="mailto:are.thorsnes@gmail.com" className="text-slate-700 underline">are.thorsnes@gmail.com</a>
+              E-post: <a href="mailto:support@pactiva.io" className="text-slate-700 underline">support@pactiva.io</a>
             </p>
           </Section>
 
@@ -85,8 +85,8 @@ export default function PrivacyPage() {
               <Processor
                 name="Supabase"
                 role="Database og autentisering"
-                location="EU (Frankfurt, Tyskland)"
-                note="Alle data lagres i EU. Ingen overføring til tredjeland."
+                location="Europa (London, Storbritannia)"
+                note="Alle data lagres i Europa (eu-west-2). Storbritannia har adekvansavgjørelse fra EU — data kan behandles lovlig etter GDPR."
               />
               <Processor
                 name="Stripe"
@@ -135,7 +135,7 @@ export default function PrivacyPage() {
               <li><strong>Trekke samtykke:</strong> du kan når som helst deaktivere AI-assistenten i Innstillinger</li>
             </ul>
             <p className="mt-4">
-              Send forespørsler til <a href="mailto:are.thorsnes@gmail.com" className="text-slate-700 underline">are.thorsnes@gmail.com</a>.
+              Send forespørsler til <a href="mailto:support@pactiva.io" className="text-slate-700 underline">support@pactiva.io</a>.
               Du har også rett til å klage til <a href="https://www.datatilsynet.no" target="_blank" rel="noopener noreferrer" className="text-slate-700 underline">Datatilsynet</a>.
             </p>
           </Section>
@@ -156,7 +156,7 @@ export default function PrivacyPage() {
 
           <div className="border-t border-gray-100 pt-6">
             <p className="text-xs text-gray-400">
-              © {new Date().getFullYear()} Pactiva · <a href="mailto:are.thorsnes@gmail.com" className="underline">are.thorsnes@gmail.com</a>
+              © {new Date().getFullYear()} Pactiva · <a href="mailto:support@pactiva.io" className="underline">support@pactiva.io</a>
             </p>
           </div>
 

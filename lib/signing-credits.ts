@@ -11,9 +11,9 @@ export const METHOD_CREDITS: Record<string, number> = {
 }
 
 export const SIGNING_PACKAGES = [
-  { credits: 5,  amount: 17500, label: "5 signeringskreditter" },
-  { credits: 10, amount: 31900, label: "10 signeringskreditter" },
-  { credits: 20, amount: 57900, label: "20 signeringskreditter" },
+  { credits: 5,  amountNok: 17500, amountEur: 1500, nokDisplay: 175, eurDisplay: 15 },
+  { credits: 10, amountNok: 31900, amountEur: 2700, nokDisplay: 319, eurDisplay: 27 },
+  { credits: 20, amountNok: 57900, amountEur: 4900, nokDisplay: 579, eurDisplay: 49 },
 ] as const
 
 export type SigningPackage = (typeof SIGNING_PACKAGES)[number]

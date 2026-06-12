@@ -10,9 +10,10 @@ const stripe = process.env.STRIPE_SECRET_KEY ? new Stripe(process.env.STRIPE_SEC
 export async function POST(req: Request) {
   if (!stripe || !supabaseAdmin) return NextResponse.json({ error: "Not configured" }, { status: 500 })
 
-  const { credits } = await req.json()
+  const { credits, currency } = await req.json()
   const pkg = SIGNING_PACKAGES.find(p => p.credits === credits)
   if (!pkg) return NextResponse.json({ error: "Ugyldig pakke" }, { status: 400 })
+  const isEur = currency === "eur"
 
   const cookieStore = await cookies()
   const supabase = createServerClient(
@@ -44,7 +45,8 @@ export async function POST(req: Request) {
 
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL!
 
-  const priceId = process.env[`STRIPE_SIGNING_PRICE_${pkg.credits}`]
+  const priceKey = isEur ? `STRIPE_SIGNING_PRICE_EUR_${pkg.credits}` : `STRIPE_SIGNING_PRICE_${pkg.credits}`
+  const priceId = process.env[priceKey]
   if (!priceId) return NextResponse.json({ error: "Pris ikke konfigurert" }, { status: 500 })
 
   const session = await stripe.checkout.sessions.create({
