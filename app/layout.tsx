@@ -9,7 +9,7 @@ export const metadata = {
   description: "Customer and agreement management",
   icons: {
     icon: "/favicon.svg",
-    apple: "/apple-touch-icon.png",
+    apple: [{ url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" }],
   },
 }
 
