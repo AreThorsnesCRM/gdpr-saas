@@ -7,7 +7,10 @@ import { Analytics } from "@vercel/analytics/react"
 export const metadata = {
   title: "Pactiva",
   description: "Customer and agreement management",
-  icons: { icon: "/favicon.svg" },
+  icons: {
+    icon: "/favicon.svg",
+    apple: "/apple-touch-icon.png",
+  },
 }
 
 export const viewport = {
