@@ -2,6 +2,7 @@ import "./globals.css"
 import { AuthProvider } from "@/lib/AuthProvider"
 import { NextIntlClientProvider } from "next-intl"
 import { getLocale, getMessages } from "next-intl/server"
+import { Analytics } from "@vercel/analytics/react"
 
 export const metadata = {
   title: "Pactiva",
@@ -25,6 +26,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           <AuthProvider>
             {children}
           </AuthProvider>
+          <Analytics />
         </NextIntlClientProvider>
       </body>
     </html>
