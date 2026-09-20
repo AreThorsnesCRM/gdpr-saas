@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server"
 import { createServerClient } from "@supabase/ssr"
 import { supabaseAdmin } from "@/lib/supabaseAdmin"
+import { ensureAccountForUser } from "@/lib/ensureAccount"
 import { cookies } from "next/headers"
 
 export async function GET() {
@@ -16,11 +17,19 @@ export async function GET() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
 
-  const { data: accountUser } = await supabaseAdmin
-    .from("account_users")
-    .select("account_id, role, restrict_to_own")
-    .eq("user_id", user.id)
-    .single()
+  const fetchAccountUser = () =>
+    supabaseAdmin!
+      .from("account_users")
+      .select("account_id, role, restrict_to_own")
+      .eq("user_id", user.id)
+      .maybeSingle()
+
+  let { data: accountUser } = await fetchAccountUser()
+
+  if (!accountUser) {
+    await ensureAccountForUser(user)
+    accountUser = (await fetchAccountUser()).data
+  }
 
   if (!accountUser) return NextResponse.json({ error: "No account" }, { status: 404 })
 
