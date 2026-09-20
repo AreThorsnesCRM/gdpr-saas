@@ -860,6 +860,8 @@
         "body": "Este acuerdo se rige por la legislación noruega. Las controversias se resolverán en la jurisdicción [del Cliente/de Pactiva], salvo que la normativa imperativa disponga lo contrario."
       }
     ],
-    "acceptanceFooter": "Al marcar «Acepto el acuerdo de tratamiento de datos» durante el registro, el usuario confirma tener autoridad para celebrar este acuerdo en nombre de la empresa que se registra."
+    "acceptanceFooter": "Al marcar «Acepto el acuerdo de tratamiento de datos» durante el registro, el usuario confirma tener autoridad para celebrar este acuerdo en nombre de la empresa que se registra.",
+    "acceptCheckbox": "He leído y acepto el acuerdo de tratamiento de datos.",
+    "acceptCheckboxHint": "Esto también marca la casilla del formulario de registro, si está abierto en otra pestaña."
   }
 }

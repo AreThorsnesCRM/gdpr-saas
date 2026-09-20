@@ -878,6 +878,8 @@
         "body": "This agreement is governed by Norwegian law. Disputes shall be resolved at [the Customer's/Pactiva's] venue, unless otherwise required by mandatory legislation."
       }
     ],
-    "acceptanceFooter": "By ticking “I accept the data processing agreement” during registration, the user confirms having authority to enter into this agreement on behalf of the business being registered."
+    "acceptanceFooter": "By ticking “I accept the data processing agreement” during registration, the user confirms having authority to enter into this agreement on behalf of the business being registered.",
+    "acceptCheckbox": "I have read and accept the data processing agreement.",
+    "acceptCheckboxHint": "This also ticks the box in the registration form, if it is open in another tab."
   }
 }

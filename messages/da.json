@@ -860,6 +860,8 @@
         "body": "Aftalen er underlagt norsk ret. Tvister søges løst ved [Kundens/Pactivas] værneting, medmindre andet følger af ufravigelig lovgivning."
       }
     ],
-    "acceptanceFooter": "Ved at krædse af “Jeg accepterer databehandleraftalen” ved registrering bekræfter brugeren at have fuldmagt til at indgå denne aftale på vegne af den virksomhed, der registreres."
+    "acceptanceFooter": "Ved at krædse af “Jeg accepterer databehandleraftalen” ved registrering bekræfter brugeren at have fuldmagt til at indgå denne aftale på vegne af den virksomhed, der registreres.",
+    "acceptCheckbox": "Jeg har læst og accepterer databehandleraftalen.",
+    "acceptCheckboxHint": "Dette afkrydser også feltet i registreringsformularen, hvis den er åben i en anden fane."
   }
 }

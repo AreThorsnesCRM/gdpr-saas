@@ -1,7 +1,11 @@
+export const dynamic = "force-dynamic"
+
 import Link from "next/link"
 import { getTranslations } from "next-intl/server"
 import { Metadata } from "next"
 import { DPA_VERSION } from "@/lib/dpa"
+import LanguageSwitcher from "@/app/components/LanguageSwitcher"
+import DpaAcceptCheckbox from "./DpaAcceptCheckbox"
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("dpa")
@@ -20,18 +24,20 @@ type DpaSection = {
   note?: string
 }
 
-export default async function DpaPage() {
+export default async function DpaPage({ searchParams }: { searchParams: Promise<{ from?: string }> }) {
   const t = await getTranslations("dpa")
   const sections = t.raw("sections") as DpaSection[]
+  const { from } = await searchParams
 
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-3xl mx-auto px-6 py-16">
 
-        <div className="mb-10">
+        <div className="mb-10 flex items-center justify-between">
           <Link href="/login" className="text-sm text-slate-500 hover:text-slate-800 transition-colors">
             {t("backLink")}
           </Link>
+          <LanguageSwitcher variant="light" />
         </div>
 
         <div className="bg-white rounded-2xl border border-gray-200 p-10 space-y-10">
@@ -104,6 +110,8 @@ export default async function DpaPage() {
           ))}
 
           <p className="text-sm text-gray-500 border-t border-gray-100 pt-6">{t("acceptanceFooter")}</p>
+
+          {from === "register" && <DpaAcceptCheckbox />}
 
         </div>
       </div>

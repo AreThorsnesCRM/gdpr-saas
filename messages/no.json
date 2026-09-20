@@ -878,6 +878,8 @@
         "body": "Avtalen reguleres av norsk rett. Tvister søkes løst ved [Kundens/Pactivas] verneting, med mindre annet følger av ufravikelig lovgivning."
       }
     ],
-    "acceptanceFooter": "Ved å krysse av «Jeg godtar databehandleravtalen» ved registrering, bekrefter brukeren å ha fullmakt til å inngå denne avtalen på vegne av virksomheten som registreres."
+    "acceptanceFooter": "Ved å krysse av «Jeg godtar databehandleravtalen» ved registrering, bekrefter brukeren å ha fullmakt til å inngå denne avtalen på vegne av virksomheten som registreres.",
+    "acceptCheckbox": "Jeg har lest og godtar databehandleravtalen.",
+    "acceptCheckboxHint": "Dette huker også av i registreringsskjemaet, hvis det er åpent i en annen fane."
   }
 }

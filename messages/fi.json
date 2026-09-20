@@ -860,6 +860,8 @@
         "body": "Sopimukseen sovelletaan Norjan lakia. Riidat pyritään ratkaisemaan [Asiakkaan/Pactivan] oikeuspaikassa, ellei pakottavasta lainsäädännöstä muuta johdu."
       }
     ],
-    "acceptanceFooter": "Valitsemalla “Hyväksyn henkilötietojen käsittelysopimuksen” rekisteröitymisen yhteydessä käyttäjä vahvistaa, että hänellä on valtuudet tehdä tämä sopimus rekisteröitävän yrityksen puolesta."
+    "acceptanceFooter": "Valitsemalla “Hyväksyn henkilötietojen käsittelysopimuksen” rekisteröitymisen yhteydessä käyttäjä vahvistaa, että hänellä on valtuudet tehdä tämä sopimus rekisteröitävän yrityksen puolesta.",
+    "acceptCheckbox": "Olen lukenut ja hyväksyn henkilötietojen käsittelysopimuksen.",
+    "acceptCheckboxHint": "Tämä valitsee myös rekisteröitymislomakkeen valintaruudun, jos se on auki toisessa välilehdessä."
   }
 }

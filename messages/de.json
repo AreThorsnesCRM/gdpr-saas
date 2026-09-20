@@ -860,6 +860,8 @@
         "body": "Diese Vereinbarung unterliegt norwegischem Recht. Streitigkeiten werden am Gerichtsstand [des Kunden/von Pactiva] beigelegt, sofern nicht zwingendes Recht etwas anderes vorschreibt."
       }
     ],
-    "acceptanceFooter": "Durch das Ankreuzen von “Ich akzeptiere den Auftragsverarbeitungsvertrag” bei der Registrierung bestätigt der Nutzer, zum Abschluss dieser Vereinbarung im Namen des registrierten Unternehmens befugt zu sein."
+    "acceptanceFooter": "Durch das Ankreuzen von “Ich akzeptiere den Auftragsverarbeitungsvertrag” bei der Registrierung bestätigt der Nutzer, zum Abschluss dieser Vereinbarung im Namen des registrierten Unternehmens befugt zu sein.",
+    "acceptCheckbox": "Ich habe den Auftragsverarbeitungsvertrag gelesen und akzeptiere ihn.",
+    "acceptCheckboxHint": "Dadurch wird auch das Kästchen im Registrierungsformular angekreuzt, falls es in einem anderen Tab geöffnet ist."
   }
 }

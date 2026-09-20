@@ -860,6 +860,8 @@
         "body": "Avtalet regleras av norsk rätt. Tvister ska lösas vid [Kundens/Pactivas] forum, om inte annat följer av tvingande lagstiftning."
       }
     ],
-    "acceptanceFooter": "Genom att kryssa i “Jag godkänner personuppgiftsbiträdesavtalet” vid registrering bekräftar användaren att ha fullmakt att ingå detta avtal å verksamhetens vägnar."
+    "acceptanceFooter": "Genom att kryssa i “Jag godkänner personuppgiftsbiträdesavtalet” vid registrering bekräftar användaren att ha fullmakt att ingå detta avtal å verksamhetens vägnar.",
+    "acceptCheckbox": "Jag har läst och godkänner personuppgiftsbiträdesavtalet.",
+    "acceptCheckboxHint": "Detta kryssar också i rutan i registreringsformuläret, om det är öppet i en annan flik."
   }
 }

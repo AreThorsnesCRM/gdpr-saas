@@ -860,6 +860,8 @@
         "body": "Este acordo rege-se pela lei norueguesa. Os litígios serão resolvidos no foro [do Cliente/da Pactiva], salvo disposição legal imperativa em contrário."
       }
     ],
-    "acceptanceFooter": "Ao assinalar “Aceito o acordo de tratamento de dados” durante o registo, o utilizador confirma ter poderes para celebrar este acordo em nome da empresa registada."
+    "acceptanceFooter": "Ao assinalar “Aceito o acordo de tratamento de dados” durante o registo, o utilizador confirma ter poderes para celebrar este acordo em nome da empresa registada.",
+    "acceptCheckbox": "Li e aceito o acordo de tratamento de dados.",
+    "acceptCheckboxHint": "Isto também assinala a caixa no formulário de registo, se estiver aberto noutro separador."
   }
 }

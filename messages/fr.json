@@ -860,6 +860,8 @@
         "body": "Le présent accord est régi par le droit norvégien. Les litiges sont résolus devant la juridiction [du Client/de Pactiva], sauf disposition légale impérative contraire."
       }
     ],
-    "acceptanceFooter": "En cochant « J'accepte l'accord de traitement des données » lors de l'inscription, l'utilisateur confirme être habilité à conclure cet accord au nom de l'entreprise enregistrée."
+    "acceptanceFooter": "En cochant « J'accepte l'accord de traitement des données » lors de l'inscription, l'utilisateur confirme être habilité à conclure cet accord au nom de l'entreprise enregistrée.",
+    "acceptCheckbox": "J'ai lu et j'accepte l'accord de traitement des données.",
+    "acceptCheckboxHint": "Cela coche également la case du formulaire d'inscription, s'il est ouvert dans un autre onglet."
   }
 }

@@ -6,6 +6,7 @@ import { useTranslations } from "next-intl";
 import Link from "next/link";
 import Script from "next/script";
 import { supabase } from "@/lib/supabaseClient";
+import { useDpaSync } from "@/lib/useDpaSync";
 
 function getPasswordStrength(password: string): 0 | 1 | 2 | 3 {
   if (password.length < 8) return 0;
@@ -28,6 +29,7 @@ export default function RegisterForm() {
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
   const [dpaAccepted, setDpaAccepted] = useState(false);
+  const updateDpaAccepted = useDpaSync(dpaAccepted, setDpaAccepted, "form");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [turnstileToken, setTurnstileToken] = useState("");
@@ -248,14 +250,14 @@ export default function RegisterForm() {
               <input
                 type="checkbox"
                 checked={dpaAccepted}
-                onChange={(e) => setDpaAccepted(e.target.checked)}
+                onChange={(e) => updateDpaAccepted(e.target.checked)}
                 className="mt-0.5 h-3.5 w-3.5 rounded border-gray-300 text-slate-800 focus:ring-slate-400 shrink-0"
               />
               <span>
                 {t.rich("dpaLabel", {
                   a: (chunks) => (
                     <a
-                      href="/dpa"
+                      href="/dpa?from=register"
                       target="_blank"
                       rel="noopener noreferrer"
                       className="underline hover:text-gray-800 transition-colors"
