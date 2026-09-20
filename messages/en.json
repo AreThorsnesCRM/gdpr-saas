@@ -108,7 +108,9 @@
     "errorCaptcha": "Please complete the security check",
     "errorCaptchaFailed": "Security check failed. Please try again.",
     "cookieNotice": "We only use necessary cookies for authentication.",
-    "cookiePrivacyLink": "Read our privacy policy"
+    "cookiePrivacyLink": "Read our privacy policy",
+    "dpaLabel": "I have read and accept the <a>data processing agreement</a>, and confirm that I have authority to enter into it on behalf of the business.",
+    "errorDpaRequired": "You must accept the data processing agreement to create an account."
   },
   "checkEmail": {
     "title": "Check your email",
@@ -526,7 +528,12 @@
     "methodEvrotrustUsage": "Legally sensitive documents, real estate, public contracts, financial agreements",
     "methodItsmeLevel": "QES — Qualified Electronic Signature",
     "methodItsmeDesc": "Signature via the itsme® app, a Belgian/Dutch approved digital identity solution.",
-    "methodItsmeUsage": "Same use cases as QES. Available in Belgium and the Netherlands"
+    "methodItsmeUsage": "Same use cases as QES. Available in Belgium and the Netherlands",
+    "dpaTitle": "Data Processing Agreement (DPA)",
+    "dpaDesc": "The agreement governing Pactiva's processing of personal data on behalf of the business.",
+    "dpaAcceptedText": "Accepted: version {version}, {date}",
+    "dpaNotAccepted": "No acceptance recorded yet.",
+    "dpaViewLink": "View the agreement"
   },
   "slideOver": {
     "backToForm": "← Back to form",
@@ -724,5 +731,153 @@
     "labelCategory": "Category",
     "labelNoCategory": "No category",
     "signingMethodOverride": "Signing method for this agreement"
+  },
+  "dpa": {
+    "metaTitle": "Data Processing Agreement (DPA) — Pactiva",
+    "metaDescription": "The data processing agreement governing Pactiva's processing of personal data on the customer's behalf, in accordance with GDPR Article 28.",
+    "draftBadge": "Working draft",
+    "draftNotice": "This is a working draft, not a finalised legal document. It should be reviewed by legal counsel before use, particularly the provisions on liability (12) and the controller/processor roles for “Customer Data” (see section 3).",
+    "lastUpdated": "Last updated",
+    "version": "Version",
+    "backLink": "← Back",
+    "heading": "Data Processing Agreement (DPA)",
+    "partiesHeading": "Parties",
+    "partiesIntro": "This data processing agreement (the “Agreement”) is entered into between:",
+    "controllerLabel": "Controller (“the Customer”)",
+    "controllerText": "The business that creates an account in Pactiva, identified by the company name and registration number provided at account creation.",
+    "processorLabel": "Processor (“Pactiva”)",
+    "processorText": "Thorsnes Digital (org. no. 937 787 138), which develops and operates the Pactiva service.",
+    "electronicAcceptance": "The Agreement is entered into electronically when a person authorised to bind the Customer ticks the acceptance box during account creation, cf. the confirmation text in the registration form.",
+    "sections": [
+      {
+        "title": "1. Background and purpose",
+        "body": "The Customer uses Pactiva to register and manage agreements, signing processes and information about the Customer's own customers (“Customer Data”). In doing so, Pactiva processes personal data on behalf of the Customer. This agreement governs Pactiva's processing of such personal data, in accordance with GDPR Article 28."
+      },
+      {
+        "title": "2. Duration",
+        "body": "This agreement runs for as long as the Customer has an active Pactiva account, and terminates automatically when the subscription is cancelled, unless otherwise provided in section 8 (deletion/return of data)."
+      },
+      {
+        "title": "3. Roles — scope of the agreement",
+        "body": "The parties agree on the following allocation of roles:",
+        "table": {
+          "headers": [
+            "Data category",
+            "Controller",
+            "Processor"
+          ],
+          "rows": [
+            [
+              "Customer Data (name, email, phone, registration number, address, notes, activity log about the Customer's own customers)",
+              "Customer",
+              "Pactiva"
+            ],
+            [
+              "Agreement data (agreement titles, dates, uploaded documents, signing status related to the Customer's agreements)",
+              "Customer",
+              "Pactiva"
+            ],
+            [
+              "User and company data (the Customer's own user accounts)",
+              "Pactiva",
+              "— (Pactiva is itself the controller here; governed by the privacy policy)"
+            ]
+          ]
+        },
+        "note": "Note: this table should be reconciled with section 1 of the privacy policy, which currently defines Pactiva as controller for “personal data processed in the service” without this distinction. Should be reviewed by legal counsel."
+      },
+      {
+        "title": "4. Instructions",
+        "body": "Pactiva shall only process personal data on documented instructions from the Customer, including instructions given through normal use of the service's functionality. Pactiva shall notify the Customer if Pactiva believes an instruction infringes GDPR or other data protection legislation."
+      },
+      {
+        "title": "5. Confidentiality",
+        "body": "Persons with access to personal data at Pactiva are bound by confidentiality obligations, either through an employment agreement or an equivalent undertaking."
+      },
+      {
+        "title": "6. Security measures",
+        "body": "Pactiva shall implement appropriate technical and organisational measures to ensure a level of security appropriate to the risk, including:",
+        "bullets": [
+          "Encryption of passwords",
+          "Access control for systems and data",
+          "Secure storage with sub-processors subject to equivalent obligations (see section 7)",
+          "Backup routines"
+        ]
+      },
+      {
+        "title": "7. Sub-processors",
+        "body": "The Customer grants Pactiva a general authorisation to use sub-processors for the processing of personal data. Pactiva shall inform the Customer of planned changes to the list of sub-processors, and the Customer has the right to object to such changes on reasonable grounds.\n\nAs of [date], Pactiva uses the following sub-processors:",
+        "table": {
+          "headers": [
+            "Sub-processor",
+            "Purpose",
+            "Location",
+            "Transfer basis"
+          ],
+          "rows": [
+            [
+              "Supabase",
+              "Database and authentication",
+              "United Kingdom (eu-west-2)",
+              "UK adequacy decision"
+            ],
+            [
+              "Stripe",
+              "Payment processing",
+              "USA",
+              "Standard Contractual Clauses"
+            ],
+            [
+              "Resend",
+              "Email delivery",
+              "USA",
+              "Standard Contractual Clauses"
+            ],
+            [
+              "Anthropic",
+              "AI assistant (only when enabled)",
+              "USA",
+              "Standard Contractual Clauses"
+            ],
+            [
+              "e-signature.eu",
+              "Digital signing (eIDAS)",
+              "Belgium (EU)",
+              "— (within the EU/EEA)"
+            ]
+          ]
+        },
+        "footer": "Pactiva shall enter into agreements with sub-processors that impose on them the same data protection obligations as set out in this agreement."
+      },
+      {
+        "title": "8. Deletion and return of data",
+        "body": "Upon termination of the agreement, Pactiva shall, at the Customer's choice, delete or return all personal data processed on the Customer's behalf, unless retention is required by law (e.g. accounting legislation for invoice data, cf. section 5 of the privacy policy). Data is automatically deleted 30 days after cancellation, in accordance with the current privacy policy."
+      },
+      {
+        "title": "9. Assistance to the Customer",
+        "body": "To the extent reasonably possible, Pactiva shall assist the Customer with:",
+        "bullets": [
+          "Responding to requests from data subjects regarding access, rectification, erasure, portability and objection",
+          "Fulfilling obligations relating to security, breach notification and any data protection impact assessments (DPIA)"
+        ]
+      },
+      {
+        "title": "10. Personal data breaches",
+        "body": "Pactiva shall notify the Customer without undue delay, and no later than [24/48] hours after becoming aware of a breach affecting the Customer's personal data. The notification shall, as far as possible, describe the nature of the breach, the categories affected, the number of data subjects, and the measures taken."
+      },
+      {
+        "title": "11. Audit",
+        "body": "The Customer has the right to request documentation demonstrating that Pactiva complies with its obligations under this agreement, and may, with reasonable notice, carry out or have carried out an audit."
+      },
+      {
+        "title": "12. Liability",
+        "body": "[This provision should be drafted by legal counsel. Common practice is to refer to the liability limitations in the general terms, or to set a cap tied to the subscription value.]"
+      },
+      {
+        "title": "13. Governing law and venue",
+        "body": "This agreement is governed by Norwegian law. Disputes shall be resolved at [the Customer's/Pactiva's] venue, unless otherwise required by mandatory legislation."
+      }
+    ],
+    "acceptanceFooter": "By ticking “I accept the data processing agreement” during registration, the user confirms having authority to enter into this agreement on behalf of the business being registered."
   }
 }

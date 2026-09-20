@@ -108,7 +108,9 @@
     "errorCaptcha": "Suorita turvatarkistus",
     "errorCaptchaFailed": "Turvatarkistus epäonnistui. Yritä uudelleen.",
     "cookieNotice": "Käytämme vain välttämättömiä evästeitä kirjautumiseen.",
-    "cookiePrivacyLink": "Lue tietosuojakäytäntömme"
+    "cookiePrivacyLink": "Lue tietosuojakäytäntömme",
+    "dpaLabel": "Olen lukenut ja hyväksyn <a>henkilötietojen käsittelysopimuksen</a> ja vahvistan, että minulla on valtuudet tehdä tämä sopimus yrityksen puolesta.",
+    "errorDpaRequired": "Sinun on hyväksyttävä henkilötietojen käsittelysopimus luodaksesi tilin."
   },
   "checkEmail": {
     "title": "Tarkista sähköpostisi",
@@ -508,7 +510,12 @@
     "methodVeriff": "Veriff (edistynyt)",
     "methodEvrotrust": "Evrotrust (pätevä)",
     "methodItsme": "itsme® (pätevä)",
-    "signingMethodOverride": "Allekirjoitusmenetelmä tälle sopimukselle"
+    "signingMethodOverride": "Allekirjoitusmenetelmä tälle sopimukselle",
+    "dpaTitle": "Henkilötietojen käsittelysopimus (DPA)",
+    "dpaDesc": "Sopimus, joka sääntää Pactivan henkilötietojen käsittelyä yrityksen puolesta.",
+    "dpaAcceptedText": "Hyväksytty: versio {version}, {date}",
+    "dpaNotAccepted": "Ei vielä rekisteröityä hyväksyntää.",
+    "dpaViewLink": "Katso sopimus"
   },
   "slideOver": {
     "backToForm": "← Takaisin lomakkeeseen",
@@ -706,5 +713,153 @@
     "signingPending": "Odottaa allekirjoitusta",
     "signingSigned": "Allekirjoitettu ↗",
     "signingMethodOverride": "Allekirjoitusmenetelmä tälle sopimukselle"
+  },
+  "dpa": {
+    "metaTitle": "Henkilötietojen käsittelysopimus (DPA) — Pactiva",
+    "metaDescription": "Henkilötietojen käsittelysopimus, joka sääntää Pactivan henkilötietojen käsittelyä asiakkaan puolesta GDPR:n 28 artiklan mukaisesti.",
+    "draftBadge": "Työluonnos",
+    "draftNotice": "Tämä on työluonnos, ei lopullinen oikeudellinen asiakirja. Lakimiehen tulisi tarkistaa se ennen käyttöönottoa, erityisesti vastuuta koskeva kohta (12) sekä rekisteröinnin pitäjän/käsittelijän roolijako “Asiakastietojen” osalta (ks. kohta 3).",
+    "lastUpdated": "Viimeksi päivitetty",
+    "version": "Versio",
+    "backLink": "← Takaisin",
+    "heading": "Henkilötietojen käsittelysopimus (DPA)",
+    "partiesHeading": "Osapuolet",
+    "partiesIntro": "Tämä henkilötietojen käsittelysopimus (“Sopimus”) on tehty seuraavien osapuolten välillä:",
+    "controllerLabel": "Rekisteröinnin pitäjä (“Asiakas”)",
+    "processorLabel": "Henkilötietojen käsittelijä (“Pactiva”)",
+    "controllerText": "Yritys, joka luo tilin Pactivaan, tunnistettu yrityksen nimellä ja Y-tunnuksella, jotka annetaan tilin luonnin yhteydessä.",
+    "processorText": "Thorsnes Digital (Y-tunnus 937 787 138), joka kehittää ja ylläpitää Pactiva-palvelua.",
+    "electronicAcceptance": "Sopimus tehdään sähköisesti, kun henkilö, jolla on valtuudet sitoa Asiakas, valitsee hyväksyntävalintaruudun tilin luonnin yhteydessä, ks. rekisteröitymislomakkeen vahvistusteksti.",
+    "sections": [
+      {
+        "title": "1. Tausta ja tarkoitus",
+        "body": "Asiakas käyttää Pactivaa rekisteröidäkseen ja hallinnoidakseen sopimuksia, allekirjoitusprosesseja ja tietoja Asiakkaan omista asiakkaista (“Asiakastiedot”). Tässä yhteydessä Pactiva käsittelee henkilötietoja Asiakkaan puolesta. Tämä sopimus sääntää Pactivan tällaisten henkilötietojen käsittelyä GDPR:n 28 artiklan mukaisesti."
+      },
+      {
+        "title": "2. Kesto",
+        "body": "Sopimus on voimassa niin kauan kuin Asiakkaalla on aktiivinen Pactiva-tili, ja se päättyy automaattisesti tilauksen päättyessä, ellei kohdasta 8 (tietojen poistaminen/palauttaminen) muuta johdu."
+      },
+      {
+        "title": "3. Roolit — mitä sopimus kattaa",
+        "body": "Osapuolet ovat sopineet seuraavasta roolijaosta:",
+        "table": {
+          "headers": [
+            "Tietokategoria",
+            "Rekisteröinnin pitäjä",
+            "Henkilötietojen käsittelijä"
+          ],
+          "rows": [
+            [
+              "Asiakastiedot (nimi, sähköposti, puhelin, Y-tunnus, osoite, muistiinpanot, toimintaloki Asiakkaan omista asiakkaista)",
+              "Asiakas",
+              "Pactiva"
+            ],
+            [
+              "Sopimustiedot (sopimusten otsikot, päivämäärät, ladatut asiakirjat, Asiakkaan sopimusten allekirjoitustila)",
+              "Asiakas",
+              "Pactiva"
+            ],
+            [
+              "Käyttäjä- ja yritystiedot (Asiakkaan omat käyttäjätilit)",
+              "Pactiva",
+              "— (Pactiva on tässä itse rekisteröinnin pitäjä, säännellään tietosuojaselosteessa)"
+            ]
+          ]
+        },
+        "note": "Huom: tämä taulukko tulisi yhtenäistää tietosuojaselosteen kohdan 1 kanssa, joka tällä hetkellä määrittää Pactivan rekisteröinnin pitäjäksi “palvelussa käsiteltävien henkilötietojen” osalta ilman tätä erottelua. Lakimiehen tulisi tarkistaa tämä."
+      },
+      {
+        "title": "4. Ohjeet",
+        "body": "Pactiva saa käsitellä henkilötietoja vain Asiakkaan dokumentoitujen ohjeiden mukaisesti, mukaan lukien palvelun normaalin käytön kautta annetut ohjeet. Pactivan tulee ilmoittaa Asiakkaalle, jos se katsoo ohjeen olevan ristiriidassa GDPR:n tai muun tietosuojalainsäädännön kanssa."
+      },
+      {
+        "title": "5. Salassapitovelvollisuus",
+        "body": "Henkilöt, joilla on pääsy henkilötietoihin Pactivassa, ovat salassapitovelvollisuuden alaisia joko työsopimuksen tai vastaavan sitoumuksen kautta."
+      },
+      {
+        "title": "6. Turvatoimet",
+        "body": "Pactivan tulee toteuttaa asianmukaiset tekniset ja organisatoriset toimenpiteet riskiin suhteutetun turvallisuustason varmistamiseksi, mukaan lukien:",
+        "bullets": [
+          "Salasanojen salaus",
+          "Järjestelmien ja tietojen käyttöoikeuksien hallinta",
+          "Turvallinen säilytys alihankkijoilla, joilla on vastaavat velvoitteet (ks. kohta 7)",
+          "Varmuuskopiointikäytännöt"
+        ]
+      },
+      {
+        "title": "7. Alihankkijat",
+        "body": "Asiakas antaa Pactivalle yleisen valtuutuksen käyttää alihankkijoita henkilötietojen käsittelyyn. Pactivan tulee tiedottaa Asiakkaalle suunnitelluista muutoksista alihankkijaluetteloon, ja Asiakkaalla on oikeus vastustaa näitä muutoksia perustellusti.\n\n[Päivämäärä] alkaen Pactiva käyttää seuraavia alihankkijoita:",
+        "table": {
+          "headers": [
+            "Alihankkija",
+            "Tarkoitus",
+            "Sijainti",
+            "Siirtoperuste"
+          ],
+          "rows": [
+            [
+              "Supabase",
+              "Tietokanta ja todennus",
+              "Iso-Britannia (eu-west-2)",
+              "Ison-Britannian tietosuojan riittävyyspäätös"
+            ],
+            [
+              "Stripe",
+              "Maksujen käsittely",
+              "USA",
+              "Vakiosopimuslausekkeet"
+            ],
+            [
+              "Resend",
+              "Sähköpostin lähetys",
+              "USA",
+              "Vakiosopimuslausekkeet"
+            ],
+            [
+              "Anthropic",
+              "AI-avustaja (vain kun käytössä)",
+              "USA",
+              "Vakiosopimuslausekkeet"
+            ],
+            [
+              "e-signature.eu",
+              "Digitaalinen allekirjoitus (eIDAS)",
+              "Belgia (EU)",
+              "— (EU/ETA-alueella)"
+            ]
+          ]
+        },
+        "footer": "Pactivan tulee tehdä alihankkijoiden kanssa sopimukset, jotka asettavat niille samat tietosuojavelvoitteet kuin tässä sopimuksessa."
+      },
+      {
+        "title": "8. Tietojen poistaminen ja palauttaminen",
+        "body": "Sopimussuhteen päättyessä Pactivan tulee Asiakkaan valinnan mukaan poistaa tai palauttaa kaikki Asiakkaan puolesta käsitellyt henkilötiedot, ellei säilyttäminen ole lain vaatimaa (esim. kirjanpitolaki laskutustietojen osalta, ks. tietosuojaselosteen kohta 5). Tiedot poistetaan automaattisesti 30 päivän kuluttua irtisanomisesta, voimassa olevan tietosuojaselosteen mukaisesti."
+      },
+      {
+        "title": "9. Avustaminen Asiakkaalle",
+        "body": "Siinä laajuudessa kuin se on kohtuudella mahdollista, Pactivan tulee avustaa Asiakasta:",
+        "bullets": [
+          "Vastaamalla rekisteröityjen pyyntöihin, jotka koskevat tarkastusoikeutta, oikaisua, poistamista, siirrettävyyttä ja vastustamista",
+          "Täyttämällä turvallisuuteen, tietoturvaloukkauksista ilmoittamiseen ja mahdollisiin vaikutustenarviointeihin (DPIA) liittyvät velvoitteet"
+        ]
+      },
+      {
+        "title": "10. Tietoturvaloukkaukset",
+        "body": "Pactivan tulee ilmoittaa Asiakkaalle ilman aiheetonta viivytystä ja viimeistään [24/48] tunnin kuluessa siitä, kun se on saanut tiedon Asiakkaan henkilötietoja koskevasta tietoturvaloukkauksesta. Ilmoituksessa tulee mahdollisuuksien mukaan kuvata loukkauksen luonne, siihen liittyvät tietoryhmät ja rekisteröityjen määrä sekä toteutetut toimenpiteet."
+      },
+      {
+        "title": "11. Tarkastus",
+        "body": "Asiakkaalla on oikeus pyytää dokumentaatiota, joka osoittaa Pactivan noudattavan tämän sopimuksen velvoitteita, ja se voi kohtuullisella etukäteisilmoituksella suorittaa tai teettää tarkastuksen."
+      },
+      {
+        "title": "12. Vastuu",
+        "body": "[Tämä kohta tulisi laatia lakimiehen toimesta. Yleinen käytäntö on viitata yleisten ehtojen vastuunrajoituksiin tai asettaa yläraja, joka on sidottu tilauksen arvoon.]"
+      },
+      {
+        "title": "13. Sovellettava laki ja oikeuspaikka",
+        "body": "Sopimukseen sovelletaan Norjan lakia. Riidat pyritään ratkaisemaan [Asiakkaan/Pactivan] oikeuspaikassa, ellei pakottavasta lainsäädännöstä muuta johdu."
+      }
+    ],
+    "acceptanceFooter": "Valitsemalla “Hyväksyn henkilötietojen käsittelysopimuksen” rekisteröitymisen yhteydessä käyttäjä vahvistaa, että hänellä on valtuudet tehdä tämä sopimus rekisteröitävän yrityksen puolesta."
   }
 }

@@ -122,6 +122,7 @@ export default function SettingsPage() {
     fetchUsers()
     fetchCompanyProfile()
     loadCategories()
+    fetchDpaInfo()
   }, [])
 
   useEffect(() => {
@@ -188,6 +189,16 @@ export default function SettingsPage() {
     setSavingSigningMethod(false)
     setSigningMethodSaved(true)
     setTimeout(() => setSigningMethodSaved(false), 2000)
+  }
+
+  const [dpaInfo, setDpaInfo] = useState<{ version: string | null; acceptedAt: string | null }>({ version: null, acceptedAt: null })
+
+  async function fetchDpaInfo() {
+    const res = await fetch("/api/account/dpa")
+    if (res.ok) {
+      const data = await res.json()
+      setDpaInfo({ version: data.version ?? null, acceptedAt: data.acceptedAt ?? null })
+    }
   }
 
   async function loadCategories() {
@@ -1183,6 +1194,27 @@ export default function SettingsPage() {
             >
               {t("privacyLink")}
             </a>
+
+            <div className="mt-6 pt-6 border-t border-gray-100">
+              <h3 className="text-sm font-semibold text-gray-900">{t("dpaTitle")}</h3>
+              <p className="text-xs text-gray-500 mt-0.5">{t("dpaDesc")}</p>
+              <p className="text-sm text-gray-600 mt-2">
+                {dpaInfo.version
+                  ? t("dpaAcceptedText", {
+                      version: dpaInfo.version,
+                      date: new Date(dpaInfo.acceptedAt!).toLocaleDateString(locale, { day: "numeric", month: "short", year: "numeric" }),
+                    })
+                  : t("dpaNotAccepted")}
+              </p>
+              <a
+                href="/dpa"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-block mt-2 text-sm text-slate-700 underline hover:text-slate-900 transition-colors"
+              >
+                {t("dpaViewLink")}
+              </a>
+            </div>
           </section>
 
           <Divider />

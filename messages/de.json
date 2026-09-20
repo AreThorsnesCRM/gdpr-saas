@@ -108,7 +108,9 @@
     "errorCaptcha": "Bitte führen Sie die Sicherheitsprüfung durch",
     "errorCaptchaFailed": "Sicherheitsprüfung fehlgeschlagen. Bitte versuchen Sie es erneut.",
     "cookieNotice": "Wir verwenden nur notwendige Cookies für die Anmeldung.",
-    "cookiePrivacyLink": "Datenschutzerklärung lesen"
+    "cookiePrivacyLink": "Datenschutzerklärung lesen",
+    "dpaLabel": "Ich habe den <a>Auftragsverarbeitungsvertrag</a> gelesen und akzeptiere ihn und bestätige, dass ich befugt bin, diesen im Namen des Unternehmens abzuschließen.",
+    "errorDpaRequired": "Sie müssen dem Auftragsverarbeitungsvertrag zustimmen, um ein Konto zu erstellen."
   },
   "checkEmail": {
     "title": "Überprüfen Sie Ihre E-Mail",
@@ -508,7 +510,12 @@
     "methodVeriff": "Veriff (fortgeschritten)",
     "methodEvrotrust": "Evrotrust (qualifiziert)",
     "methodItsme": "itsme® (qualifiziert)",
-    "signingMethodOverride": "Signaturmethode für diesen Vertrag"
+    "signingMethodOverride": "Signaturmethode für diesen Vertrag",
+    "dpaTitle": "Auftragsverarbeitungsvertrag (AVV)",
+    "dpaDesc": "Die Vereinbarung, die die Verarbeitung personenbezogener Daten durch Pactiva im Auftrag des Unternehmens regelt.",
+    "dpaAcceptedText": "Akzeptiert: Version {version}, {date}",
+    "dpaNotAccepted": "Noch keine Zustimmung erfasst.",
+    "dpaViewLink": "Vereinbarung ansehen"
   },
   "slideOver": {
     "backToForm": "← Zurück zum Formular",
@@ -706,5 +713,153 @@
     "signingPending": "Warte auf Unterzeichnung",
     "signingSigned": "Unterzeichnet ↗",
     "signingMethodOverride": "Signaturmethode für diesen Vertrag"
+  },
+  "dpa": {
+    "metaTitle": "Auftragsverarbeitungsvertrag (AVV) — Pactiva",
+    "metaDescription": "Der Auftragsverarbeitungsvertrag, der die Verarbeitung personenbezogener Daten durch Pactiva im Auftrag des Kunden gemäß Art. 28 DSGVO regelt.",
+    "draftBadge": "Arbeitsentwurf",
+    "draftNotice": "Dies ist ein Arbeitsentwurf, kein fertiges Rechtsdokument. Sollte vor Verwendung von einem Juristen geprüft werden, insbesondere die Bestimmungen zur Haftung (12) und die Verantwortlicher/Auftragsverarbeiter-Rolle bei “Kundendaten” (siehe Ziffer 3).",
+    "lastUpdated": "Zuletzt aktualisiert",
+    "version": "Version",
+    "backLink": "← Zurück",
+    "heading": "Auftragsverarbeitungsvertrag (AVV)",
+    "partiesHeading": "Parteien",
+    "partiesIntro": "Dieser Auftragsverarbeitungsvertrag (die “Vereinbarung”) wird geschlossen zwischen:",
+    "controllerLabel": "Verantwortlicher (“der Kunde”)",
+    "controllerText": "Das Unternehmen, das ein Konto bei Pactiva anlegt, identifiziert durch den bei der Kontoerstellung angegebenen Firmennamen und die Handelsregisternummer.",
+    "processorLabel": "Auftragsverarbeiter (“Pactiva”)",
+    "processorText": "Thorsnes Digital (Unternehmensnr. 937 787 138), das den Dienst Pactiva entwickelt und betreibt.",
+    "electronicAcceptance": "Die Vereinbarung wird elektronisch geschlossen, indem eine zur Vertretung des Kunden befugte Person bei der Kontoerstellung das Zustimmungsfeld ankreuzt, vgl. den Bestätigungstext im Registrierungsformular.",
+    "sections": [
+      {
+        "title": "1. Hintergrund und Zweck",
+        "body": "Der Kunde nutzt Pactiva, um Verträge, Signaturprozesse und Informationen über die eigenen Kunden des Kunden (“Kundendaten”) zu erfassen und zu verwalten. Dabei verarbeitet Pactiva personenbezogene Daten im Auftrag des Kunden. Diese Vereinbarung regelt die Verarbeitung solcher personenbezogener Daten durch Pactiva gemäß Art. 28 DSGVO."
+      },
+      {
+        "title": "2. Laufzeit",
+        "body": "Diese Vereinbarung gilt, solange der Kunde ein aktives Pactiva-Konto hat, und endet automatisch mit Kündigung des Abonnements, sofern in Ziffer 8 (Löschung/Rückgabe von Daten) nichts anderes bestimmt ist."
+      },
+      {
+        "title": "3. Rollen — Umfang der Vereinbarung",
+        "body": "Die Parteien vereinbaren folgende Rollenverteilung:",
+        "table": {
+          "headers": [
+            "Datenkategorie",
+            "Verantwortlicher",
+            "Auftragsverarbeiter"
+          ],
+          "rows": [
+            [
+              "Kundendaten (Name, E-Mail, Telefon, Handelsregisternummer, Adresse, Notizen, Aktivitätsprotokoll zu den eigenen Kunden des Kunden)",
+              "Kunde",
+              "Pactiva"
+            ],
+            [
+              "Vertragsdaten (Vertragstitel, Daten, hochgeladene Dokumente, Signaturstatus der Verträge des Kunden)",
+              "Kunde",
+              "Pactiva"
+            ],
+            [
+              "Benutzer- und Firmendaten (eigene Benutzerkonten des Kunden)",
+              "Pactiva",
+              "— (Pactiva ist hierfür selbst Verantwortlicher, geregelt in der Datenschutzerklärung)"
+            ]
+          ]
+        },
+        "note": "Hinweis: Diese Tabelle sollte mit Ziffer 1 der Datenschutzerklärung abgeglichen werden, die Pactiva derzeit ohne diese Unterscheidung als Verantwortlichen für “im Dienst verarbeitete personenbezogene Daten” definiert. Sollte von einem Juristen geprüft werden."
+      },
+      {
+        "title": "4. Weisungen",
+        "body": "Pactiva darf personenbezogene Daten nur auf dokumentierte Weisung des Kunden verarbeiten, einschließlich Weisungen, die durch die normale Nutzung der Dienstfunktionen erteilt werden. Pactiva informiert den Kunden, wenn Pactiva der Ansicht ist, dass eine Weisung gegen die DSGVO oder anderes Datenschutzrecht verstößt."
+      },
+      {
+        "title": "5. Vertraulichkeit",
+        "body": "Personen bei Pactiva mit Zugang zu personenbezogenen Daten unterliegen der Vertraulichkeit, entweder durch einen Arbeitsvertrag oder eine gleichwertige Verpflichtung."
+      },
+      {
+        "title": "6. Sicherheitsmaßnahmen",
+        "body": "Pactiva setzt geeignete technische und organisatorische Maßnahmen um, um ein dem Risiko angemessenes Sicherheitsniveau zu gewährleisten, unter anderem:",
+        "bullets": [
+          "Verschlüsselung von Passwörtern",
+          "Zugriffskontrolle für Systeme und Daten",
+          "Sichere Speicherung bei Unterauftragsverarbeitern mit gleichwertigen Verpflichtungen (siehe Ziffer 7)",
+          "Routinen zur Datensicherung"
+        ]
+      },
+      {
+        "title": "7. Unterauftragsverarbeiter",
+        "body": "Der Kunde erteilt Pactiva eine generelle Genehmigung zur Beauftragung von Unterauftragsverarbeitern für die Verarbeitung personenbezogener Daten. Pactiva informiert den Kunden über geplante Änderungen der Liste der Unterauftragsverarbeiter, und der Kunde hat das Recht, solchen Änderungen aus sachlichem Grund zu widersprechen.\n\nStand [Datum] nutzt Pactiva folgende Unterauftragsverarbeiter:",
+        "table": {
+          "headers": [
+            "Unterauftragsverarbeiter",
+            "Zweck",
+            "Standort",
+            "Übermittlungsgrundlage"
+          ],
+          "rows": [
+            [
+              "Supabase",
+              "Datenbank und Authentifizierung",
+              "Vereinigtes Königreich (eu-west-2)",
+              "UK-Angemessenheitsbeschluss"
+            ],
+            [
+              "Stripe",
+              "Zahlungsabwicklung",
+              "USA",
+              "Standardvertragsklauseln"
+            ],
+            [
+              "Resend",
+              "E-Mail-Versand",
+              "USA",
+              "Standardvertragsklauseln"
+            ],
+            [
+              "Anthropic",
+              "KI-Assistent (nur bei Aktivierung)",
+              "USA",
+              "Standardvertragsklauseln"
+            ],
+            [
+              "e-signature.eu",
+              "Digitale Signatur (eIDAS)",
+              "Belgien (EU)",
+              "— (innerhalb der EU/des EWR)"
+            ]
+          ]
+        },
+        "footer": "Pactiva schließt mit Unterauftragsverarbeitern Vereinbarungen ab, die ihnen dieselben Datenschutzpflichten auferlegen wie in dieser Vereinbarung festgelegt."
+      },
+      {
+        "title": "8. Löschung und Rückgabe von Daten",
+        "body": "Bei Beendigung des Vertragsverhältnisses löscht oder gibt Pactiva nach Wahl des Kunden alle im Auftrag des Kunden verarbeiteten personenbezogenen Daten zurück, sofern keine gesetzliche Aufbewahrungspflicht besteht (z. B. Buchhaltungsrecht für Rechnungsdaten, vgl. Ziffer 5 der Datenschutzerklärung). Daten werden 30 Tage nach Kündigung automatisch gelöscht, gemäß der jeweils gültigen Datenschutzerklärung."
+      },
+      {
+        "title": "9. Unterstützung des Kunden",
+        "body": "Soweit zumutbar möglich, unterstützt Pactiva den Kunden bei:",
+        "bullets": [
+          "Der Beantwortung von Anfragen betroffener Personen zu Auskunft, Berichtigung, Löschung, Datenübertragbarkeit und Widerspruch",
+          "Der Erfüllung von Pflichten im Zusammenhang mit Sicherheit, Meldung von Verletzungen und etwaigen Datenschutz-Folgenabschätzungen (DPIA)"
+        ]
+      },
+      {
+        "title": "10. Verletzungen des Schutzes personenbezogener Daten",
+        "body": "Pactiva informiert den Kunden unverzüglich, spätestens jedoch innerhalb von [24/48] Stunden nach Kenntniserlangung einer Verletzung, die personenbezogene Daten des Kunden betrifft. Die Benachrichtigung beschreibt, soweit möglich, die Art der Verletzung, betroffene Kategorien und die Anzahl betroffener Personen sowie die ergriffenen Maßnahmen."
+      },
+      {
+        "title": "11. Audit",
+        "body": "Der Kunde hat das Recht, Dokumentation anzufordern, die belegt, dass Pactiva seinen Pflichten aus dieser Vereinbarung nachkommt, und kann mit angemessener Vorankündigung ein Audit durchführen oder durchführen lassen."
+      },
+      {
+        "title": "12. Haftung",
+        "body": "[Diese Bestimmung sollte von einem Juristen ausgearbeitet werden. Üblich ist ein Verweis auf die Haftungsbeschränkungen in den allgemeinen Geschäftsbedingungen oder eine Obergrenze, die sich am Abonnementwert orientiert.]"
+      },
+      {
+        "title": "13. Anwendbares Recht und Gerichtsstand",
+        "body": "Diese Vereinbarung unterliegt norwegischem Recht. Streitigkeiten werden am Gerichtsstand [des Kunden/von Pactiva] beigelegt, sofern nicht zwingendes Recht etwas anderes vorschreibt."
+      }
+    ],
+    "acceptanceFooter": "Durch das Ankreuzen von “Ich akzeptiere den Auftragsverarbeitungsvertrag” bei der Registrierung bestätigt der Nutzer, zum Abschluss dieser Vereinbarung im Namen des registrierten Unternehmens befugt zu sein."
   }
 }

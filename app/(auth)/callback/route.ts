@@ -113,6 +113,8 @@ export async function GET(request: NextRequest) {
     .eq("user_id", user.id)
     .maybeSingle();
 
+  let newAccountId: string | null = null;
+
   if (!existingAccountUser) {
     const { data: newAccount, error: accountError } = await supabaseAdmin
       .from("accounts")
@@ -130,6 +132,8 @@ export async function GET(request: NextRequest) {
     if (accountError) console.error("[callback] accounts insert error:", accountError);
 
     if (newAccount) {
+      newAccountId = newAccount.id;
+
       const { error: auError } = await supabaseAdmin
         .from("account_users")
         .insert({ account_id: newAccount.id, user_id: user.id, role: "admin" });
@@ -154,6 +158,17 @@ export async function GET(request: NextRequest) {
         .update({ account_id: existingAccountUser.account_id })
         .eq("user_id", user.id);
     }
+  }
+
+  // Backfill account_id on the DPA acceptance recorded at signup time (before the
+  // account existed — see app/api/dpa/accept/route.ts).
+  const finalAccountId = newAccountId ?? existingAccountUser?.account_id ?? null;
+  if (finalAccountId) {
+    await supabaseAdmin
+      .from("dpa_acceptances")
+      .update({ account_id: finalAccountId })
+      .eq("user_id", user.id)
+      .is("account_id", null);
   }
 
   return response;

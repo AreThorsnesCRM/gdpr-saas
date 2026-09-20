@@ -108,7 +108,9 @@
     "errorCaptcha": "Por favor complete la verificación de seguridad",
     "errorCaptchaFailed": "La verificación de seguridad falló. Inténtelo de nuevo.",
     "cookieNotice": "Solo usamos cookies necesarias para la autenticación.",
-    "cookiePrivacyLink": "Leer nuestra política de privacidad"
+    "cookiePrivacyLink": "Leer nuestra política de privacidad",
+    "dpaLabel": "He leído y acepto el <a>acuerdo de tratamiento de datos</a>, y confirmo que tengo autoridad para celebrarlo en nombre de la empresa.",
+    "errorDpaRequired": "Debe aceptar el acuerdo de tratamiento de datos para crear una cuenta."
   },
   "checkEmail": {
     "title": "Compruebe su correo electrónico",
@@ -508,7 +510,12 @@
     "methodVeriff": "Veriff (avanzado)",
     "methodEvrotrust": "Evrotrust (cualificado)",
     "methodItsme": "itsme® (cualificado)",
-    "signingMethodOverride": "Método de firma para este acuerdo"
+    "signingMethodOverride": "Método de firma para este acuerdo",
+    "dpaTitle": "Acuerdo de tratamiento de datos (DPA)",
+    "dpaDesc": "El acuerdo que regula el tratamiento de datos personales por parte de Pactiva en nombre de la empresa.",
+    "dpaAcceptedText": "Aceptado: versión {version}, {date}",
+    "dpaNotAccepted": "Aún no se ha registrado ninguna aceptación.",
+    "dpaViewLink": "Ver el acuerdo"
   },
   "slideOver": {
     "backToForm": "← Volver al formulario",
@@ -706,5 +713,153 @@
     "labelCategory": "Categoría",
     "labelNoCategory": "Sin categoría",
     "signingMethodOverride": "Método de firma para este acuerdo"
+  },
+  "dpa": {
+    "metaTitle": "Acuerdo de tratamiento de datos (DPA) — Pactiva",
+    "metaDescription": "El acuerdo de tratamiento de datos que regula el tratamiento de datos personales por parte de Pactiva en nombre del cliente, de conformidad con el artículo 28 del RGPD.",
+    "draftBadge": "Borrador de trabajo",
+    "draftNotice": "Este es un borrador de trabajo, no un documento legal definitivo. Debería ser revisado por un abogado antes de su uso, en particular las disposiciones sobre responsabilidad (12) y el reparto de roles responsable/encargado para los «Datos del Cliente» (véase la cláusula 3).",
+    "lastUpdated": "Última actualización",
+    "version": "Versión",
+    "backLink": "← Volver",
+    "heading": "Acuerdo de tratamiento de datos (DPA)",
+    "partiesHeading": "Partes",
+    "partiesIntro": "El presente acuerdo de tratamiento de datos (el «Acuerdo») se celebra entre:",
+    "controllerLabel": "Responsable del tratamiento («el Cliente»)",
+    "controllerText": "La empresa que crea una cuenta en Pactiva, identificada por el nombre de la empresa y el número de registro indicados al crear la cuenta.",
+    "processorLabel": "Encargado del tratamiento («Pactiva»)",
+    "processorText": "Thorsnes Digital (n.º de empresa 937 787 138), que desarrolla y opera el servicio Pactiva.",
+    "electronicAcceptance": "El Acuerdo se celebra electrónicamente cuando una persona autorizada para vincular al Cliente marca la casilla de aceptación al crear la cuenta, véase el texto de confirmación del formulario de registro.",
+    "sections": [
+      {
+        "title": "1. Antecedentes y finalidad",
+        "body": "El Cliente utiliza Pactiva para registrar y gestionar contratos, procesos de firma e información sobre sus propios clientes («Datos del Cliente»). En este contexto, Pactiva trata datos personales por cuenta del Cliente. Este acuerdo regula el tratamiento de dichos datos personales por parte de Pactiva, de conformidad con el artículo 28 del RGPD."
+      },
+      {
+        "title": "2. Duración",
+        "body": "Este acuerdo se mantiene vigente mientras el Cliente disponga de una cuenta activa en Pactiva y finaliza automáticamente al cancelar la suscripción, salvo lo dispuesto en la cláusula 8 (eliminación/devolución de datos)."
+      },
+      {
+        "title": "3. Roles — alcance del acuerdo",
+        "body": "Las partes acuerdan la siguiente distribución de roles:",
+        "table": {
+          "headers": [
+            "Categoría de datos",
+            "Responsable del tratamiento",
+            "Encargado del tratamiento"
+          ],
+          "rows": [
+            [
+              "Datos del Cliente (nombre, correo electrónico, teléfono, número de registro, dirección, notas, registro de actividad sobre los propios clientes del Cliente)",
+              "Cliente",
+              "Pactiva"
+            ],
+            [
+              "Datos contractuales (títulos de contratos, fechas, documentos cargados, estado de firma de los contratos del Cliente)",
+              "Cliente",
+              "Pactiva"
+            ],
+            [
+              "Datos de usuarios y de la empresa (cuentas de usuario propias del Cliente)",
+              "Pactiva",
+              "— (Pactiva es aquí su propio responsable del tratamiento, regulado por la política de privacidad)"
+            ]
+          ]
+        },
+        "note": "Nota: esta tabla debería conciliarse con la cláusula 1 de la política de privacidad, que actualmente define a Pactiva como responsable del tratamiento de «los datos personales tratados en el servicio» sin esta distinción. Debería revisarla un abogado."
+      },
+      {
+        "title": "4. Instrucciones",
+        "body": "Pactiva solo tratará datos personales siguiendo instrucciones documentadas del Cliente, incluidas las instrucciones dadas mediante el uso normal de las funcionalidades del servicio. Pactiva notificará al Cliente si considera que una instrucción infringe el RGPD u otra normativa de protección de datos."
+      },
+      {
+        "title": "5. Confidencialidad",
+        "body": "Las personas de Pactiva con acceso a datos personales están sujetas a confidencialidad, ya sea mediante un contrato laboral o un compromiso equivalente."
+      },
+      {
+        "title": "6. Medidas de seguridad",
+        "body": "Pactiva implementará medidas técnicas y organizativas adecuadas para garantizar un nivel de seguridad acorde al riesgo, incluyendo:",
+        "bullets": [
+          "Cifrado de contraseñas",
+          "Control de acceso a sistemas y datos",
+          "Almacenamiento seguro con subencargados sujetos a obligaciones equivalentes (véase la cláusula 7)",
+          "Rutinas de copia de seguridad"
+        ]
+      },
+      {
+        "title": "7. Subencargados del tratamiento",
+        "body": "El Cliente otorga a Pactiva una autorización general para recurrir a subencargados para el tratamiento de datos personales. Pactiva informará al Cliente de los cambios previstos en la lista de subencargados, y el Cliente tendrá derecho a oponerse a dichos cambios por motivos razonables.\n\nA fecha de [fecha], Pactiva utiliza los siguientes subencargados:",
+        "table": {
+          "headers": [
+            "Subencargado",
+            "Finalidad",
+            "Ubicación",
+            "Base de la transferencia"
+          ],
+          "rows": [
+            [
+              "Supabase",
+              "Base de datos y autenticación",
+              "Reino Unido (eu-west-2)",
+              "Decisión de adecuación del Reino Unido"
+            ],
+            [
+              "Stripe",
+              "Procesamiento de pagos",
+              "EE. UU.",
+              "Cláusulas contractuales tipo"
+            ],
+            [
+              "Resend",
+              "Envío de correo electrónico",
+              "EE. UU.",
+              "Cláusulas contractuales tipo"
+            ],
+            [
+              "Anthropic",
+              "Asistente de IA (solo si se activa)",
+              "EE. UU.",
+              "Cláusulas contractuales tipo"
+            ],
+            [
+              "e-signature.eu",
+              "Firma digital (eIDAS)",
+              "Bélgica (UE)",
+              "— (dentro de la UE/EEE)"
+            ]
+          ]
+        },
+        "footer": "Pactiva celebrará acuerdos con los subencargados que les impongan las mismas obligaciones de protección de datos que las establecidas en este acuerdo."
+      },
+      {
+        "title": "8. Eliminación y devolución de datos",
+        "body": "Al finalizar la relación contractual, Pactiva, a elección del Cliente, eliminará o devolverá todos los datos personales tratados por cuenta del Cliente, salvo que la ley exija su conservación (por ejemplo, la normativa contable para los datos de facturación, véase la cláusula 5 de la política de privacidad). Los datos se eliminan automáticamente 30 días después de la cancelación, conforme a la política de privacidad vigente."
+      },
+      {
+        "title": "9. Asistencia al Cliente",
+        "body": "En la medida razonablemente posible, Pactiva asistirá al Cliente con:",
+        "bullets": [
+          "Responder a las solicitudes de los interesados sobre acceso, rectificación, supresión, portabilidad y oposición",
+          "Cumplir con las obligaciones relativas a la seguridad, la notificación de brechas y las evaluaciones de impacto (EIPD) que puedan ser necesarias"
+        ]
+      },
+      {
+        "title": "10. Violaciones de seguridad de los datos personales",
+        "body": "Pactiva notificará al Cliente sin demora indebida, y a más tardar dentro de [24/48] horas desde que tenga conocimiento de una violación que afecte a los datos personales del Cliente. La notificación describirá, en la medida de lo posible, la naturaleza de la violación, las categorías afectadas, el número de interesados y las medidas adoptadas."
+      },
+      {
+        "title": "11. Auditoría",
+        "body": "El Cliente tiene derecho a solicitar documentación que demuestre que Pactiva cumple con sus obligaciones bajo este acuerdo, y podrá, con un aviso razonable, realizar o encargar una auditoría."
+      },
+      {
+        "title": "12. Responsabilidad",
+        "body": "[Esta cláusula debería ser redactada por un abogado. La práctica habitual es remitirse a las limitaciones de responsabilidad de los términos generales, o establecer un límite vinculado al valor de la suscripción.]"
+      },
+      {
+        "title": "13. Ley aplicable y jurisdicción",
+        "body": "Este acuerdo se rige por la legislación noruega. Las controversias se resolverán en la jurisdicción [del Cliente/de Pactiva], salvo que la normativa imperativa disponga lo contrario."
+      }
+    ],
+    "acceptanceFooter": "Al marcar «Acepto el acuerdo de tratamiento de datos» durante el registro, el usuario confirma tener autoridad para celebrar este acuerdo en nombre de la empresa que se registra."
   }
 }

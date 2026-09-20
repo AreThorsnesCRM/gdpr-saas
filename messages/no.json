@@ -108,7 +108,9 @@
     "errorCaptcha": "Vennligst fullfør sikkerhetskontrollen",
     "errorCaptchaFailed": "Sikkerhetskontrollen feilet. Prøv igjen.",
     "cookieNotice": "Vi bruker kun nødvendige informasjonskapsler for innlogging.",
-    "cookiePrivacyLink": "Les vår personvernerklæring"
+    "cookiePrivacyLink": "Les vår personvernerklæring",
+    "dpaLabel": "Jeg har lest og godtar <a>databehandleravtalen</a>, og bekrefter at jeg har fullmakt til å inngå denne på vegne av virksomheten.",
+    "errorDpaRequired": "Du må godta databehandleravtalen for å opprette konto."
   },
   "checkEmail": {
     "title": "Sjekk e-posten din",
@@ -526,7 +528,12 @@
     "methodEvrotrustUsage": "Juridisk sensitive dokumenter, eiendom, offentlige kontrakter, finansavtaler",
     "methodItsmeLevel": "QES — Kvalifisert elektronisk signatur",
     "methodItsmeDesc": "Signatur via itsme®-appen, en belgisk/nederlandsk godkjent digital identitetsløsning.",
-    "methodItsmeUsage": "Samme bruksområder som QES. Tilgjengelig i Belgia og Nederland"
+    "methodItsmeUsage": "Samme bruksområder som QES. Tilgjengelig i Belgia og Nederland",
+    "dpaTitle": "Databehandleravtale (DPA)",
+    "dpaDesc": "Avtalen som regulerer Pactivas behandling av personopplysninger på vegne av virksomheten.",
+    "dpaAcceptedText": "Godtatt: versjon {version}, {date}",
+    "dpaNotAccepted": "Ingen aksept registrert ennå.",
+    "dpaViewLink": "Se avtalen"
   },
   "slideOver": {
     "backToForm": "← Tilbake til skjema",
@@ -724,5 +731,153 @@
     "signingPending": "Venter på signering",
     "signingSigned": "Signert ↗",
     "signingMethodOverride": "Signeringsmetode for denne avtalen"
+  },
+  "dpa": {
+    "metaTitle": "Databehandleravtale (DPA) — Pactiva",
+    "metaDescription": "Databehandleravtalen som regulerer Pactivas behandling av personopplysninger på vegne av kunden, i tråd med GDPR artikkel 28.",
+    "draftBadge": "Arbeidsutkast",
+    "draftNotice": "Dette er et arbeidsutkast, ikke et ferdig juridisk dokument. Bør leses gjennom av jurist før det tas i bruk, særlig punktene om ansvar (12) og kontrollør/behandler-rollen for «Kundedata» (se punkt 3).",
+    "lastUpdated": "Sist oppdatert",
+    "version": "Versjon",
+    "backLink": "← Tilbake",
+    "heading": "Databehandleravtale (DPA)",
+    "partiesHeading": "Parter",
+    "partiesIntro": "Denne databehandleravtalen («Avtalen») er inngått mellom:",
+    "controllerLabel": "Behandlingsansvarlig («Kunden»)",
+    "controllerText": "Virksomheten som oppretter en konto i Pactiva, identifisert ved firmanavn og organisasjonsnummer registrert ved kontoopprettelse.",
+    "processorLabel": "Databehandler («Pactiva»)",
+    "processorText": "Thorsnes Digital (org.nr. 937 787 138), som utvikler og drifter tjenesten Pactiva.",
+    "electronicAcceptance": "Avtalen inngås elektronisk ved at en person med fullmakt til å binde Kunden krysser av for aksept ved kontoopprettelse, jf. bekreftelsesteksten i registreringsskjemaet.",
+    "sections": [
+      {
+        "title": "1. Bakgrunn og formål",
+        "body": "Kunden bruker Pactiva til å registrere og administrere avtaler, signeringsprosesser og opplysninger om Kundens egne kunder («Kundedata»). I den forbindelse behandler Pactiva personopplysninger på vegne av Kunden. Denne avtalen regulerer Pactivas behandling av slike personopplysninger, i tråd med GDPR artikkel 28."
+      },
+      {
+        "title": "2. Varighet",
+        "body": "Avtalen løper så lenge Kunden har en aktiv konto hos Pactiva, og opphører automatisk ved oppsigelse av abonnementet, med mindre annet følger av punkt 8 (sletting/retur av data)."
+      },
+      {
+        "title": "3. Roller — hva dekker avtalen",
+        "body": "Partene er enige om følgende rollefordeling:",
+        "table": {
+          "headers": [
+            "Datakategori",
+            "Behandlingsansvarlig",
+            "Databehandler"
+          ],
+          "rows": [
+            [
+              "Kundedata (navn, e-post, telefon, org.nr, adresse, notater, aktivitetslogg om Kundens egne kunder)",
+              "Kunden",
+              "Pactiva"
+            ],
+            [
+              "Avtaledata (avtaletitler, datoer, opplastede dokumenter, signeringsstatus knyttet til Kundens avtaler)",
+              "Kunden",
+              "Pactiva"
+            ],
+            [
+              "Brukerdata og firmadata (Kundens egne brukerkontoer)",
+              "Pactiva",
+              "— (Pactiva er selv behandlingsansvarlig, reguleres av personvernerklæringen)"
+            ]
+          ]
+        },
+        "note": "Merk: denne tabellen bør avstemmes med formuleringen i personvernerklæringens punkt 1, som i dag definerer Pactiva som behandlingsansvarlig for «personopplysninger som behandles i tjenesten» uten dette skillet. Bør ses over av jurist."
+      },
+      {
+        "title": "4. Instruks",
+        "body": "Pactiva skal kun behandle personopplysninger på dokumenterte instrukser fra Kunden, herunder instrukser gitt gjennom normal bruk av tjenestens funksjonalitet. Pactiva skal varsle Kunden dersom Pactiva mener en instruks er i strid med GDPR eller annen personvernlovgivning."
+      },
+      {
+        "title": "5. Taushetsplikt",
+        "body": "Personer med tilgang til personopplysninger hos Pactiva er underlagt taushetsplikt, enten gjennom ansettelsesavtale eller tilsvarende forpliktelse."
+      },
+      {
+        "title": "6. Sikkerhetstiltak",
+        "body": "Pactiva skal implementere egnede tekniske og organisatoriske tiltak for å sikre et sikkerhetsnivå som er tilpasset risikoen, herunder:",
+        "bullets": [
+          "Kryptering av passord",
+          "Tilgangsstyring til systemer og data",
+          "Sikker lagring hos underleverandører med tilsvarende forpliktelser (se punkt 7)",
+          "Rutiner for sikkerhetskopiering"
+        ]
+      },
+      {
+        "title": "7. Underleverandører (databehandlere i andre ledd)",
+        "body": "Kunden gir Pactiva en generell fullmakt til å benytte underleverandører for behandling av personopplysninger. Pactiva skal informere Kunden om planlagte endringer i underleverandørlisten, og Kunden har rett til å motsette seg slike endringer på saklig grunnlag.\n\nPactiva benytter per [dato] følgende underleverandører:",
+        "table": {
+          "headers": [
+            "Underleverandør",
+            "Formål",
+            "Lokasjon",
+            "Overføringsgrunnlag"
+          ],
+          "rows": [
+            [
+              "Supabase",
+              "Database og autentisering",
+              "Storbritannia (eu-west-2)",
+              "UK-adekvansbeslutning"
+            ],
+            [
+              "Stripe",
+              "Betalingsbehandling",
+              "USA",
+              "Standard Contractual Clauses"
+            ],
+            [
+              "Resend",
+              "Utsendelse av e-post",
+              "USA",
+              "Standard Contractual Clauses"
+            ],
+            [
+              "Anthropic",
+              "AI-assistent (kun ved aktivering)",
+              "USA",
+              "Standard Contractual Clauses"
+            ],
+            [
+              "e-signature.eu",
+              "Digital signering (eIDAS)",
+              "Belgia (EU)",
+              "— (innenfor EU/EØS)"
+            ]
+          ]
+        },
+        "footer": "Pactiva skal inngå avtaler med underleverandører som pålegger dem de samme databeskyttelsesforpliktelser som følger av denne avtalen."
+      },
+      {
+        "title": "8. Sletting og retur av data",
+        "body": "Ved ophør av avtaleforholdet skal Pactiva, etter Kundens valg, slette eller returnere alle personopplysninger som er behandlet på vegne av Kunden, med mindre lagring kreves av lov (f.eks. bokføringsloven for fakturadata, jf. personvernerklæringen punkt 5). Data slettes automatisk 30 dager etter oppsigelse, i tråd med gjeldende personvernerklæring."
+      },
+      {
+        "title": "9. Bistand til Kunden",
+        "body": "Pactiva skal, så langt det er mulig og innenfor rimelighetens grenser, bistå Kunden med:",
+        "bullets": [
+          "Å besvare henvendelser fra registrerte om innsyn, retting, sletting, portabilitet og innsigelse",
+          "Å oppfylle forpliktelser knyttet til sikkerhet, meldeplikt ved avvik og eventuelle personvernkonsekvensvurderinger (DPIA)"
+        ]
+      },
+      {
+        "title": "10. Avvikshåndtering (brudd på personopplysningssikkerheten)",
+        "body": "Pactiva skal varsle Kunden uten ugrunnet opphold, og senest innen [24/48] timer etter å ha blitt kjent med et avvik som omfatter Kundens personopplysninger. Varselet skal, så langt mulig, beskrive avvikets art, berørte kategorier og antall registrerte, samt hvilke tiltak som er iverksatt."
+      },
+      {
+        "title": "11. Revisjon",
+        "body": "Kunden har rett til å be om dokumentasjon som viser at Pactiva overholder forpliktelsene i denne avtalen, og kan, med rimelig varsel, gjennomføre eller få gjennomført revisjon."
+      },
+      {
+        "title": "12. Ansvar",
+        "body": "[Denne bestemmelsen bør utformes av jurist. Vanlig praksis er å henvise til ansvarsbegrensninger i de generelle vilkårene, evt. sette et tak knyttet til abonnementsverdi.]"
+      },
+      {
+        "title": "13. Lovvalg og verneting",
+        "body": "Avtalen reguleres av norsk rett. Tvister søkes løst ved [Kundens/Pactivas] verneting, med mindre annet følger av ufravikelig lovgivning."
+      }
+    ],
+    "acceptanceFooter": "Ved å krysse av «Jeg godtar databehandleravtalen» ved registrering, bekrefter brukeren å ha fullmakt til å inngå denne avtalen på vegne av virksomheten som registreres."
   }
 }

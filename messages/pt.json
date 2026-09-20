@@ -108,7 +108,9 @@
     "errorCaptcha": "Por favor complete a verificação de segurança",
     "errorCaptchaFailed": "A verificação de segurança falhou. Tente novamente.",
     "cookieNotice": "Utilizamos apenas cookies necessários para autenticação.",
-    "cookiePrivacyLink": "Ler a nossa política de privacidade"
+    "cookiePrivacyLink": "Ler a nossa política de privacidade",
+    "dpaLabel": "Li e aceito o <a>acordo de tratamento de dados</a>, e confirmo que tenho poderes para o celebrar em nome da empresa.",
+    "errorDpaRequired": "Tem de aceitar o acordo de tratamento de dados para criar uma conta."
   },
   "checkEmail": {
     "title": "Verifique o seu e-mail",
@@ -508,7 +510,12 @@
     "methodVeriff": "Veriff (avançado)",
     "methodEvrotrust": "Evrotrust (qualificado)",
     "methodItsme": "itsme® (qualificado)",
-    "signingMethodOverride": "Método de assinatura para este acordo"
+    "signingMethodOverride": "Método de assinatura para este acordo",
+    "dpaTitle": "Acordo de tratamento de dados (DPA)",
+    "dpaDesc": "O acordo que rege o tratamento de dados pessoais pela Pactiva em nome da empresa.",
+    "dpaAcceptedText": "Aceite: versão {version}, {date}",
+    "dpaNotAccepted": "Ainda não há aceitação registada.",
+    "dpaViewLink": "Ver o acordo"
   },
   "slideOver": {
     "backToForm": "← Voltar ao formulário",
@@ -706,5 +713,153 @@
     "signingPending": "A aguardar assinatura",
     "signingSigned": "Assinado ↗",
     "signingMethodOverride": "Método de assinatura para este acordo"
+  },
+  "dpa": {
+    "metaTitle": "Acordo de tratamento de dados (DPA) — Pactiva",
+    "metaDescription": "O acordo de tratamento de dados que rege o tratamento de dados pessoais pela Pactiva em nome do cliente, em conformidade com o artigo 28.º do RGPD.",
+    "draftBadge": "Rascunho de trabalho",
+    "draftNotice": "Este é um rascunho de trabalho, não um documento jurídico final. Deve ser revisto por um jurista antes de ser utilizado, particularmente as disposições sobre responsabilidade (12) e a distribuição das funções responsável/subcontratante para os “Dados do Cliente” (ver cláusula 3).",
+    "lastUpdated": "Última atualização",
+    "version": "Versão",
+    "backLink": "← Voltar",
+    "heading": "Acordo de tratamento de dados (DPA)",
+    "partiesHeading": "Partes",
+    "partiesIntro": "O presente acordo de tratamento de dados (o “Acordo”) é celebrado entre:",
+    "controllerLabel": "Responsável pelo tratamento (“o Cliente”)",
+    "controllerText": "A empresa que cria uma conta na Pactiva, identificada pelo nome da empresa e número de registo indicados na criação da conta.",
+    "processorLabel": "Subcontratante (“a Pactiva”)",
+    "processorText": "Thorsnes Digital (n.º de empresa 937 787 138), que desenvolve e opera o serviço Pactiva.",
+    "electronicAcceptance": "O Acordo é celebrado eletronicamente quando uma pessoa com poderes para vincular o Cliente assinala a caixa de aceitação durante a criação da conta, cf. o texto de confirmação no formulário de registo.",
+    "sections": [
+      {
+        "title": "1. Contexto e finalidade",
+        "body": "O Cliente utiliza a Pactiva para registar e gerir contratos, processos de assinatura e informações sobre os seus próprios clientes (“Dados do Cliente”). Nesse âmbito, a Pactiva trata dados pessoais em nome do Cliente. Este acordo rege o tratamento desses dados pessoais pela Pactiva, em conformidade com o artigo 28.º do RGPD."
+      },
+      {
+        "title": "2. Duração",
+        "body": "Este acordo mantém-se em vigor enquanto o Cliente tiver uma conta Pactiva ativa e cessa automaticamente com o cancelamento da subscrição, salvo disposição em contrário na cláusula 8 (eliminação/devolução de dados)."
+      },
+      {
+        "title": "3. Funções — âmbito do acordo",
+        "body": "As partes acordam na seguinte distribuição de funções:",
+        "table": {
+          "headers": [
+            "Categoria de dados",
+            "Responsável pelo tratamento",
+            "Subcontratante"
+          ],
+          "rows": [
+            [
+              "Dados do Cliente (nome, e-mail, telefone, número de registo, morada, notas, registo de atividade sobre os próprios clientes do Cliente)",
+              "Cliente",
+              "Pactiva"
+            ],
+            [
+              "Dados dos contratos (títulos dos contratos, datas, documentos carregados, estado de assinatura dos contratos do Cliente)",
+              "Cliente",
+              "Pactiva"
+            ],
+            [
+              "Dados de utilizadores e da empresa (contas de utilizador próprias do Cliente)",
+              "Pactiva",
+              "— (a Pactiva é aqui a própria responsável pelo tratamento, regida pela política de privacidade)"
+            ]
+          ]
+        },
+        "note": "Nota: esta tabela deve ser conciliada com a cláusula 1 da política de privacidade, que atualmente define a Pactiva como responsável pelo tratamento dos “dados pessoais tratados no serviço” sem esta distinção. Deve ser revista por um jurista."
+      },
+      {
+        "title": "4. Instruções",
+        "body": "A Pactiva só pode tratar dados pessoais mediante instruções documentadas do Cliente, incluindo instruções dadas através da utilização normal das funcionalidades do serviço. A Pactiva notificará o Cliente caso considere que uma instrução viola o RGPD ou outra legislação de proteção de dados."
+      },
+      {
+        "title": "5. Confidencialidade",
+        "body": "As pessoas da Pactiva com acesso a dados pessoais estão sujeitas a dever de confidencialidade, seja através de um contrato de trabalho ou de compromisso equivalente."
+      },
+      {
+        "title": "6. Medidas de segurança",
+        "body": "A Pactiva implementará medidas técnicas e organizativas adequadas para garantir um nível de segurança adequado ao risco, incluindo:",
+        "bullets": [
+          "Encriptação de palavras-passe",
+          "Controlo de acesso a sistemas e dados",
+          "Armazenamento seguro com subcontratantes sujeitos a obrigações equivalentes (ver cláusula 7)",
+          "Rotinas de cópia de segurança"
+        ]
+      },
+      {
+        "title": "7. Subcontratantes",
+        "body": "O Cliente concede à Pactiva uma autorização geral para recorrer a subcontratantes para o tratamento de dados pessoais. A Pactiva informará o Cliente sobre alterações planeadas à lista de subcontratantes, e o Cliente tem o direito de se opor a essas alterações com fundamento razoável.\n\nDesde [data], a Pactiva utiliza os seguintes subcontratantes:",
+        "table": {
+          "headers": [
+            "Subcontratante",
+            "Finalidade",
+            "Localização",
+            "Base de transferência"
+          ],
+          "rows": [
+            [
+              "Supabase",
+              "Base de dados e autenticação",
+              "Reino Unido (eu-west-2)",
+              "Decisão de adequação do Reino Unido"
+            ],
+            [
+              "Stripe",
+              "Processamento de pagamentos",
+              "EUA",
+              "Cláusulas contratuais-tipo"
+            ],
+            [
+              "Resend",
+              "Envio de e-mail",
+              "EUA",
+              "Cláusulas contratuais-tipo"
+            ],
+            [
+              "Anthropic",
+              "Assistente de IA (apenas quando ativado)",
+              "EUA",
+              "Cláusulas contratuais-tipo"
+            ],
+            [
+              "e-signature.eu",
+              "Assinatura digital (eIDAS)",
+              "Bélgica (UE)",
+              "— (dentro da UE/EEE)"
+            ]
+          ]
+        },
+        "footer": "A Pactiva celebrará acordos com os subcontratantes que lhes imponham as mesmas obrigações de proteção de dados previstas neste acordo."
+      },
+      {
+        "title": "8. Eliminação e devolução de dados",
+        "body": "Findo o relacionamento contratual, a Pactiva deve, à escolha do Cliente, eliminar ou devolver todos os dados pessoais tratados em nome do Cliente, salvo se a conservação for exigida por lei (por exemplo, legislação contabilística para dados de faturação, cf. cláusula 5 da política de privacidade). Os dados são eliminados automaticamente 30 dias após o cancelamento, em conformidade com a política de privacidade em vigor."
+      },
+      {
+        "title": "9. Assistência ao Cliente",
+        "body": "Na medida razoavelmente possível, a Pactiva prestará assistência ao Cliente com:",
+        "bullets": [
+          "Responder a pedidos dos titulares dos dados relativos a acesso, retificação, eliminação, portabilidade e oposição",
+          "Cumprir obrigações relacionadas com segurança, notificação de violações e eventuais avaliações de impacto (AIPD)"
+        ]
+      },
+      {
+        "title": "10. Violações de dados pessoais",
+        "body": "A Pactiva notificará o Cliente sem atraso injustificado, e o mais tardar no prazo de [24/48] horas após tomar conhecimento de uma violação que afete os dados pessoais do Cliente. A notificação deve, na medida do possível, descrever a natureza da violação, as categorias afetadas, o número de titulares e as medidas adotadas."
+      },
+      {
+        "title": "11. Auditoria",
+        "body": "O Cliente tem o direito de solicitar documentação que demonstre que a Pactiva cumpre as suas obrigações ao abrigo deste acordo, podendo, mediante aviso prévio razoável, realizar ou mandar realizar uma auditoria."
+      },
+      {
+        "title": "12. Responsabilidade",
+        "body": "[Esta disposição deve ser redigida por um jurista. A prática comum é remeter para as limitações de responsabilidade dos termos gerais, ou fixar um limite associado ao valor da subscrição.]"
+      },
+      {
+        "title": "13. Lei aplicável e foro",
+        "body": "Este acordo rege-se pela lei norueguesa. Os litígios serão resolvidos no foro [do Cliente/da Pactiva], salvo disposição legal imperativa em contrário."
+      }
+    ],
+    "acceptanceFooter": "Ao assinalar “Aceito o acordo de tratamento de dados” durante o registo, o utilizador confirma ter poderes para celebrar este acordo em nome da empresa registada."
   }
 }
