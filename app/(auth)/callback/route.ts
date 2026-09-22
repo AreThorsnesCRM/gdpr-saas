@@ -146,12 +146,10 @@ export async function GET(request: NextRequest) {
         .eq("user_id", user.id);
     }
   } else {
-    if (existingAccountUser.role !== "admin") {
-      await supabaseAdmin
-        .from("account_users")
-        .update({ role: "admin" })
-        .eq("user_id", user.id);
-    }
+    // Role is intentionally left untouched here — /callback fires on any completed
+    // auth flow (not just first signup), and unconditionally promoting an existing
+    // member to admin would let any such flow silently escalate their access. Role
+    // changes only happen through the explicit "Gjør til admin" action in Settings.
     if (!existingProfile?.account_id) {
       await supabaseAdmin
         .from("profiles")
